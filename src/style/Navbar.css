@@ -1,0 +1,57 @@
+.encuestas {
+  margin: 0 ;
+  padding: 0 ;
+}
+
+.encuestas-container {
+  margin: 0 ;
+  padding: 0 ;
+}
+
+.navbar {
+  
+  background-color: #00324d;
+  border-radius: 1px 0px 0px 1px;
+  padding: 4rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0px; /* Espacio entre los íconos, ajusta según necesidad */
+}
+
+.navbar img {
+  width: 40px; /* Ajusta según el tamaño deseado de los íconos */
+  height: auto;
+}
+
+.navbar a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  padding: 1rem 0;
+  width: 100%;
+  margin-bottom: 0px; /* Espacio inferior entre los íconos */
+}
+
+.navbar a:hover {
+  opacity: 0.8; /* Añadir un pequeño efecto de opacidad al hacer hover */
+}
+
+.navbar .active {
+  background-color: #fff; /* Ejemplo de cómo podrías destacar un ícono activo */
+  border-radius: 25% 0 0 25%;
+  /* padding: 10px; */
+  
+  margin-left: 0.8rem;
+}
+
+.navbar .previous-to-active {
+  border-radius: 0 25% 25% 0;
+}
+
+.navbar .next-to-active {
+  /* background-color: red; */
+  border-radius: 0 25% 0 0;
+}

@@ -1,0 +1,48 @@
+/* DetailForm.css */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px; /* Tamaño ajustado del switch */
+  height: 28px; /* Tamaño ajustado del switch */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc; /* Fondo gris del switch */
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 24px; /* Tamaño del botón */
+  width: 24px; /* Tamaño del botón */
+  left: 2px;
+  bottom: 2px;
+  background-color: #00324D; /* Botón verde cuando está a la izquierda */
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #ccc; /* Mantén el fondo gris del switch activado */
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px); /* Mueve el botón hacia la derecha */
+  background-color: #39A900; /* Botón azul cuando está a la derecha */
+}
+
+
