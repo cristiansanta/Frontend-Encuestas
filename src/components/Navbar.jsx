@@ -85,7 +85,7 @@ export const Navbar = () => {
   // Estilo para el elemento activo
   const getActiveItemStyle = (isActive) => {
     if (isActive) {
-      return "bg-white rounded-r-full rounded-l-full";
+      return "bg-white rounded-l-full"; // Redondear solo el borde izquierdo
     }
     return "";
   };
@@ -133,7 +133,7 @@ export const Navbar = () => {
       </div>
 
       {/* Navbar lateral para pantallas grandes */}
-      <div className="navbar fixed h-screen w-40 sticky inset-0 hidden xl:flex flex-col items-center bg-[#00324d]">
+      <div className="navbar fixed h-screen w-20 sticky inset-0 hidden xl:flex flex-col items-center bg-[#00324d]">
         {menuItems.map((value, index) => (
           <div
             key={index}
