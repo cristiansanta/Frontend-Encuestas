@@ -13,7 +13,7 @@ const Modal = ({
 }) => {
   if (!isOpen) return null; // No renderiza si el modal no está abierto
 
-  const modalStyle = status === 'error' ? 'bg-red-600' : 'bg-green-600'; // Ajuste según el estado
+  const modalStyle = status === 'error' ? 'bg--600' : 'bg-green-600'; // Ajuste según el estado
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

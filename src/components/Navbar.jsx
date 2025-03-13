@@ -8,13 +8,16 @@ import SettingsIcon from '../assets/SettingsIcon';
 import '../style/Navbar.css';
 import apiRequest from '../Provider/apiHelper';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Logo from '../assets/img/zajuna.svg';
+import LogoZajuna from '../assets/img/zajuna_navbar.svg';
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activePath, setActivePath] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Actualiza la ruta activa cuando cambia la ubicación
+  // Update active path when location changes
   useEffect(() => {
     const currentPath = location.hash ? location.hash.substring(1) : location.pathname;
     setActivePath(currentPath);
@@ -82,33 +85,21 @@ export const Navbar = () => {
     }
   };
 
-  // Estilo para el elemento activo
-  const getActiveItemStyle = (isActive) => {
-    if (isActive) {
-      return "bg-white rounded-l-full"; // Redondear solo el borde izquierdo
-    }
-    return "";
-  };
-
   return (
     <div>
-      {/* Navbar superior para pantallas pequeñas */}
-      <div className="flex justify-around items-center h-16 w-full fixed top-0 left-0 bg-[#002B3D] xl:hidden">
+      {/* Mobile navbar for small screens */}
+      <div className="mobile-navbar xl:hidden">
         {menuItems.map((value, index) => (
           <a
             key={index}
             href={value.path}
-            className={`text-white flex justify-center items-center relative p-2 ${
-              value.active ? "bg-white rounded-full" : ""
-            }`}
+            className={value.active ? "active" : ""}
+            data-title={value.label}
           >
             <value.icon
-              className="w-8 h-8"
+              className="w-6 h-6"
               strokeColor={value.active ? "#39A900" : "#FFFFFF"}
             />
-            <span className="absolute bottom-[-1.5rem] hidden text-sm bg-gray-700 text-white px-2 py-1 rounded shadow-md group-hover:block">
-              {value.label}
-            </span>
           </a>
         ))}
 
@@ -123,37 +114,50 @@ export const Navbar = () => {
                 console.error("Error al cerrar sesión:", error);
               });
           }}
-          className="text-white flex justify-center items-center cursor-pointer p-2"
+          className="cursor-pointer"
+          data-title="Cerrar sesión"
         >
-          <LogoutIcon className="w-8 h-8" />
-          <span className="absolute bottom-[-1.5rem] hidden text-sm bg-gray-700 text-white px-2 py-1 rounded shadow-md group-hover:block">
-            Cerrar sesión
-          </span>
+          <LogoutIcon className="w-6 h-6" />
         </a>
       </div>
 
-      {/* Navbar lateral para pantallas grandes */}
-      <div className="navbar fixed h-screen w-20 sticky inset-0 hidden xl:flex flex-col items-center bg-[#00324d]">
-        {menuItems.map((value, index) => (
-          <div
-            key={index}
-            className="w-full flex justify-center py-4"
-          >
+      {/* Sidebar for large screens */}
+      <div
+        className={`navbar hidden xl:flex ${isExpanded ? "expanded" : ""}`}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
+        {/* Logo section */}
+        <div className="navbar-logo">
+          <div className="logo-container">
+            {isExpanded ? (
+              <img src={LogoZajuna} alt="Logo Zajuna" />
+            ) : (
+              <img src={Logo} alt="Logo Z" className="logo-icon" />
+            )}
+          </div>
+        </div>
+
+        {/* Menu items */}
+        <div className="navbar-menu">
+          {menuItems.map((value, index) => (
             <a
+              key={index}
               href={value.path}
-              className={`relative group flex justify-center items-center py-3 px-6 ${getActiveItemStyle(value.active)}`}
+              className={value.active ? "active" : ""}
+              data-title={value.label}
             >
               <value.icon
-                className="w-8 h-8 mx-auto"
                 strokeColor={value.active ? "#39A900" : "#FFFFFF"}
+                className="w-6 h-6"
               />
-              <span className="absolute left-16 hidden group-hover:block bg-gray-700 text-white text-sm px-2 py-1 rounded shadow-md z-10">
-                {value.label}
-              </span>
+              <span>{value.label}</span>
             </a>
-          </div>
-        ))}
-        <div className="mt-auto mb-4 w-full flex justify-center">
+          ))}
+        </div>
+
+        {/* Logout button */}
+        <div className="navbar-logout">
           <a
             onClick={(e) => {
               e.preventDefault();
@@ -165,12 +169,11 @@ export const Navbar = () => {
                   console.error("Error al cerrar sesión:", error);
                 });
             }}
-            className="relative group flex justify-center items-center py-3 px-6 cursor-pointer"
+            className="cursor-pointer"
+            data-title="Cerrar sesión"
           >
-            <LogoutIcon className="w-8 h-8 mx-auto" />
-            <span className="absolute left-16 hidden group-hover:block bg-gray-700 text-white text-sm px-2 py-1 rounded shadow-md z-10">
-              Cerrar sesión
-            </span>
+            <LogoutIcon className="w-6 h-6" />
+            <span>Cerrar sesión</span>
           </a>
         </div>
       </div>

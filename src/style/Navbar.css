@@ -1,57 +1,257 @@
 .encuestas {
-  margin: 0 ;
-  padding: 0 ;
+  margin: 0;
+  padding: 0;
 }
 
 .encuestas-container {
-  margin: 0 ;
-  padding: 0 ;
+  margin: 0;
+  padding: 0;
 }
 
 .navbar {
-  
   background-color: #00324d;
   border-radius: 1px 0px 0px 1px;
-  padding: 4rem 0;
+  padding: 1rem 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   flex-shrink: 0;
-  gap: 0px; /* Espacio entre los íconos, ajusta según necesidad */
+  gap: 1.5rem; /* Increased spacing between icons */
+  height: 100vh;
+  position: fixed;
+  width: 80px;
+  transition: width 0.3s ease;
+  z-index: 100;
+  overflow: hidden;
 }
 
-.navbar img {
-  width: 40px; /* Ajusta según el tamaño deseado de los íconos */
-  height: auto;
+/* Actualización específica para el centrado del logo */
+.navbar-logo {
+  width: 100%;
+  text-align: center;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar-logo img {
+  width: auto;
+  height: 40px;
+  transition: all 0.3s ease;
+  margin: 0 auto; /* Asegura centrado horizontal */
+}
+
+/* Para asegurar que el logo Z quede centrado cuando está plegado */
+.navbar:not(.expanded) .navbar-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.navbar:not(.expanded) .navbar-logo img {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Si hay problemas específicos con el logo Z circular, esta regla lo solucionará */
+.navbar:not(.expanded) .navbar-logo img[src*="zajuna.svg"] {
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.navbar-logo img {
+  width: auto;
+  height: 60px;
+  transition: all 0.8s ease;
+}
+
+.navbar-menu {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-grow: 1;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.navbar svg {
+  width: 24px; /* Standardized icon size */
+  height: 24px;
+  transition: all 0.3s ease;
 }
 
 .navbar a {
   display: flex;
-  justify-content: center;
   align-items: center;
   text-decoration: none;
-  padding: 1rem 0;
+  padding: 0.75rem 1rem;
   width: 100%;
-  margin-bottom: 0px; /* Espacio inferior entre los íconos */
+  color: #fff;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
-.navbar a:hover {
-  opacity: 0.8; /* Añadir un pequeño efecto de opacidad al hacer hover */
+.navbar a span {
+  margin-left: 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
 }
 
+/* Ensure icons are always visible */
+.navbar a svg, 
+.navbar a img {
+  min-width: 24px;
+}
+
+/* Active item styling - fixed width issue */
 .navbar .active {
-  background-color: #fff; /* Ejemplo de cómo podrías destacar un ícono activo */
-  border-radius: 25% 0 0 25%;
-  /* padding: 10px; */
+  background-color: #fff;
+  border-radius: 25px 0 0 25px;
+  width: calc(100% + 1px); /* Ensures no overflow while maintaining style */
+  padding-left: 1.5rem;
+}
+
+.navbar .active svg path,
+.navbar .active svg rect,
+.navbar .active svg circle {
+  stroke: #39A900;
+}
+
+.navbar .active span {
+  color: #00324d;
+  font-weight: 600;
+}
+
+/* Hover effect - fixed width issue */
+.navbar a:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 25px 0 0 25px;
+  width: calc(100% + 1px);
+  padding-left: 1.5rem;
+}
+
+/* Tooltip for non-expanded state */
+.navbar a:not(.active)::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 90px;
+  background-color: #555;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.navbar a:not(.active):hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Expanded navbar state */
+.navbar.expanded {
+  width: 240px;
+}
+
+.navbar.expanded a span {
+  opacity: 1;
+}
+
+.navbar.expanded a:not(.active)::after {
+  display: none;
+}
+
+/* Logout placement */
+.navbar-logout {
+  margin-top: auto;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+/* Media query for mobile */
+@media (max-width: 1279px) {
+  .navbar {
+    display: none;
+  }
   
-  margin-left: 0.8rem;
-}
-
-.navbar .previous-to-active {
-  border-radius: 0 25% 25% 0;
-}
-
-.navbar .next-to-active {
-  /* background-color: red; */
-  border-radius: 0 25% 0 0;
+  .mobile-navbar {
+    display: flex;
+    position: fixed;
+    bottom: 0; /* Changed to bottom for better mobile UX */
+    left: 0;
+    width: 100%;
+    background-color: #00324d;
+    justify-content: space-around;
+    padding: 0.75rem 0;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .mobile-navbar a {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .mobile-navbar a.active {
+    position: relative;
+  }
+  
+  .mobile-navbar a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #39A900;
+    border-radius: 50%;
+  }
+  
+  .mobile-navbar a::before {
+    content: attr(data-title);
+    position: absolute;
+    top: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #555;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  
+  .mobile-navbar a:hover::before {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .mobile-navbar svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .mobile-navbar .active svg path,
+  .mobile-navbar .active svg rect,
+  .mobile-navbar .active svg circle {
+    stroke: #39A900;
+  }
 }
