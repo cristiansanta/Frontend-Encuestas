@@ -6,6 +6,7 @@
 .encuestas-container {
   margin: 0;
   padding: 0;
+  border-radius: 0 20px 20px 0; /* Bordes redondeados en el lado derecho */
 }
 
 .navbar {
@@ -105,7 +106,7 @@
 }
 
 /* Ensure icons are always visible */
-.navbar a svg, 
+.navbar a svg,
 .navbar a img {
   min-width: 24px;
 }
@@ -184,7 +185,7 @@
   .navbar {
     display: none;
   }
-  
+
   .mobile-navbar {
     display: flex;
     position: fixed;
@@ -197,7 +198,7 @@
     z-index: 1000;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   }
-  
+
   .mobile-navbar a {
     padding: 0.5rem;
     display: flex;
@@ -205,11 +206,11 @@
     justify-content: center;
     position: relative;
   }
-  
+
   .mobile-navbar a.active {
     position: relative;
   }
-  
+
   .mobile-navbar a.active::after {
     content: "";
     position: absolute;
@@ -221,7 +222,7 @@
     background-color: #39A900;
     border-radius: 50%;
   }
-  
+
   .mobile-navbar a::before {
     content: attr(data-title);
     position: absolute;
@@ -238,17 +239,17 @@
     transition: opacity 0.3s;
     white-space: nowrap;
   }
-  
+
   .mobile-navbar a:hover::before {
     opacity: 1;
     visibility: visible;
   }
-  
+
   .mobile-navbar svg {
     width: 24px;
     height: 24px;
   }
-  
+
   .mobile-navbar .active svg path,
   .mobile-navbar .active svg rect,
   .mobile-navbar .active svg circle {

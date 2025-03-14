@@ -1,20 +1,33 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import bannerImage from '../assets/img/bannner_encuestas.png';
-import dashboardImage from '../assets/img/DashboardHeader.png';
+import dashboardImage from '../assets/img/newbanner.svg';
+import '../style/HeaderBanner.css';
 
-function HeaderBanner({ showDashboardBanner }) {
-  // Mostrar la imagen según el estado booleano
-  const imageToShow = showDashboardBanner ? dashboardImage : bannerImage;
+
+const HeaderBanner = ({ showDashboardBanner }) => {
+  // Seleccionar la imagen basada en el estado booleano
+  const imageSrc = showDashboardBanner ? dashboardImage : bannerImage;
 
   return (
-    <div className="w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 h-36 overflow-hidden">
-      <img 
-        src={imageToShow} 
-        alt="Banner Encuestas" 
-        className="w-full h-full object-fill" 
+    <div className="banner-container">
+      <img
+        src={imageSrc}
+        alt="Banner Encuestas"
+        className="banner-image"
       />
     </div>
   );
-}
+};
+
+// Definir los tipos de propiedades esperadas
+HeaderBanner.propTypes = {
+  showDashboardBanner: PropTypes.bool.isRequired,
+};
+
+// Definir los valores por defecto de las propiedades
+HeaderBanner.defaultProps = {
+  showDashboardBanner: false,
+};
 
 export default HeaderBanner;
