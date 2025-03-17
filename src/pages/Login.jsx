@@ -5,7 +5,7 @@ import backgroundImage from '../assets/img/login_enc.svg';
 import logo1 from '../assets/img/Vector.png';
 import logo2 from '../assets/img/logo_sena.svg';
 import EyeIcon from '../assets/img/EyeIcon.svg';
-import logoGov from '../assets/img/log_gov.svg';
+import TopBanner from '../components/TopBanner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -49,19 +49,13 @@ const Login = () => {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      {/* Barra azul superior */}
-      <div className="w-full bg-blue-600 py-3.5 px-4 flex items-center">
-        <img 
-          src={logoGov} 
-          alt="GOV.CO" 
-          className="h-[22px] w-[250px]"
-        />
-      </div>
+      {/* Usar el componente TopBanner en lugar del código original */}
+      <TopBanner />
 
       {/* Contenedor principal */}
       <div className="flex flex-grow w-full relative">
         {/* Background azul que ocupa toda la pantalla */}
-        <div 
+        <div
           className="absolute inset-0 w-full h-full"
           style={{
             background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)'
@@ -79,17 +73,17 @@ const Login = () => {
 
         {/* Panel blanco con bordes redondeados */}
         <div className="relative ml-auto w-full md:w-2/5 h-full">
-          <div className="absolute inset-0 bg-white rounded-l-[42px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-white rounded-l-[25px] flex items-center justify-center">
             <div className="w-full max-w-3xl px-4 sm:px-6 md:px-8">
               {/* Cabecera */}
               <div className="text-center mb-10">
-                <h2 className="text-6xl" style={{ color: '#00324D' }}>
+                <h2 className="text-5xl" style={{ color: '#00324D' }}>
                   Bienvenido al
                 </h2>
-                <h2 className="text-6xl font-bold" style={{ color: '#39A900' }}>
+                <h2 className="text-5xl font-bold" style={{ color: '#39A900' }}>
                   Sistema de Encuestas
                 </h2>
-                <p className="mt-3 text-2xl text-center" style={{ color: '#00324D' }}>
+                <p className="mt-3 text-1xl text-center" style={{ color: '#00324D' }}>
                   Un espacio diseñado para hacer más fácil y eficiente
                   <br />
                   la experiencia de toda la comunidad <span className="font-bold">SENA</span>.
@@ -97,14 +91,14 @@ const Login = () => {
               </div>
 
               {/* Formulario con placeholders */}
-              <form className="space-y-6 w-full" onSubmit={handleSubmit}>
+              <form className="space-y-6 w-full flex flex-col items-center" onSubmit={handleSubmit}>
                 {/* Campo de correo con placeholder */}
-                <div className="w-full">
+                <div className="w-4/5 mx-auto">  {/* Añadido mx-auto para centrar */}
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-6 py-4 rounded-md border focus:outline-none text-2xl"
+                    className="w-full px-6 py-3 rounded-md border focus:outline-none text-xl"
                     style={{ borderColor: '#D1D5DB' }}
                     placeholder="Correo electrónico"
                     required
@@ -112,12 +106,12 @@ const Login = () => {
                 </div>
 
                 {/* Campo de contraseña con placeholder */}
-                <div className="relative w-full">
+                <div className="relative w-4/5 mx-auto">  {/* Añadido mx-auto para centrar */}
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-6 py-4 rounded-md border focus:outline-none text-2xl"
+                    className="w-full px-6 py-3 rounded-md border focus:outline-none text-xl"
                     style={{ borderColor: '#D1D5DB' }}
                     placeholder="Contraseña"
                     required
@@ -131,21 +125,21 @@ const Login = () => {
                 </div>
 
                 {/* Mensaje de error */}
-                {error && <p className="text-red-500 text-center text-2xl">{error}</p>}
+                {error && <p className="text-red-500 text-center text-2xl w-4/5 mx-auto">{error}</p>}
 
                 {/* Botón de inicio de sesión */}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none transition-colors text-2xl"
+                  className="w-4/5 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none transition-colors text-xl mx-auto"
                   style={{ backgroundColor: '#39A900' }}
                 >
                   Iniciar sesión
                 </button>
 
                 {/* Enlace de registro */}
-                <div className="text-center mt-2">
+                <div className="text-center mt-2 w-4/5 mx-auto">
                   <Link to="/register">
-                    <div style={{ color: '#00324D', textDecoration: 'underline' }} className="inline-block text-2xl">
+                    <div style={{ color: '#00324D', textDecoration: 'underline' }} className="inline-block text-xl">
                       ¿No tiene una cuenta aún?, <span className="font-bold">Registrarme</span>
                     </div>
                   </Link>
