@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar.jsx';
-import HeaderBar from '../components/HeaderBar.jsx';
 import HeaderBanner from '../components/HeaderBanner.jsx';
 import bannerImage from '../assets/img/NewSurvey.png';
 import DashboardCard from '../components/DashboardCard.jsx';
@@ -39,9 +38,8 @@ const Dashboard = () => {
       <Navbar />
       <div className="flex-1 flex flex-col items-center mt-0">
         <div className="w-full h-48"> {/* Asegura que el contenedor ocupe todo el ancho y tenga altura fija */}
-          <HeaderBanner showDashboardBanner={showDashboardBanner} />
+          <HeaderBanner showDashboardBanner={showDashboardBanner} username={username} />
         </div>
-        <HeaderBar username={username} />
         {hasNoRoles ? (
           <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto bg-red-500 text-white rounded-lg text-center p-4">
             <h2 className="text-lg font-bold">⚠️ No tienes roles asignados</h2>

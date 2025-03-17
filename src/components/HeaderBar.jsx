@@ -10,20 +10,20 @@ function HeaderBar({ username }) {
   };
 
   return (
-    <div className="flex w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 h-14 items-center justify-center p-2 bg-[#ffc400] relative">
-      <p className="font-bold text-[#00324d] text-lg flex items-center">
+    <div className="flex items-center p-2 absolute top-0 right-0">
+      <p className="font-bold text-white text-lg flex items-center">
         {username}
       </p>
       <div className="flex items-center ml-4 relative">
         <button onClick={toggleMenu} className="flex items-center">
-          <img src={Select} alt="Seleccionar" className="h-6 mr-2" />          
+          <img src={Select} alt="Seleccionar" className="h-2 mr-2" />
         </button>
         {isOpen && (
-          <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg">
-            <button className="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left">
+          <div className="absolute left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg">
+            <button className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">
               Ver perfil
             </button>
-            <button className="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left">
+            <button className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left">
               Cerrar sesión
             </button>
           </div>
