@@ -140,7 +140,7 @@ const Login = () => {
                 <div className="text-center mt-2 w-4/5 mx-auto">
                   <Link to="/register">
                     <div style={{ color: '#00324D', textDecoration: 'underline' }} className="inline-block text-xl">
-                      ¿No tiene una cuenta aún?, <span className="font-bold">Registrarme</span>
+                      ¿No tiene una cuenta aún? <span className="font-bold">Registrarme</span>
                     </div>
                   </Link>
                 </div>
@@ -148,7 +148,7 @@ const Login = () => {
 
               {/* Logotipos inferiores */}
               <div className="flex justify-center items-center mt-40 mb-10">
-                <img src={logo2} alt="Logo SENA" className="h-30" />
+                <img src={logo2} alt="Logo SENA" className="h-16 md:h-30" />
               </div>
             </div>
           </div>
