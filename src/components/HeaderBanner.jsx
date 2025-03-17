@@ -4,13 +4,12 @@ import bannerImage from '../assets/img/bannner_encuestas.png';
 import dashboardImage from '../assets/img/newbanner.svg';
 import '../style/HeaderBanner.css';
 
-
 const HeaderBanner = ({ showDashboardBanner }) => {
   // Seleccionar la imagen basada en el estado booleano
   const imageSrc = showDashboardBanner ? dashboardImage : bannerImage;
 
   return (
-    <div className="banner-container">
+    <div className={`banner-container ${showDashboardBanner ? 'svg-container' : ''}`}>
       <img
         src={imageSrc}
         alt="Banner Encuestas"
