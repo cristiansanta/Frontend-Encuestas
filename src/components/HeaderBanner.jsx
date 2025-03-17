@@ -3,13 +3,15 @@ import PropTypes from 'prop-types';
 import bannerImage from '../assets/img/bannner_encuestas.png';
 import dashboardImage from '../assets/img/newbanner.svg';
 import '../style/HeaderBanner.css';
+import TopBanner from '../components/TopBanner';
 
 const HeaderBanner = ({ showDashboardBanner }) => {
   // Seleccionar la imagen basada en el estado booleano
   const imageSrc = showDashboardBanner ? dashboardImage : bannerImage;
 
-  return (
+  return (    
     <div className={`banner-container ${showDashboardBanner ? 'svg-container' : ''}`}>
+      <TopBanner />
       <img
         src={imageSrc}
         alt="Banner Encuestas"

@@ -41,8 +41,8 @@ const Dashboard = () => {
         <div className="w-full h-48"> {/* Asegura que el contenedor ocupe todo el ancho y tenga altura fija */}
           <HeaderBanner showDashboardBanner={showDashboardBanner} />
         </div>
-        {/* <HeaderBar props={`Bienvenido ${username}`} /> */}
-        {/* {hasNoRoles ? (
+        <HeaderBar username={username} />
+        {hasNoRoles ? (
           <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto bg-red-500 text-white rounded-lg text-center p-4">
             <h2 className="text-lg font-bold">⚠️ No tienes roles asignados</h2>
             <p className="text-sm">Por favor, solicita a un administrador que te asigne un rol para continuar.</p>
@@ -64,7 +64,7 @@ const Dashboard = () => {
             </div>
             <DashboardCard />
           </>
-        )} */}
+        )}
       </div>
     </div>
   );
