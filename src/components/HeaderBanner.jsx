@@ -4,7 +4,7 @@ import bannerImage from '../assets/img/bannner_encuestas.png';
 import dashboardImage from '../assets/img/newbanner.svg';
 import '../style/HeaderBanner.css';
 import TopBanner from '../components/TopBanner';
-import HeaderBar from '../components/HeaderBar'; // Importa HeaderBar
+import HeaderBar from '../components/HeaderBar';
 
 const HeaderBanner = ({ showDashboardBanner, username }) => {
   // Seleccionar la imagen basada en el estado booleano
@@ -13,11 +13,11 @@ const HeaderBanner = ({ showDashboardBanner, username }) => {
   return (
     <div className={`banner-container ${showDashboardBanner ? 'svg-container' : ''} relative`}>
       <TopBanner />
-      <div className="relative">
+      <div className="banner-image-wrapper relative">
         <img
           src={imageSrc}
           alt="Banner Encuestas"
-          className="banner-image"
+          className={`banner-image ${showDashboardBanner ? 'dashboard-svg' : ''}`}
         />
         <HeaderBar username={username} />
       </div>
@@ -28,13 +28,13 @@ const HeaderBanner = ({ showDashboardBanner, username }) => {
 // Definir los tipos de propiedades esperadas
 HeaderBanner.propTypes = {
   showDashboardBanner: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired, // Añade la propiedad username
+  username: PropTypes.string.isRequired,
 };
 
 // Definir los valores por defecto de las propiedades
 HeaderBanner.defaultProps = {
   showDashboardBanner: false,
-  username: '', // Valor por defecto para username
+  username: '',
 };
 
 export default HeaderBanner;

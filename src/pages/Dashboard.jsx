@@ -46,8 +46,8 @@ const Dashboard = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <div className="flex-1 flex flex-col items-center">
-        {/* Contenedor del banner - altura responsive */}
-        <div className="w-full h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72 relative">
+        {/* Contenedor del banner - ahora respeta las alturas definidas en el CSS */}
+        <div className="w-full relative h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72">
           <HeaderBanner showDashboardBanner={showDashboardBanner} username={username} />
         </div>
 
@@ -64,7 +64,6 @@ const Dashboard = () => {
               Número de contacto: 000000000000
             </p>
           </div>
-
         )}
 
         {/* Contenido principal del dashboard si tiene roles */}
