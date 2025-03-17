@@ -1,38 +1,41 @@
+/* Estilos para el contenedor principal */
 .banner-container {
     width: 100%;
-    height: 100%; /* Asegura que el contenedor ocupe toda la altura disponible */
     margin: 0;
     padding: 0;
     overflow: hidden;
-    display: flex;
-  }
-  
-  .svg-container {
-    height: 30px; /* Solo en pantallas grandes */
-  }
-  
-  .banner-image {
+}
+
+/* Estilos para la imagen regular (no SVG) */
+.banner-image {
     width: 100%;
     height: 100%; /* Asegura que la imagen ocupe toda la altura del contenedor */
     display: block;
-    object-fit: cover; /* Cover para llenar todo el espacio */
+    object-fit: cover;
     max-width: 100%;
-  }
-  
-  /* Media Query para dispositivos móviles */
-  @media (max-width: 767px) {
+}
+
+/* Wrapper para el SVG como fondo */
+.svg-wrapper {
+    width: 100%;
+    height: 50px; /* Altura fija para escritorio */
+    background-size: cover;
+    background-position: left top;
+    background-repeat: no-repeat;
+}
+
+/* Media Query para dispositivos móviles */
+@media (max-width: 767px) {
     .banner-container {
-      height: 192px; /* Altura específica basada en tus dimensiones */
+        height: 192px; /* Altura fija para móvil según el inspector */
     }
-    
-    .svg-container {
-      height: 100%; /* Anula la altura de 30px en móviles */
-    }
-  
+
     .banner-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* Asegura que cubra todo el espacio */
-      object-position: center; /* Centra la imagen */
+        height: 100%; /* Asegura que la imagen ocupe toda la altura del contenedor */
     }
-  }
+
+    .svg-wrapper {
+        height: 100%; /* Toma toda la altura del contenedor en móvil */
+        background-size: 100% 100%; /* Estira la imagen para llenar todo el espacio */
+    }
+}
