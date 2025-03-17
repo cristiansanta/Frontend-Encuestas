@@ -37,10 +37,11 @@ const Dashboard = () => {
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-lg font-medium text-red-600">Error al cargar permisos</div>
     </div>
-  );
+  );  
 
   // Verificar si no hay roles asignados
-  const hasNoRoles = !userPermissions.roles || userPermissions.roles.length === 0;
+  // const hasNoRoles = !userPermissions.roles || userPermissions.roles.length === 0;
+  const hasNoRoles = false; // Forzamos a false para desactivar la validación
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -53,7 +54,7 @@ const Dashboard = () => {
 
         {/* Mensaje de advertencia si no tiene roles - padding responsive */}
         {hasNoRoles && (
-          <div className="mt-24 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto bg-gray-200 text-white rounded-lg text-center p-4 z-50">
+          <div className="mt-34 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto bg-gray-200 text-white rounded-lg text-center p-4 z-50">
             <h2 className="text-lg sm:text-xl font-semibold" style={{ color: "#002C4D" }}>
               No hay roles registrados
             </h2>
