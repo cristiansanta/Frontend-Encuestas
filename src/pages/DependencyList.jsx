@@ -7,6 +7,7 @@ import HeaderBar from '../components/HeaderBar';
 import TableDependency from '../components/TableDependency.jsx';
 import ProgresBar from '../components/ProgresBar.jsx';
 import Notificationpush from '../components/Notificationpush.jsx'; // Importar el componente de notificación
+import Modal from '../components/Modal'; // Importar el componente Modal
 import { useNavigate } from 'react-router-dom';
 import apiRequest from '../Provider/apiHelper.jsx';
 
@@ -19,6 +20,10 @@ const DependencyList = () => {
     const [showNotification, setShowNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationAction, setNotificationAction] = useState('guardar');
+
+    // Estados para manejar el modal de edición
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editItem, setEditItem] = useState(null);
 
     // Función para obtener datos de la encuesta
     const fetchSurveyDetails = async () => {
@@ -83,18 +88,17 @@ const DependencyList = () => {
     if (error) return <div>Error al cargar preguntas</div>;
 
     const handleEdit = (item) => {
-        console.log(item);
-        alert('Editando: ');
+        setEditItem(item);
+        setIsEditModalOpen(true);
     };
 
     const handleDelete = async (itemId) => {
-        
         try {
             const url = `questions/destroy/${itemId}`;
             const method = 'PUT';
             const response = await apiRequest(method, url);
 
-            setNotificationMessage('Pregunta eliminada con éxito ID',itemId);
+            setNotificationMessage('Pregunta eliminada con éxito ID', itemId);
             setNotificationAction('eliminar'); // Configura la acción para "eliminar"
             setShowNotification(true);
 
@@ -110,6 +114,27 @@ const DependencyList = () => {
 
     const handleFinish = () => {
         navigate('/surveyDetails');
+    };
+
+    const handleEditSubmit = async (updatedItem) => {
+        try {
+            const url = `questions/update/${updatedItem.id}`;
+            const method = 'PUT';
+            const response = await apiRequest(method, url, updatedItem);
+
+            setNotificationMessage('Pregunta actualizada con éxito');
+            setNotificationAction('editar'); // Configura la acción para "editar"
+            setShowNotification(true);
+
+            console.log(response); // Mensaje de éxito
+            refetch();
+            setIsEditModalOpen(false); // Cierra el modal de edición
+        } catch (error) {
+            console.error('Error al actualizar:', error);
+            setNotificationMessage('Hubo un error al actualizar la pregunta');
+            setNotificationAction('editar'); // Configura la acción para "editar"
+            setShowNotification(true);
+        }
     };
 
     return (
@@ -153,7 +178,6 @@ const DependencyList = () => {
                                     handleDelete={handleDelete}
                                     refresh={refetch}
                                 />
-
                             </div>
                         );
                     })}
@@ -172,7 +196,88 @@ const DependencyList = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de edición */}
+            {isEditModalOpen && (
+                <Modal
+                    isOpen={isEditModalOpen}
+                    title="Editar Pregunta"
+                    message={
+                        <EditForm
+                            item={editItem}
+                            onSubmit={handleEditSubmit}
+                            onCancel={() => setIsEditModalOpen(false)}
+                        />
+                    }
+                    onConfirm={() => {}}
+                    onCancel={() => setIsEditModalOpen(false)}
+                    confirmText="Guardar"
+                    cancelText="Cancelar"
+                    type="informative"
+                    status="default"
+                />
+            )}
         </div>
+    );
+};
+
+const EditForm = ({ item, onSubmit, onCancel }) => {
+    const [formData, setFormData] = useState(item);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                    Título
+                </label>
+                <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+            </div>
+            <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                    Descripción
+                </label>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+            </div>
+            <div className="flex items-center justify-between">
+                <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                    Guardar
+                </button>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                    Cancelar
+                </button>
+            </div>
+        </form>
     );
 };
 
