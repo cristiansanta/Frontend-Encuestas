@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import backgroundImage from '../assets/img/login_enc.svg';
+import backgroundImage from '../assets/img/zajunaMove.gif';
+// Asumimos que tienes esta imagen estática (último frame del GIF)
+import backgroundStatic from '../assets/img/zajunaStatic.svg'; 
 import logo2 from '../assets/img/logo_sena.svg';
 import EyeIcon from '../assets/img/EyeIcon.svg';
 import logoGov from '../assets/img/log_gov.svg'; // Importar el logo GOV.CO
 import TopBanner from '../components/TopBanner';
+import zajunaframe from '../assets/img/zajunaFrame.svg';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +18,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  // Nuevo estado para controlar si el GIF ya se reprodujo
+  const [gifPlayed, setGifPlayed] = useState(false);
 
   const endpoint = import.meta.env.VITE_API_ENDPOINT;
 
@@ -29,6 +34,21 @@ const Login = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Efecto para controlar la reproducción del GIF una sola vez
+  useEffect(() => {
+    // Solo si no se ha reproducido todavía
+    if (!gifPlayed) {
+      // Duración aproximada del GIF - ajusta esto según la duración real
+      const gifDuration = 3000; // 3 segundos
+      
+      const timer = setTimeout(() => {
+        setGifPlayed(true);
+      }, gifDuration);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [gifPlayed]);
 
   // Auto-rotación del carrusel en móvil
   useEffect(() => {
@@ -72,10 +92,7 @@ const Login = () => {
   };
 
   // Imágenes para el carrusel móvil
-  // En un entorno real, deberías importar las imágenes adecuadas para los slides
   const carouselImages = [
-    // Intenta usar la imagen de referencia que mostraste (imagen 2)
-    // La segunda imagen muestra las pantallas de la aplicación con el usuario
     `${import.meta.env.VITE_PUBLIC_URL}/carrusel_1.jpg`, 
     `${import.meta.env.VITE_PUBLIC_URL}/carrusel_2.jpg`,
     `${import.meta.env.VITE_PUBLIC_URL}/carrusel_3.jpg`
@@ -220,12 +237,21 @@ const Login = () => {
             background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)'
           }}
         >
-          {/* Contenido de imagen de fondo */}
+          {/* Contenedor para el logo/frame de Zajuna en la parte superior */}
+          <div className="absolute inset-0 flex items-start justify-center pr-[40%] pt-16">
+            <img
+              src={zajunaframe}
+              alt="Zajuna Frame"
+              className="z-20 w-auto h-auto max-w-[80%] max-h-[30%] object-contain"
+            />
+          </div>
+        
+          {/* Contenedor para la imagen de fondo (gif o estática) */}
           <div className="absolute inset-0 flex items-center justify-center pr-[40%]">
             <img
-              src={backgroundImage}
+              src={gifPlayed ? backgroundStatic : backgroundImage}
               alt="Sistema de Encuestas Zajuna"
-              className="w-full h-full object-cover"
+              className="w-4/5 h-4/5 object-contain z-10"
             />
           </div>
         </div>
