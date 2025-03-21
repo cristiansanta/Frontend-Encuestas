@@ -131,7 +131,7 @@ export const Navbar = () => {
         <div className="navbar-logo">
           <div className="logo-container">
             {isExpanded ? (
-              <img src={LogoZajuna} alt="Logo Zajuna" />
+              <img src={LogoZajuna} alt="Logo Zajuna" className="logo-zajuna" />
             ) : (
               <img src={Logo} alt="Logo Z" className="logo-icon" />
             )}

@@ -1,11 +1,10 @@
-.encuestas {
+.encuestas,
+.encuestas-container {
   margin: 0;
   padding: 0;
 }
 
 .encuestas-container {
-  margin: 0;
-  padding: 0;
   border-radius: 0 20px 20px 0; /* Bordes redondeados en el lado derecho */
 }
 
@@ -26,7 +25,6 @@
   overflow: hidden;
 }
 
-/* Actualización específica para el centrado del logo */
 .navbar-logo {
   width: 100%;
   text-align: center;
@@ -44,11 +42,7 @@
   margin: 0 auto; /* Asegura centrado horizontal */
 }
 
-/* Para asegurar que el logo Z quede centrado cuando está plegado */
 .navbar:not(.expanded) .navbar-logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 0.5rem;
 }
 
@@ -57,18 +51,17 @@
   margin: 0 auto;
 }
 
-/* Si hay problemas específicos con el logo Z circular, esta regla lo solucionará */
+.navbar-logo .logo-zajuna {
+  width: 180px !important; /* Ajusta el ancho según sea necesario */
+  height: auto !important; /* Mantiene la proporción de la imagen */
+  transition: all 0.3s ease !important; /* Animación suave para cambios de tamaño */
+}
+
 .navbar:not(.expanded) .navbar-logo img[src*="zajuna.svg"] {
   max-width: 48px;
   max-height: 48px;
   object-fit: contain;
   object-position: center;
-}
-
-.navbar-logo img {
-  width: auto;
-  height: 60px;
-  transition: all 0.8s ease;
 }
 
 .navbar-menu {
@@ -80,10 +73,13 @@
   gap: 1.5rem;
 }
 
-.navbar svg {
+.navbar svg,
+.navbar a svg,
+.navbar a img {
   width: 24px; /* Standardized icon size */
   height: 24px;
   transition: all 0.3s ease;
+  min-width: 24px;
 }
 
 .navbar a {
@@ -105,13 +101,6 @@
   white-space: nowrap;
 }
 
-/* Ensure icons are always visible */
-.navbar a svg,
-.navbar a img {
-  min-width: 24px;
-}
-
-/* Active item styling - fixed width issue */
 .navbar .active {
   background-color: #fff;
   border-radius: 25px 0 0 25px;
@@ -130,7 +119,6 @@
   font-weight: 600;
 }
 
-/* Hover effect - fixed width issue */
 .navbar a:not(.active):hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 25px 0 0 25px;
@@ -138,7 +126,6 @@
   padding-left: 1.5rem;
 }
 
-/* Tooltip for non-expanded state */
 .navbar a:not(.active)::after {
   content: attr(data-title);
   position: absolute;
@@ -160,9 +147,17 @@
   visibility: visible;
 }
 
-/* Expanded navbar state */
 .navbar.expanded {
-  width: 240px;
+  width: 210px; /* Ajusta el ancho según sea necesario */
+}
+
+.navbar.expanded .navbar-menu a span {
+  opacity: 1;
+  font-size: 0.85rem; /* Ajusta el tamaño del texto si es necesario */
+}
+
+.navbar.expanded .navbar-logo .logo-zajuna {
+  width: 150px; /* Ajusta el tamaño del logo si es necesario */
 }
 
 .navbar.expanded a span {
@@ -173,14 +168,12 @@
   display: none;
 }
 
-/* Logout placement */
 .navbar-logout {
   margin-top: auto;
   margin-bottom: 2rem;
   width: 100%;
 }
 
-/* Media query for mobile */
 @media (max-width: 1279px) {
   .navbar {
     display: none;
