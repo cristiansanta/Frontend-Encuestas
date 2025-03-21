@@ -10,13 +10,13 @@
 
 .navbar {
   background-color: #00324d;
-  border-radius: 1px 0px 0px 1px;
+  border-radius: 0 35px 20px 0; /* Bordes redondeados solo en el lado derecho */
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  gap: 1.5rem; /* Increased spacing between icons */
+  gap: 1.5rem; /* Espaciado entre íconos */
   height: 100vh;
   position: fixed;
   width: 80px;
@@ -103,20 +103,23 @@
 
 .navbar .active {
   background-color: #fff;
-  border-radius: 25px 0 0 25px;
-  width: calc(100% + 1px); /* Ensures no overflow while maintaining style */
+  border-radius: 20px 0 0 20px; /* Bordes redondeados hacia afuera e izquierda */
+  width: calc(100% + 1px); /* Asegura que no haya desbordamiento */
   padding-left: 1.5rem;
-}
-
-.navbar .active svg path,
-.navbar .active svg rect,
-.navbar .active svg circle {
-  stroke: #39A900;
+  position: relative;
+  z-index: 1; /* Asegura que esté por encima de otros elementos */
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); /* Opcional: sombra para resaltar */
 }
 
 .navbar .active span {
   color: #00324d;
   font-weight: 600;
+}
+
+.navbar .active svg path,
+.navbar .active svg rect,
+.navbar .active svg circle {
+  stroke: #39A900; /* Cambia el color del ícono activo */
 }
 
 .navbar a:not(.active):hover {
