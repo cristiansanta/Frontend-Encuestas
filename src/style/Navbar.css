@@ -17,8 +17,9 @@
   align-items: flex-start;
   flex-shrink: 0;
   gap: 1.5rem; /* Espaciado entre íconos */
-  height: 100vh;
+  height: calc(100vh - 15px); /* Mantiene la altura total pero ajustada */
   position: fixed;
+  top: 30px; /* Reduce la altura desde la parte superior */
   width: 80px;
   transition: width 0.3s ease;
   z-index: 100;
@@ -69,8 +70,9 @@
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  justify-content: center;
-  gap: 1.5rem;
+  justify-content: flex-start; /* Alinea las opciones al inicio */
+  gap: 1.5rem; /* Espaciado entre íconos */
+  margin-top: 21rem; /* Baja las opciones del navbar */
 }
 
 .navbar svg,
