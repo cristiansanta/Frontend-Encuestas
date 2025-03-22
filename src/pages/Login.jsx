@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import backgroundImage from '../assets/img/zajunaMove.gif';
-// Asumimos que tienes esta imagen estática (último frame del GIF)
-import backgroundStatic from '../assets/img/zajunaStatic.svg'; 
+import backgroundStatic from '../assets/img/zajunaStatic.gif';
 import logo2 from '../assets/img/logo_sena.svg';
 import EyeIcon from '../assets/img/EyeIcon.svg';
-import logoGov from '../assets/img/log_gov.svg'; // Importar el logo GOV.CO
+import logoGov from '../assets/img/log_gov.svg';
 import TopBanner from '../components/TopBanner';
 import zajunaframe from '../assets/img/zajunaFrame.svg';
 
@@ -18,8 +17,19 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  // Nuevo estado para controlar si el GIF ya se reprodujo
+  
+  // Referencias para medir el tamaño exacto y posición del GIF
+  const gifRef = useRef(null);
+  const staticRef = useRef(null);
+  
+  // Estado para la transición del GIF a la imagen estática
   const [gifPlayed, setGifPlayed] = useState(false);
+  // Estado para controlar la opacidad de la transición
+  const [transitionOpacity, setTransitionOpacity] = useState({ gif: 1, static: 0 });
+  // Estado para verificar si el GIF está cargado
+  const [gifLoaded, setGifLoaded] = useState(false);
+  // Estado para controlar las dimensiones precisas
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const endpoint = import.meta.env.VITE_API_ENDPOINT;
 
@@ -35,20 +45,96 @@ const Login = () => {
     };
   }, []);
 
-  // Efecto para controlar la reproducción del GIF una sola vez
+  // Precargar el GIF y capturar su tamaño cuando se carga
   useEffect(() => {
-    // Solo si no se ha reproducido todavía
-    if (!gifPlayed) {
-      // Duración aproximada del GIF - ajusta esto según la duración real
-      const gifDuration = 3000; // 3 segundos
+    const preloadGif = new Image();
+    preloadGif.src = backgroundImage;
+    preloadGif.onload = () => {
+      setGifLoaded(true);
       
-      const timer = setTimeout(() => {
-        setGifPlayed(true);
-      }, gifDuration);
-      
-      return () => clearTimeout(timer);
+      // Esperar un poco para que el DOM se actualice con el GIF
+      setTimeout(() => {
+        if (gifRef.current) {
+          // Capturar las dimensiones exactas del GIF renderizado
+          const { width, height } = gifRef.current.getBoundingClientRect();
+          setDimensions({ width, height });
+        }
+      }, 100);
+    };
+    
+    return () => {
+      preloadGif.onload = null;
+    };
+  }, []);
+
+  // Efecto para sincronizar las dimensiones de la imagen estática con el GIF
+  useEffect(() => {
+    if (staticRef.current && dimensions.width && dimensions.height) {
+      // Ajustar las dimensiones de la imagen estática para que coincidan exactamente con el GIF
+      staticRef.current.style.width = `${dimensions.width}px`;
+      staticRef.current.style.height = `${dimensions.height}px`;
     }
-  }, [gifPlayed]);
+  }, [dimensions, gifPlayed]);
+
+  // Efecto mejorado para controlar la reproducción del GIF y la transición más suave
+  useEffect(() => {
+    if (!gifLoaded) return;
+    
+    // La duración real del GIF - 7 segundos
+    const gifDuration = 7000;
+    
+    // Iniciar la transición con más tiempo para hacerla más gradual
+    // Aumentamos el tiempo de transición a 1500ms para una transición más suave
+    const transitionStart = gifDuration - 970;
+    
+    let animationFrame;
+    const startTime = performance.now();
+    
+    const animateTransition = (currentTime) => {
+      const elapsedTime = currentTime - startTime;
+      
+      // Si estamos en el periodo de transición
+      if (elapsedTime >= transitionStart && elapsedTime < gifDuration) {
+        // Usamos una curva de ease personalizada más suave
+        const progress = (elapsedTime - transitionStart) / (gifDuration - transitionStart);
+        
+        // Función de ease personalizada para una transición muy gradual
+        const easeProgress = easeOutQuint(progress);
+        
+        setTransitionOpacity({ 
+          gif: 1 - easeProgress, 
+          static: easeProgress 
+        });
+        
+        animationFrame = requestAnimationFrame(animateTransition);
+      } 
+      // Si hemos completado la animación
+      else if (elapsedTime >= gifDuration) {
+        // Aseguramos una transición completa limpia
+        setTransitionOpacity({ gif: 0, static: 1 });
+        setGifPlayed(true);
+      } 
+      // Si aún no hemos llegado al tiempo de transición
+      else {
+        animationFrame = requestAnimationFrame(animateTransition);
+      }
+    };
+    
+    // Función de ease mejorada - easeOutQuint proporciona una salida muy suave
+    const easeOutQuint = (t) => {
+      return 1 - Math.pow(1 - t, 5);
+    };
+    
+    // Iniciar la animación
+    animationFrame = requestAnimationFrame(animateTransition);
+    
+    // Limpieza
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [gifLoaded]);
 
   // Auto-rotación del carrusel en móvil
   useEffect(() => {
@@ -104,6 +190,7 @@ const Login = () => {
   };
 
   const renderMobileView = () => (
+    // Código del mobile view sin cambios
     <div className="flex flex-col w-full h-screen overflow-hidden bg-blue-600">
       {/* Header móvil con logo GOV.CO como imagen */}
       <div className="w-full bg-blue-600 text-white py-2 px-4 flex items-center">
@@ -246,13 +333,41 @@ const Login = () => {
             />
           </div>
         
-          {/* Contenedor para la imagen de fondo (gif o estática) */}
+          {/* Contenedor para las imágenes con transición suave */}
           <div className="absolute inset-0 flex items-center justify-center pr-[40%]">
-            <img
-              src={gifPlayed ? backgroundStatic : backgroundImage}
-              alt="Sistema de Encuestas Zajuna"
-              className="w-4/5 h-4/5 object-contain z-10"
-            />
+            {/* Utilizamos ambas imágenes con posición absoluta y controlamos la opacidad */}
+            <div className="w-4/5 h-4/5 relative flex items-center justify-center">
+              {/* Imagen animada (GIF) con transición mejorada */}
+              {!gifPlayed && gifLoaded && (
+                <img
+                  ref={gifRef}
+                  src={backgroundImage}
+                  alt="Sistema de Encuestas Zajuna (Animado)"
+                  className="object-contain absolute z-10"
+                  style={{ 
+                    opacity: transitionOpacity.gif,
+                    width: "100%",
+                    height: "100%",
+                    transition: "opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1)"
+                  }}
+                />
+              )}
+              
+              {/* Imagen estática con transición mejorada */}
+              <img
+                ref={staticRef}
+                src={backgroundStatic}
+                alt="Sistema de Encuestas Zajuna"
+                className="object-contain absolute z-10"
+                style={{ 
+                  opacity: gifPlayed ? 1 : transitionOpacity.static,
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                  transition: "opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1)"
+                }}
+              />
+            </div>
           </div>
         </div>
 
