@@ -34,16 +34,42 @@ const Login = () => {
   const endpoint = import.meta.env.VITE_API_ENDPOINT;
 
   // Detectar si es vista móvil
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+// Detectar si es vista móvil
+useEffect(() => {
+  const handleResize = () => {
+    const newIsMobile = window.innerWidth < 768;
+    
+    // Si cambiamos entre modo móvil y desktop
+    if (newIsMobile !== isMobile) {
+      // Cambiamos el estado de isMobile
+      setIsMobile(newIsMobile);
+      
+      // Reiniciamos las dimensiones para que se capturen nuevamente
+      setDimensions({ width: 0, height: 0 });
+      
+      // Si hay un cambio a desktop, reiniciamos también el estado del GIF
+      // para permitir una nueva captura de dimensiones
+      if (!newIsMobile) {
+        // Pequeño retraso para permitir que el DOM se actualice
+        setTimeout(() => {
+          if (gifRef.current) {
+            const { width, height } = gifRef.current.getBoundingClientRect();
+            setDimensions({ width, height });
+          }
+        }, 300);
+      }
+    } else {
+      // Si solo es un cambio de tamaño dentro del mismo modo, 
+      // actualizamos isMobile sin reiniciar dimensiones
+      setIsMobile(newIsMobile);
+    }
+  };
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  window.addEventListener('resize', handleResize);
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, [isMobile]);
 
   // Precargar el GIF y capturar su tamaño cuando se carga
   useEffect(() => {
@@ -68,13 +94,29 @@ const Login = () => {
   }, []);
 
   // Efecto para sincronizar las dimensiones de la imagen estática con el GIF
-  useEffect(() => {
-    if (staticRef.current && dimensions.width && dimensions.height) {
-      // Ajustar las dimensiones de la imagen estática para que coincidan exactamente con el GIF
-      staticRef.current.style.width = `${dimensions.width}px`;
-      staticRef.current.style.height = `${dimensions.height}px`;
+  // Efecto para sincronizar las dimensiones de la imagen estática con el GIF
+useEffect(() => {
+  if (staticRef.current) {
+    if (dimensions.width && dimensions.height) {
+      // Si tenemos dimensiones válidas, las aplicamos
+      if (isMobile) {
+        // Para móvil, aseguramos que se ajusta al contenedor
+        staticRef.current.style.width = '100%';
+        staticRef.current.style.height = 'auto';
+        staticRef.current.style.maxHeight = 'calc(100% - 80px)';
+      } else {
+        // Para desktop, aplicamos las dimensiones exactas
+        staticRef.current.style.width = `${dimensions.width}px`;
+        staticRef.current.style.height = `${dimensions.height}px`;
+      }
+    } else if (!isMobile) {
+      // Si no tenemos dimensiones pero estamos en desktop,
+      // aplicamos un estilo base para evitar que se vea mal
+      staticRef.current.style.width = '100%';
+      staticRef.current.style.height = '100%';
     }
-  }, [dimensions, gifPlayed]);
+  }
+}, [dimensions, gifPlayed, isMobile]);
 
   // Efecto mejorado para controlar la reproducción del GIF y la transición más suave
   useEffect(() => {
@@ -84,8 +126,8 @@ const Login = () => {
     const gifDuration = 7000;
     
     // Iniciar la transición con más tiempo para hacerla más gradual
-    // Aumentamos el tiempo de transición a 1500ms para una transición más suave
-    const transitionStart = gifDuration - 970;
+    // Aumentamos el tiempo de transición a 955ms para una transición más suave
+    const transitionStart = gifDuration - 955;
     
     let animationFrame;
     const startTime = performance.now();
@@ -136,15 +178,15 @@ const Login = () => {
     };
   }, [gifLoaded]);
 
-  // Auto-rotación del carrusel en móvil
-  useEffect(() => {
-    if (isMobile) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prevSlide) => (prevSlide + 1) % 3);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [isMobile]);
+  // Auto-rotación del carrusel en móvil - Ya no se utiliza con la nueva implementación
+  // useEffect(() => {
+  //   if (isMobile) {
+  //     const timer = setInterval(() => {
+  //       setCurrentSlide((prevSlide) => (prevSlide + 1) % 3);
+  //     }, 5000);
+  //     return () => clearInterval(timer);
+  //   }
+  // }, [isMobile]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -177,7 +219,7 @@ const Login = () => {
     }
   };
 
-  // Imágenes para el carrusel móvil
+  // Imágenes para el carrusel móvil - Ya no se utilizan con la nueva implementación
   const carouselImages = [
     `${import.meta.env.VITE_PUBLIC_URL}/carrusel_1.jpg`, 
     `${import.meta.env.VITE_PUBLIC_URL}/carrusel_2.jpg`,
@@ -190,44 +232,61 @@ const Login = () => {
   };
 
   const renderMobileView = () => (
-    // Código del mobile view sin cambios
     <div className="flex flex-col w-full h-screen overflow-hidden bg-blue-600">
       {/* Header móvil con logo GOV.CO como imagen */}
       <div className="w-full bg-blue-600 text-white py-2 px-4 flex items-center">
         <img src={logoGov} alt="GOV.CO" className="h-5" />
       </div>
-
+  
       {/* Área de contenido principal */}
       <div className="flex-grow relative overflow-hidden" 
            style={{ background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)' }}>
-          {/* Carrusel en versión móvil */}
-        <div className="absolute inset-0 flex items-center justify-center pt-16 pb-40">
-          <div className="w-full h-full relative flex flex-col items-center">            
-            {/* Imagen principal del carrusel */}
-            <img
-              src={carouselImages[currentSlide]}
-              alt={`Slide ${currentSlide + 1}`}
-              className="w-full object-contain"
-              style={{ maxHeight: "calc(100% - 80px)" }}
-              onError={handleImageError}
-            />
+          
+          {/* Contenedor para imágenes con transición */}
+          <div className="absolute inset-0 flex items-center justify-center pt-16 pb-40">
+            <div className="w-full h-full relative flex flex-col items-center">
+              {/* Imagen animada (GIF) con transición */}
+              {!gifPlayed && gifLoaded && (
+                <img
+                  ref={gifRef}
+                  src={backgroundImage}
+                  alt="Sistema de Encuestas Zajuna (Animado)"
+                  className="w-full object-contain"
+                  style={{ 
+                    maxHeight: "calc(100% - 80px)",
+                    opacity: transitionOpacity.gif,
+                    transition: "opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1)"
+                  }}
+                  onError={handleImageError}
+                />
+              )}
+              
+              {/* Imagen estática con transición */}
+              <img
+                ref={staticRef}
+                src={backgroundStatic}
+                alt="Sistema de Encuestas Zajuna"
+                className="w-full object-contain absolute top-0 left-0 right-0"
+                style={{ 
+                  maxHeight: "calc(100% - 80px)",
+                  opacity: gifPlayed ? 1 : transitionOpacity.static,
+                  transition: "opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1)"
+                }}
+                onError={handleImageError}
+              />
+              
+              {/* Zajuna Frame superpuesto sobre el GIF/imagen estática */}
+              <div className="absolute top-0 left-0 right-0 flex justify-center items-start pt-2">
+                <img
+                  src={zajunaframe}
+                  alt="Zajuna Frame"
+                  className="w-auto max-w-[100%] h-auto max-h-16 fixed top-20 left-0 right-0 z-20 object-contain"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Indicadores del carrusel */}
-        <div className="absolute bottom-[42%] w-full flex justify-center items-center space-x-2">
-          {[0, 1, 2].map((index) => (
-            <div 
-              key={index}
-              className={`w-2 h-2 rounded-full ${
-                currentSlide === index ? 'bg-green-500' : 'bg-white'
-              }`}
-              onClick={() => setCurrentSlide(index)}
-            ></div>
-          ))}
-        </div>
-
-        {/* Panel blanco redondeado en la parte inferior */}
+  
+        {/* Panel blanco redondeado en la parte inferior - sin modificar */}
         <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[25px] pt-6 pb-12 px-6">
           <div className="flex flex-col items-center">
             {/* Texto de bienvenida */}
@@ -241,8 +300,8 @@ const Login = () => {
               Un espacio diseñado para hacer más fácil y eficiente la experiencia
               de toda la comunidad <span className="font-bold">SENA</span>.
             </p>
-
-            {/* Formulario */}
+  
+            {/* Formulario - sin cambios */}
             <form className="w-full space-y-3 mt-4" onSubmit={handleSubmit}>
               <input
                 type="email"
@@ -277,9 +336,9 @@ const Login = () => {
                   />
                 </button>
               </div>
-
+  
               {error && <p className="text-red-500 text-center text-xs">{error}</p>}
-
+  
               <button
                 type="submit"
                 className="w-full py-2 bg-green-600 text-white font-medium rounded-md text-sm"
@@ -288,7 +347,7 @@ const Login = () => {
                 Iniciar sesión
               </button>
             </form>
-
+  
             {/* Enlace de registro */}
             <div className="text-center mt-3">
               <Link to="/register">
@@ -297,7 +356,7 @@ const Login = () => {
                 </div>
               </Link>
             </div>
-
+  
             {/* Logo SENA */}
             <div className="mt-8 flex justify-center">
               <img src={logo2} alt="Logo SENA" className="h-12" />
