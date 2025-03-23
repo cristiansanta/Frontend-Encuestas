@@ -15,7 +15,6 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   // Referencias para medir el tamaño exacto y posición del GIF
@@ -178,16 +177,6 @@ useEffect(() => {
     };
   }, [gifLoaded]);
 
-  // Auto-rotación del carrusel en móvil - Ya no se utiliza con la nueva implementación
-  // useEffect(() => {
-  //   if (isMobile) {
-  //     const timer = setInterval(() => {
-  //       setCurrentSlide((prevSlide) => (prevSlide + 1) % 3);
-  //     }, 5000);
-  //     return () => clearInterval(timer);
-  //   }
-  // }, [isMobile]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -218,13 +207,6 @@ useEffect(() => {
       console.error('Error en el login:', err);
     }
   };
-
-  // Imágenes para el carrusel móvil - Ya no se utilizan con la nueva implementación
-  const carouselImages = [
-    `${import.meta.env.VITE_PUBLIC_URL}/carrusel_1.jpg`, 
-    `${import.meta.env.VITE_PUBLIC_URL}/carrusel_2.jpg`,
-    `${import.meta.env.VITE_PUBLIC_URL}/carrusel_3.jpg`
-  ];
   
   // Fallback a la imagen que ya tenemos en caso de error
   const handleImageError = (e) => {
