@@ -15,13 +15,13 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Estados para la detección de dispositivo y orientación
   const [layout, setLayout] = useState({
     isMobile: false,
     isLandscape: false
   });
-  
+
   // Estado para la transición del GIF a la imagen estática
   const [gifState, setGifState] = useState({
     played: false,
@@ -39,11 +39,11 @@ const Login = () => {
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
       return mobileRegex.test(userAgent) || window.innerWidth < 768;
     };
-    
+
     const updateLayout = () => {
       const isMobile = detectMobileDevice();
       const isLandscape = window.innerWidth > window.innerHeight;
-      
+
       // Actualizar layout solo cuando hay cambios reales
       setLayout(prev => {
         if (prev.isMobile !== isMobile || prev.isLandscape !== isLandscape) {
@@ -59,15 +59,15 @@ const Login = () => {
         return prev;
       });
     };
-    
+
     // Ejecutar inmediatamente y configurar listeners
     updateLayout();
-    
+
     window.addEventListener('resize', updateLayout);
     window.addEventListener('orientationchange', () => {
       setTimeout(updateLayout, 100);
     });
-    
+
     return () => {
       window.removeEventListener('resize', updateLayout);
       window.removeEventListener('orientationchange', updateLayout);
@@ -82,41 +82,41 @@ const Login = () => {
       preloadGif.onload = () => {
         setGifState(prev => ({ ...prev, loaded: true }));
       };
-      
+
       return () => {
         preloadGif.onload = null;
       };
     }
-    
+
     if (gifState.loaded && !gifState.played) {
       // La duración real del GIF - 7 segundos
       const gifDuration = 7000;
-      
+
       // La transición comienza 955ms antes del final del GIF para lograr un efecto más suave
       const transitionStart = gifDuration - 955;
-      
+
       let animationFrame;
       const startTime = performance.now();
-      
+
       const animateTransition = (currentTime) => {
         const elapsedTime = currentTime - startTime;
-        
+
         // Si estamos en el periodo de transición
         if (elapsedTime >= transitionStart && elapsedTime < gifDuration) {
           // Calculamos el progreso de la transición (0-1)
           const progress = (elapsedTime - transitionStart) / (gifDuration - transitionStart);
-          
+
           // Función de ease personalizada para una transición muy gradual (igual que el original)
           const easeProgress = easeOutQuint(progress);
-          
+
           setGifState(prev => ({
             ...prev,
             opacity: 1 - easeProgress,
             staticOpacity: easeProgress
           }));
-          
+
           animationFrame = requestAnimationFrame(animateTransition);
-        } 
+        }
         // Si hemos completado la animación
         else if (elapsedTime >= gifDuration) {
           // Aseguramos una transición completa limpia
@@ -126,22 +126,22 @@ const Login = () => {
             opacity: 0,
             staticOpacity: 1
           }));
-        } 
+        }
         // Si aún no hemos llegado al tiempo de transición
         else {
           animationFrame = requestAnimationFrame(animateTransition);
         }
       };
-      
+
       // Función de ease mejorada - easeOutQuint proporciona una salida muy suave
       // Esta es la misma función de ease que usabas en tu código original
       const easeOutQuint = (t) => {
         return 1 - Math.pow(1 - t, 5);
       };
-      
+
       // Iniciar la animación
       animationFrame = requestAnimationFrame(animateTransition);
-      
+
       // Limpieza
       return () => {
         if (animationFrame) {
@@ -181,30 +181,30 @@ const Login = () => {
       console.error('Error en el login:', err);
     }
   };
-  
+
   // Estilos declarativos para las imágenes
   const getImageStyles = () => {
     const { isMobile, isLandscape } = layout;
     const { opacity, staticOpacity, played } = gifState;
-    
+
     // Mantener exactamente la misma transición que estaba en el código original
     const baseStyles = {
       transition: "opacity 1200ms cubic-bezier(0.22, 1, 0.36, 1)"
     };
-    
+
     // Estilos para el GIF animado
     const gifStyles = {
       ...baseStyles,
       opacity: opacity,
       display: played ? 'none' : 'block', // Quitar del DOM cuando termine
     };
-    
+
     // Estilos para la imagen estática
     const staticStyles = {
       ...baseStyles,
       opacity: played ? 1 : staticOpacity
     };
-    
+
     // Estilos contenedor adaptados por dispositivo/orientación
     if (isMobile) {
       if (isLandscape) {
@@ -236,18 +236,18 @@ const Login = () => {
   const renderMobileLandscapeView = () => {
     const { containerClass, gifStyles, staticStyles } = getImageStyles();
     console.log("Ejecutando móvil horizontal (Landscape)");
-    
+
     return (
       <div className="flex flex-row w-full h-screen overflow-hidden bg-blue-600">
         {/* Header móvil con logo GOV.CO como imagen */}
         <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white py-1 px-6 flex items-center z-30">
           <img src={logoGov} alt="GOV.CO" className="h-4" />
         </div>
-    
+
         {/* Área de contenido principal - adaptada para landscape */}
-        <div className="flex flex-row w-full h-full relative overflow-hidden" 
-             style={{ background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)' }}>
-            
+        <div className="flex flex-row w-full h-full relative overflow-hidden"
+          style={{ background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)' }}>
+
           {/* Sección izquierda para imágenes - 60% del ancho */}
           <div className="w-3/5 h-full relative flex items-center justify-center pt-10">
             {/* Zajuna Frame ajustado para landscape */}
@@ -257,30 +257,30 @@ const Login = () => {
                 alt="Zajuna Frame"
                 className="w-auto max-w-[80%] h-auto max-h-8 z-20 object-contain"
               />
-            </div>            
+            </div>
             {/* Contenedor para imágenes con transición */}
-          <div className="w-full h-full relative flex items-center justify-center">
-            
-            {/* Imagen animada (GIF) con transición - modificar así */}
-            {!gifState.played && gifState.loaded && (
+            <div className="w-full h-full relative flex items-center justify-center">
+
+              {/* Imagen animada (GIF) con transición - modificar así */}
+              {!gifState.played && gifState.loaded && (
+                <img
+                  src={backgroundImage}
+                  alt="Sistema de Encuestas Zajuna (Animado)"
+                  className={`${containerClass} absolute top-0 left-0 right-0 bottom-0 m-auto`}
+                  style={gifStyles}
+                />
+              )}
+
+              {/* Imagen estática con transición - modificar así */}
               <img
-                src={backgroundImage}
-                alt="Sistema de Encuestas Zajuna (Animado)"
+                src={backgroundStatic}
+                alt="Sistema de Encuestas Zajuna"
                 className={`${containerClass} absolute top-0 left-0 right-0 bottom-0 m-auto`}
-                style={gifStyles}
+                style={staticStyles}
               />
-            )}
-            
-            {/* Imagen estática con transición - modificar así */}
-            <img
-              src={backgroundStatic}
-              alt="Sistema de Encuestas Zajuna"
-              className={`${containerClass} absolute top-0 left-0 right-0 bottom-0 m-auto`}
-              style={staticStyles}
-            />
+            </div>
           </div>
-        </div>
-          
+
           {/* Sección derecha para formulario - 40% del ancho CON ESQUINAS REDONDEADAS */}
           <div className="w-2/5 h-full flex items-center justify-center">
             <div className="bg-white h-full w-full flex flex-col justify-center px-4 py-6 rounded-l-[25px]">
@@ -297,7 +297,7 @@ const Login = () => {
                   la experiencia de toda la comunidad <span className="font-bold">SENA</span>.
                 </p>
               </div>
-    
+
               {/* Formulario adaptado para landscape */}
               <form className="w-full space-y-2" onSubmit={handleSubmit}>
                 <input
@@ -309,7 +309,7 @@ const Login = () => {
                   placeholder="Correo electrónico"
                   required
                 />
-                
+
                 <div className="relative w-full">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -333,9 +333,9 @@ const Login = () => {
                     />
                   </button>
                 </div>
-    
+
                 {error && <p className="text-red-500 text-center text-xs">{error}</p>}
-    
+
                 <button
                   type="submit"
                   className="w-full py-1.5 bg-green-600 text-white font-medium rounded-md text-xs"
@@ -344,7 +344,7 @@ const Login = () => {
                   Iniciar sesión
                 </button>
               </form>
-    
+
               {/* Enlace de registro */}
               <div className="text-center mt-2">
                 <Link to="/register">
@@ -353,7 +353,7 @@ const Login = () => {
                   </div>
                 </Link>
               </div>
-    
+
               {/* Logo SENA */}
               <div className="mt-6 flex justify-center">
                 <img src={logo2} alt="Logo SENA" className="h-8" />
@@ -368,50 +368,50 @@ const Login = () => {
   const renderMobileView = () => {
     const { containerClass, gifStyles, staticStyles } = getImageStyles();
     console.log("Ejecutando móvil verticalmente");
-    
+
     return (
       <div className="flex flex-col w-full h-screen overflow-hidden bg-blue-600">
         {/* Header móvil con logo GOV.CO como imagen */}
         <div className="w-full bg-blue-600 text-white py-2 px-4 flex items-center">
           <img src={logoGov} alt="GOV.CO" className="h-5" />
         </div>
-    
+
         {/* Área de contenido principal */}
-        <div className="flex-grow relative overflow-hidden" 
-             style={{ background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)' }}>
-            
-            {/* Contenedor para imágenes con transición */}
-            <div className="absolute inset-0 flex items-center justify-center pt-16 pb-40">
-              <div className="w-full h-full relative flex flex-col items-center">
-                {/* Imagen animada (GIF) con transición */}
-                {!gifState.played && gifState.loaded && (
-                  <img
-                    src={backgroundImage}
-                    alt="Sistema de Encuestas Zajuna (Animado)"
-                    className={containerClass}
-                    style={gifStyles}
-                  />
-                )}
-                
-                {/* Imagen estática con transición */}
+        <div className="flex-grow relative overflow-hidden"
+          style={{ background: 'linear-gradient(to bottom, #002C4D 0%, #002032 100%)' }}>
+
+          {/* Contenedor para imágenes con transición */}
+          <div className="absolute inset-0 flex items-center justify-center pt-16 pb-40">
+            <div className="w-full h-full relative flex flex-col items-center">
+              {/* Imagen animada (GIF) con transición */}
+              {!gifState.played && gifState.loaded && (
                 <img
-                  src={backgroundStatic}
-                  alt="Sistema de Encuestas Zajuna"
-                  className={`${containerClass} absolute top-0 left-0 right-0`}
-                  style={staticStyles}
+                  src={backgroundImage}
+                  alt="Sistema de Encuestas Zajuna (Animado)"
+                  className={containerClass}
+                  style={gifStyles}
                 />
-                
-                {/* Zajuna Frame superpuesto sobre el GIF/imagen estática */}
-                <div className="absolute top-0 left-0 right-0 flex justify-center items-start pt-2">
-                  <img
-                    src={zajunaframe}
-                    alt="Zajuna Frame"
-                    className="w-auto max-w-[100%] h-auto max-h-16 fixed top-20 left-0 right-0 z-20 object-contain"
-                  />
-                </div>
+              )}
+
+              {/* Imagen estática con transición */}
+              <img
+                src={backgroundStatic}
+                alt="Sistema de Encuestas Zajuna"
+                className={`${containerClass} absolute top-0 left-0 right-0`}
+                style={staticStyles}
+              />
+
+              {/* Zajuna Frame superpuesto sobre el GIF/imagen estática */}
+              <div className="absolute top-0 left-0 right-0 flex justify-center items-start pt-2">
+                <img
+                  src={zajunaframe}
+                  alt="Zajuna Frame"
+                  className="w-auto max-w-[100%] h-auto max-h-16 z-20 object-contain"
+                />
               </div>
             </div>
-    
+          </div>
+
           {/* Panel blanco redondeado en la parte inferior - sin modificar */}
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[25px] pt-6 pb-12 px-6">
             <div className="flex flex-col items-center">
@@ -426,7 +426,7 @@ const Login = () => {
                 Un espacio diseñado para hacer más fácil y eficiente la experiencia
                 de toda la comunidad <span className="font-bold">SENA</span>.
               </p>
-    
+
               {/* Formulario - sin cambios */}
               <form className="w-full space-y-3 mt-4" onSubmit={handleSubmit}>
                 <input
@@ -438,7 +438,7 @@ const Login = () => {
                   placeholder="Correo electrónico"
                   required
                 />
-                
+
                 <div className="relative w-full">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -462,9 +462,9 @@ const Login = () => {
                     />
                   </button>
                 </div>
-    
+
                 {error && <p className="text-red-500 text-center text-xs">{error}</p>}
-    
+
                 <button
                   type="submit"
                   className="w-full py-2 bg-green-600 text-white font-medium rounded-md text-sm"
@@ -473,7 +473,7 @@ const Login = () => {
                   Iniciar sesión
                 </button>
               </form>
-    
+
               {/* Enlace de registro */}
               <div className="text-center mt-3">
                 <Link to="/register">
@@ -482,7 +482,7 @@ const Login = () => {
                   </div>
                 </Link>
               </div>
-    
+
               {/* Logo SENA */}
               <div className="mt-8 flex justify-center">
                 <img src={logo2} alt="Logo SENA" className="h-12" />
@@ -497,7 +497,7 @@ const Login = () => {
   const renderDesktopView = () => {
     const { containerClass, gifStyles, staticStyles } = getImageStyles();
     console.log("Ejecutando versión escritorio");
-    
+
     return (
       <div className="flex flex-col w-full h-screen overflow-hidden">
         {/* TopBanner para desktop */}
@@ -522,7 +522,7 @@ const Login = () => {
                 className="z-20 w-auto h-auto max-w-[80%] max-h-[30%] object-contain"
               />
             </div>
-          
+
             {/* Contenedor para las imágenes con transición suave */}
             <div className="absolute inset-0 flex items-center justify-center pr-[40%]">
               <div className="w-4/5 h-4/5 relative flex items-center justify-center">
@@ -532,16 +532,16 @@ const Login = () => {
                     src={backgroundImage}
                     alt="Sistema de Encuestas Zajuna (Animado)"
                     className={containerClass}
-                    style={{...gifStyles, position: "absolute", zIndex: 10}}
+                    style={{ ...gifStyles, position: "absolute", zIndex: 10 }}
                   />
                 )}
-                
+
                 {/* Imagen estática con transición mejorada */}
                 <img
                   src={backgroundStatic}
                   alt="Sistema de Encuestas Zajuna"
                   className={containerClass}
-                  style={{...staticStyles, position: "absolute", zIndex: 10}}
+                  style={{ ...staticStyles, position: "absolute", zIndex: 10 }}
                 />
               </div>
             </div>
@@ -636,9 +636,9 @@ const Login = () => {
 
   // Renderizado basado en el layout actual
   console.log("DECISIÓN DE RENDERIZADO:", layout);
-  
+
   const { isMobile, isLandscape } = layout;
-  
+
   if (isMobile) {
     if (isLandscape) {
       console.log("Renderizando: Mobile Landscape");
