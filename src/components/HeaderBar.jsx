@@ -5,25 +5,40 @@ import Logo from '../assets/img/zajuna.svg';
 import Phone from '../assets/img/phone.svg';
 import Email from '../assets/img/gmail.svg';
 import Logout from '../assets/img/logout.svg';
+import { useNavigate } from 'react-router-dom';
+import apiRequest from '../Provider/apiHelper';
 
 function HeaderBar({ username }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
-    // Lógica para cerrar sesión
-    console.log('Cerrar sesión');
-  };
+  const handleLogout = async () => {
+    try {
+      const url = "logout";
+      const method = "POST";
+      const response = await apiRequest(method, url);
 
-  const handleViewProfile = () => {
-    // Lógica para ver perfil
-    console.log('Ver perfil');
-  };
-
+      if (response?.message) {
+        console.log(`Mensaje del servidor: ${response.message}`);
+        if (response.message.toLowerCase().includes("successfully")) {
+          localStorage.removeItem("accessToken");
+          navigate('/'); // Redirige al usuario a la página de inicio
+        } else {
+          console.warn("Logout no completado:", response.message);
+        }
+      } else {
+        console.warn("Respuesta inesperada del servidor:", response);
+      }
+    } catch (error) {
+      console.error("Error al realizar el logout:", error?.response?.data || error.message);
+    }
+  }; 
+  
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
       setIsOpen(false);
@@ -47,16 +62,18 @@ function HeaderBar({ username }) {
           <img src={Select} alt="Seleccionar" className="h-2 mr-2" />
         </button>
         <div
-          className={`absolute top-full left-[-170px] mt-4 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg transform transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-            }`}
+          className={`absolute top-full left-[-170px] mt-4 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg transform transition-all duration-300 ${
+            isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+          }`}
         >
           <button
-            onClick={handleViewProfile}
+            onClick={() => window.open("https://zajuna.sena.edu.co/", "_blank")}
             className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left flex items-center"
           >
             <img src={Logo} alt="Logo" className="h-4 w-4 mr-2" />
             Ir a Zajuna
           </button>
+
           <div className="px-4 py-2 text-gray-400 text-sm flex items-center">
             <img src={Phone} alt="Teléfono" className="h-4 w-4 mr-2" />
             +57 3214567890
