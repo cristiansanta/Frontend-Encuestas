@@ -5,7 +5,7 @@ import TableSurveyList from '../components/TableSurveyList.jsx';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import bannerImage from '../assets/img/NewSurvey.png';
+import bannerImage from '../assets/img/NewSurvey.svg';
 
 const SurveyList = () => {
   const endpoint = import.meta.env.VITE_API_ENDPOINT;

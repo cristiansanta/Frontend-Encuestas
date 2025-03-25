@@ -1,32 +1,31 @@
-.encuestas {
+.encuestas,
+.encuestas-container {
   margin: 0;
   padding: 0;
 }
 
 .encuestas-container {
-  margin: 0;
-  padding: 0;
   border-radius: 0 20px 20px 0; /* Bordes redondeados en el lado derecho */
 }
 
 .navbar {
   background-color: #00324d;
-  border-radius: 1px 0px 0px 1px;
+  border-radius: 0 35px 45px 0; /* Bordes redondeados solo en el lado derecho */
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  gap: 1.5rem; /* Increased spacing between icons */
-  height: 100vh;
+  gap: 1.5rem; /* Espaciado entre íconos */
+  height: calc(100vh - 15px); /* Mantiene la altura total pero ajustada */
   position: fixed;
+  top: 30px; /* Reduce la altura desde la parte superior */
   width: 80px;
   transition: width 0.3s ease;
   z-index: 100;
   overflow: hidden;
 }
 
-/* Actualización específica para el centrado del logo */
 .navbar-logo {
   width: 100%;
   text-align: center;
@@ -44,11 +43,7 @@
   margin: 0 auto; /* Asegura centrado horizontal */
 }
 
-/* Para asegurar que el logo Z quede centrado cuando está plegado */
 .navbar:not(.expanded) .navbar-logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 0.5rem;
 }
 
@@ -57,7 +52,12 @@
   margin: 0 auto;
 }
 
-/* Si hay problemas específicos con el logo Z circular, esta regla lo solucionará */
+.navbar-logo .logo-zajuna {
+  width: 180px !important; /* Ajusta el ancho según sea necesario */
+  height: auto !important; /* Mantiene la proporción de la imagen */
+  transition: all 0.3s ease !important; /* Animación suave para cambios de tamaño */
+}
+
 .navbar:not(.expanded) .navbar-logo img[src*="zajuna.svg"] {
   max-width: 48px;
   max-height: 48px;
@@ -65,25 +65,23 @@
   object-position: center;
 }
 
-.navbar-logo img {
-  width: auto;
-  height: 60px;
-  transition: all 0.8s ease;
-}
-
 .navbar-menu {
   display: flex;
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  justify-content: center;
-  gap: 1.5rem;
+  justify-content: flex-start; /* Alinea las opciones al inicio */
+  gap: 1.5rem; /* Espaciado entre íconos */
+  margin-top: 21rem; /* Baja las opciones del navbar */
 }
 
-.navbar svg {
+.navbar svg,
+.navbar a svg,
+.navbar a img {
   width: 24px; /* Standardized icon size */
   height: 24px;
   transition: all 0.3s ease;
+  min-width: 24px;
 }
 
 .navbar a {
@@ -105,24 +103,15 @@
   white-space: nowrap;
 }
 
-/* Ensure icons are always visible */
-.navbar a svg,
-.navbar a img {
-  min-width: 24px;
-}
-
-/* Active item styling - fixed width issue */
 .navbar .active {
   background-color: #fff;
-  border-radius: 25px 0 0 25px;
-  width: calc(100% + 1px); /* Ensures no overflow while maintaining style */
+  border-radius: 25px 0 0 25px; /* Bordes redondeados menos pronunciados en el lado izquierdo */
+  width: calc(100% - 15px); /* Reduce el ancho para compensar el margen */
+  margin-left: 15px; /* Mueve el borde blanco hacia la derecha */
   padding-left: 1.5rem;
-}
-
-.navbar .active svg path,
-.navbar .active svg rect,
-.navbar .active svg circle {
-  stroke: #39A900;
+  position: relative;
+  z-index: 1; /* Asegura que esté por encima de otros elementos */
+  box-shadow: -1px 0 3px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
 }
 
 .navbar .active span {
@@ -130,15 +119,19 @@
   font-weight: 600;
 }
 
-/* Hover effect - fixed width issue */
+.navbar .active svg path,
+.navbar .active svg rect,
+.navbar .active svg circle {
+  stroke: #39A900; /* Cambia el color del ícono activo */
+}
+
 .navbar a:not(.active):hover {
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 25px 0 0 25px;
+  border-radius: 30px 0 0 30px; /* Bordes redondeados menos pronunciados */
   width: calc(100% + 1px);
   padding-left: 1.5rem;
 }
 
-/* Tooltip for non-expanded state */
 .navbar a:not(.active)::after {
   content: attr(data-title);
   position: absolute;
@@ -160,9 +153,17 @@
   visibility: visible;
 }
 
-/* Expanded navbar state */
 .navbar.expanded {
-  width: 240px;
+  width: 210px; /* Ajusta el ancho según sea necesario */
+}
+
+.navbar.expanded .navbar-menu a span {
+  opacity: 1;
+  font-size: 0.85rem; /* Ajusta el tamaño del texto si es necesario */
+}
+
+.navbar.expanded .navbar-logo .logo-zajuna {
+  width: 150px; /* Ajusta el tamaño del logo si es necesario */
 }
 
 .navbar.expanded a span {
@@ -173,14 +174,12 @@
   display: none;
 }
 
-/* Logout placement */
 .navbar-logout {
   margin-top: auto;
   margin-bottom: 2rem;
   width: 100%;
 }
 
-/* Media query for mobile */
 @media (max-width: 1279px) {
   .navbar {
     display: none;
