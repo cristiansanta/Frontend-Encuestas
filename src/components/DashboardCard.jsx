@@ -25,17 +25,11 @@ const cardsData = [
 const DashboardCard = () => {
   return (
     <div className="mt-6 w-full mx-auto mb-10">
-      <div 
-        className="grid gap-8"
-        style={{ 
-          gridTemplateColumns: 'repeat(4, minmax(280px, 1fr))' 
-        }}
-      >
+      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {cardsData.map((card) => (
           <div
             key={card.id}
-            className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between"
-            style={{ border: '1px solid #ddd', width: '100%', height: '100%' }}
+            className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-300"
           >
             <div className="flex items-center mb-4">
               <img
@@ -91,7 +85,6 @@ const DashboardCard = () => {
     </div>
   );
 };
-
 
 const getStatusColor = (status) => {
   switch (status) {
