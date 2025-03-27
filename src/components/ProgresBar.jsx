@@ -28,16 +28,26 @@ const ProgressBar = ({ currentView }) => {
     navigate(route);
   };
 
+  const validateActiveStep = () => {
+    if (activeStep === step.id) {
+      return True;
+    }
+    return False;
+  }
+
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex">
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
             <div 
-              className={`flex items-center cursor-pointer ${step.completed ? '' : 'opacity-70'}`}
+              className={`flex items-center relative cursor-pointer ${step.completed ? '' : 'opacity-70'}`}
               onClick={() => handleStepClick(step.route)}
             >
               {/* Contenedor con el fondo rectangular que se extiende detrás del círculo */}
+              <div className={`absolute z-50 -left-12 size-14 shadow-md p-3 border border-4 ${validateActiveStep ? 'bg-yellow-400':'bg-gray-300'} flex items-center justify-center rounded-full w-14 h-14`}> 
+                <img src={step.icon} alt={step.label} className="size-14"/>
+              </div>
               <div 
                 className={`flex items-center relative ${
                   activeStep === step.id 
@@ -47,23 +57,13 @@ const ProgressBar = ({ currentView }) => {
                 style={{ width: '200px' }} // Ancho fijo para todos los rectángulos
               >
                 {/* Círculo exterior (naranja) con position absolute para que quede por encima del fondo */}
-                <div className={`absolute left-0 p-1 rounded-full z-10 transform -translate-x-1/2 ${
-                  activeStep === step.id 
-                    ? 'bg-orange-500' // Círculo exterior naranja para el paso activo
-                    : 'bg-gray-400'   // Círculo exterior gris oscuro para pasos inactivos
-                }`}>
+          
                   {/* Círculo interior (amarillo o gris) */}
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                    activeStep === step.id 
-                      ? 'bg-yellow-400' // Círculo activo (amarillo)
-                      : 'bg-gray-300'   // Círculo inactivo (gris)
-                  }`}>
-                    <img src={step.icon} alt={step.label} className="w-8 h-8" />
-                  </div>
-                </div>
+                  
+            
                 
                 {/* Texto dentro del fondo rectangular, con padding para dejar espacio al círculo */}
-                <div className="pl-12 pr-4 py-2 font-bold text-center w-full">
+                <div className="py-1 font-bold pl-2 w-full border border-4">
                   {step.label}
                 </div>
               </div>
