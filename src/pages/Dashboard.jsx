@@ -72,15 +72,13 @@ const Dashboard = () => {
             <p className="text-sm sm:text-base text-blue-600 mt-2 underline cursor-pointer">Número de contacto: 000000000000</p>
           </div>
         )}
-
         {/* Contenido si tiene roles */}
         {!hasNoRoles && (
           <div className="w-full px-4 sm:px-6">
-            <br />
-            <br />
-            <br />
-            <div className="mt-4 sm:mt-6 w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto flex flex-col gap-4 sm:gap-6 items-center">
+            {/* Espaciado superior */}
+            <div className="mt-12 sm:mt-16"></div>
 
+            <div className="mt-4 sm:mt-6 w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto flex flex-col gap-4 sm:gap-6 items-center">
               {/* Botones de acciones */}
               <div className="w-full flex justify-between items-center space-x-4">
                 {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
@@ -107,7 +105,7 @@ const Dashboard = () => {
                     </span>
                     <span className="bg-yellow-custom text-blue-custom px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
                       Filtrar por Estado
-                      <img src={Selectsurvey} alt="Filtrar" className="w-5 h-5" />
+                      <img src={Selectsurvey} alt="Filtrar" className="w-5 h-5 ml-3" />
                     </span>
                   </button>
 
@@ -125,7 +123,7 @@ const Dashboard = () => {
                       <img src={Tablesurvey} alt="Vista de lista" className="w-5 h-5" />
                     </span>
                     <span className="bg-blue-custom text-white px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
-                      <img src={Filter} alt="Filtrar" className="w-5 h-5" />
+                      <img src={Filter} alt="Filtrar" className="w-5 h-5 mr-4" />
                       Lista
                     </span>
                   </button>
@@ -136,7 +134,6 @@ const Dashboard = () => {
                   </button>
 
                   {/* Barra de Búsqueda */}
-
                   <div className="relative flex items-center w-48 md:w-64 lg:w-50">
                     <span className="absolute left-3 flex items-center">
                       <img src={zoomIcon} alt="Zoom" className="h-5 sm:h-6" />
@@ -150,10 +147,8 @@ const Dashboard = () => {
                       <img src={voiceIcon} alt="Voice" className="h-5 sm:h-6" />
                     </span>
                   </div>
-
                 </div>
               </div>
-
             </div>
 
             {/* Tarjetas del Dashboard */}
