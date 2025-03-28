@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Navbar from '../components/Navbar.jsx';
-import HeaderBanner from '../components/HeaderBanner.jsx';
+import Navbar from './Navbar.jsx';
+import HeaderBanner from './HeaderBanner.jsx';
 import { useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
-import apiRequest from '../Provider/apiHelper';
+import apiRequest from '../Provider/apiHelper.jsx';
 
 // Importar imágenes SVG
 import zoomIcon from '../assets/img/zoom.svg';
@@ -13,10 +13,10 @@ import Filtersurvey from '../assets/img/filtersurvey.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import Tablesurvey from '../assets/img/tablesurvey.svg';
 import Filter from '../assets/img/filtersurvey.svg';
-import ShareIcon from '../assets/img/icon1.svg'; // Reemplazar con la ruta correcta
-import ViewIcon from '../assets/img/icon2.svg'; // Reemplazar con la ruta correcta
-import EditIcon from '../assets/img/icon3.svg'; // Reemplazar con la ruta correcta
-import DeleteIcon from '../assets/img/icon4.svg'; // Reemplazar con la ruta correcta
+import ShareIcon from '../assets/img/shareicon.svg'; // Reemplazar con la ruta correcta
+import ViewIcon from '../assets/img/viewicon.svg'; // Reemplazar con la ruta correcta
+import EditIcon from '../assets/img/editicon.svg'; // Reemplazar con la ruta correcta
+import DeleteIcon from '../assets/img/deleteicon.svg'; // Reemplazar con la ruta correcta
 
 // Datos de ejemplo para la tabla (reemplazar con datos reales de API)
 const surveyData = [

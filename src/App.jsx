@@ -22,7 +22,7 @@ import SurveyCompletion from './pages/SurveyCompletion.jsx'
 import SurveyExpired from './pages/SurveyExpired.jsx'
 import SurveyReplied from './pages/SurveyReplied.jsx'
 import SurveyEdit from './pages/SurveyEdit.jsx'
-import DashboardTable from './pages/DashboardTable.jsx'
+import DashboardTable from './components/DashboardTable.jsx'
 
 
 
