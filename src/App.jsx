@@ -22,6 +22,7 @@ import SurveyCompletion from './pages/SurveyCompletion.jsx'
 import SurveyExpired from './pages/SurveyExpired.jsx'
 import SurveyReplied from './pages/SurveyReplied.jsx'
 import SurveyEdit from './pages/SurveyEdit.jsx'
+import DashboardTable from './pages/DashboardTable.jsx'
 
 
 
@@ -49,6 +50,9 @@ function App() {
             <Route path="/RolesAsignation"  element={<RolesAsignation />}  />
             <Route path="/AsignationMigrate"  element={<AsignationMigrate />}  />
             <Route path="/SurveyView"  element={<SurveyView />}  />
+
+            <Route path="/DashboardTable"  element={<DashboardTable />}  />
+
             <Route path="/SurveyCompletion"  element={<SurveyCompletion />}  />
             <Route path="/SurveyExpired"  element={<SurveyExpired />}  />
             <Route path="/SurveyReplied"  element={<SurveyReplied />}  />

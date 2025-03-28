@@ -24,16 +24,35 @@ const cardsData = [
   { name: "ve que si fun", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
 ];
 
-const DashboardCard = ({ searchTerm }) => {
-  // Filter cards based on search term
-  const filteredCards = cardsData.filter(card => 
-    // Search across multiple fields
-    card.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.fechaInicio.includes(searchTerm) ||
-    card.fechaFinal.includes(searchTerm)
-  );
+// Mapear IDs de filtro a estados de tarjeta
+const mapFilterToEstado = {
+  'active': 'Activa',
+  'ending': 'Próxima a Finalizar',
+  'unpublished': 'Sin publicar',
+  'finished': 'Finalizada',
+  'all': '' // Filtro para mostrar todos
+};
+
+const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
+  // Obtener el estado de filtro correspondiente
+  const estadoFilter = mapFilterToEstado[stateFilter] || '';
+
+  // Filtrar tarjetas basado en el término de búsqueda y el filtro de estado
+  const filteredCards = cardsData.filter(card => {
+    // Primero aplicar filtro de estado si no es 'all'
+    const passesStateFilter = stateFilter === 'all' || card.estado === estadoFilter;
+    
+    // Luego aplicar filtro de búsqueda si hay un término
+    const passesSearchFilter = searchTerm === '' || 
+      card.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.fechaInicio.includes(searchTerm) ||
+      card.fechaFinal.includes(searchTerm);
+    
+    // La tarjeta debe pasar ambos filtros
+    return passesStateFilter && passesSearchFilter;
+  });
 
   // Configuración de animación para las tarjetas
   const cardVariants = {
@@ -65,7 +84,7 @@ const DashboardCard = ({ searchTerm }) => {
           transition={{ duration: 0.5 }}
           className="text-center text-gray-500 text-xl"
         >
-          No se encontraron encuestas que coincidan con la búsqueda
+          No se encontraron encuestas que coincidan con los criterios de búsqueda
         </motion.div>
       ) : (
         <AnimatePresence>
@@ -89,7 +108,7 @@ const DashboardCard = ({ searchTerm }) => {
                       className="h-6 w-6"
                     />
                   </div>
-                  <h2 className="text-lg font-semibold ml-4">Encuesta {card.name.toString().padStart(8, '0')}</h2>
+                  <h2 className="text-lg font-semibold ml-4">Encuesta {card.name.toString()}</h2>
                 </div>
                 <div className="space-y-2 flex-grow">
                   <p className="flex justify-between items-center">
