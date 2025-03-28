@@ -86,7 +86,7 @@ const ProgressBar = ({ currentView }) => {
                       : 'bg-gray-custom'
                   }`}
                   style={{ 
-                    width: '200px',
+                    width: '230px',
                     borderRadius: isFirst 
                       ? '0 20px 20px 0' // Primer elemento: redondeado a la derecha
                       : isLast 
@@ -96,7 +96,7 @@ const ProgressBar = ({ currentView }) => {
                 >
                   {/* Texto dentro del fondo rectangular, con padding para dejar espacio al círculo */}
                   <div 
-                    className="py-1 font-bold pl-2 w-full border border-4 border-gray"
+                    className="py-1 font-bold pl-3 w-full border border-4 border-gray"
                     style={{ 
                       borderRadius: isFirst 
                         ? '0 20px 20px 0' // Primer elemento: redondeado a la derecha
