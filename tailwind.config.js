@@ -8,11 +8,13 @@ export default {
     extend: {
       colors: {
         'blue-custom': '#00324D',
-        'yellow-custom': '#FFC400',        
+        'dark-blue-custom': '#002C4D',
+        'yellow-custom': '#FFC400',       
         'purple-custom': '#81217D',
         'gren-custom': '#00AA00',
         'orange-custom': '#FF730E',
         'celeste-custom': '#00919F',
+        'gray-custom': '#D9D9D9',
       },
     },
   },
