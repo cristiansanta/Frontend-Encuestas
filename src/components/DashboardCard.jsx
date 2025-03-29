@@ -148,7 +148,7 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
                     </>
                   )}
                   {card.estado === "Activa" && (
-                    <button className="flex items-center px-4 py-2 bg-gren-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                    <button className="flex items-center px-4 py-2 bg-green-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
                       <img src={Eyel} alt="Ver Respuestas" className="h-5 w-5 mr-2" />
                       Ver Respuestas
                     </button>
@@ -192,7 +192,7 @@ const getStatusColor = (status) => {
     case 'Finalizada':
       return 'bg-purple-custom';
     case 'Activa':
-      return 'bg-gren-custom';
+      return 'bg-green-custom';
     case 'Próxima a Finalizar':
       return 'bg-orange-custom';
     case 'Sin publicar':
@@ -207,7 +207,7 @@ const getTextColor = (status) => {
     case 'Finalizada':
       return 'text-purple-custom';
     case 'Activa':
-      return 'text-gren-custom';
+      return 'text-green-custom';
     case 'Próxima a Finalizar':
       return 'text-orange-custom';
     case 'Sin publicar':
@@ -222,7 +222,7 @@ const getBorderColor = (status) => {
     case 'Finalizada':
       return 'border-purple-custom';
     case 'Activa':
-      return 'border-gren-custom';
+      return 'border-green-custom';
     case 'Próxima a Finalizar':
       return 'border-orange-custom';
     case 'Sin publicar':
