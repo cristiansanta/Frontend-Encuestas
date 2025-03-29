@@ -59,12 +59,12 @@ const ProgressBar = ({ currentView }) => {
                 onClick={() => handleStepClick(step.route)}>
                 
                 {/* Círculo con el ícono */}
-                <div className={`absolute z-50 -left-12 size-14 shadow-md p-3 border border-4 border-gray ${
+                <div className={`absolute z-50 -left-12 size-16 shadow-md p-3 border border-4 border-gray ${
                   (step.completed === true && activeStep > step.id) 
                   ? 'bg-dark-blue-custom'
                   : activeStep === step.id
                   ? 'bg-yellow-custom'
-                  : 'bg-gray-custom'} flex items-center justify-center rounded-full w-14 h-14`}> 
+                  : 'bg-gray-custom'} flex items-center justify-center rounded-full w-16 h-16`}> 
                   <img 
                     src={step.icon} 
                     alt={step.label} 
@@ -80,13 +80,13 @@ const ProgressBar = ({ currentView }) => {
                 <div
                   className={`flex items-center relative ${
                     (step.completed === true && activeStep > step.id)
-                      ? 'bg-dark-blue-custom text-white'
+                      ? 'font-work-sans font-bold bg-dark-blue-custom text-white'
                       : activeStep === step.id
-                      ? 'bg-yellow-custom'
-                      : 'bg-gray-custom'
+                      ? 'font-work-sans font-bold bg-yellow-custom'
+                      : 'font-work-sans bg-gray-custom'
                   }`}
                   style={{ 
-                    width: '230px',
+                    width: '270px',
                     borderRadius: isFirst 
                       ? '0 20px 20px 0' // Primer elemento: redondeado a la derecha
                       : isLast 
@@ -96,7 +96,7 @@ const ProgressBar = ({ currentView }) => {
                 >
                   {/* Texto dentro del fondo rectangular, con padding para dejar espacio al círculo */}
                   <div 
-                    className="py-1 font-bold pl-3 w-full border border-4 border-gray"
+                    className="py-1.5 text-xl pl-5 w-full border border-4 border-gray"
                     style={{ 
                       borderRadius: isFirst 
                         ? '0 20px 20px 0' // Primer elemento: redondeado a la derecha

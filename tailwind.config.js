@@ -11,7 +11,7 @@ export default {
         'dark-blue-custom': '#002C4D',         
         'yellow-custom': '#FFC400',                
         'purple-custom': '#81217D',         
-        'gren-custom': '#00AA00',         
+        'green-custom': '#00AA00',         
         'orange-custom': '#FF730E',         
         'celeste-custom': '#00919F',         
         'gray-custom': '#D9D9D9',       
