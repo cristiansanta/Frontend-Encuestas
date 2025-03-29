@@ -16,7 +16,7 @@ const HeaderBanner = ({ showDashboardBanner, username }) => {
       setIsMobile(window.innerWidth < 768); // Considerar móvil si el ancho es menor a 768px
     };
 
-    handleResize  (); // Ejecutar al cargar el componente
+    handleResize(); // Ejecutar al cargar el componente
     window.addEventListener('resize', handleResize); // Escuchar cambios en el tamaño de la ventana
 
     return () => {
@@ -29,7 +29,7 @@ const HeaderBanner = ({ showDashboardBanner, username }) => {
     ? isMobile
       ? dashboardresponsive
       : dashboardImage
-    : bannerImage;
+    : dashboardImage;
 
   return (
     <div className={`banner-container ${showDashboardBanner ? 'svg-container' : ''} relative`}>
