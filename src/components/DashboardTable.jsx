@@ -31,7 +31,7 @@ const DashboardTable = () => {
   const navigate = useNavigate();
   const username = localStorage.getItem('userName');
   const user_id = localStorage.getItem('id_user');
-  
+
   // Referencias separadas para las versiones desktop y móvil
   const desktopDropdownRef = useRef(null);
   const mobileDropdownRef = useRef(null);
@@ -42,17 +42,17 @@ const DashboardTable = () => {
       // Verificar si el clic fue fuera de ambos contenedores
       const desktopClicked = desktopDropdownRef.current && desktopDropdownRef.current.contains(event.target);
       const mobileClicked = mobileDropdownRef.current && mobileDropdownRef.current.contains(event.target);
-      
+
       if (!desktopClicked && !mobileClicked) {
         setIsFilterOpen(false);
       }
     }
-    
+
     // Agregar evento cuando el desplegable está abierto
     if (isFilterOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     // Cleanup
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -74,7 +74,7 @@ const DashboardTable = () => {
 
   // Definimos los filtros con clases de Tailwind personalizadas
   const filters = [
-    { id: 'active', label: 'Encuestas activas', bgClass: 'bg-gren-custom', textClass: 'text-gren-custom', borderClass: 'border-gren-custom' },
+    { id: 'active', label: 'Encuestas activas', bgClass: 'bg-green-custom', textClass: 'text-green-custom', borderClass: 'border-green-custom' },
     { id: 'ending', label: 'Próximas a finalizar', bgClass: 'bg-orange-custom', textClass: 'text-orange-custom', borderClass: 'border-orange-custom' },
     { id: 'unpublished', label: 'Encuentas sin publicar', bgClass: 'bg-celeste-custom', textClass: 'text-celeste-custom', borderClass: 'border-celeste-custom' },
     { id: 'finished', label: 'Encuestas finalizadas', bgClass: 'bg-purple-custom', textClass: 'text-purple-custom', borderClass: 'border-purple-custom' },
@@ -112,17 +112,17 @@ const DashboardTable = () => {
     // Filtrar por estado si no es 'all'
     const estadoFilter = mapFilterToEstado[selectedFilter] || '';
     const passesStateFilter = selectedFilter === 'all' || survey.estado === estadoFilter;
-    
+
     // Filtrar por término de búsqueda
-    const passesSearchFilter = 
-      searchTerm === '' || 
+    const passesSearchFilter =
+      searchTerm === '' ||
       survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.creador.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.fechaCreacion.includes(searchTerm) ||
       survey.id.toString().includes(searchTerm);
-    
+
     return passesStateFilter && passesSearchFilter;
   });
 
@@ -136,7 +136,7 @@ const DashboardTable = () => {
   const getEstadoClasses = (estado) => {
     switch (estado) {
       case 'Activo':
-        return 'text-gren-custom';
+        return 'text-green-custom';
       case 'Próxima a Finalizar':
         return 'text-orange-custom';
       case 'Sin publicar':
@@ -178,7 +178,7 @@ const DashboardTable = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-     
+
 
       <div className="flex-1 flex flex-col items-center">
         {/* Banner */}
@@ -200,18 +200,18 @@ const DashboardTable = () => {
             <div className="mt-4 sm:mt-6 w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto flex flex-col gap-4 sm:gap-6 items-center">
               {/* Botones de acciones */}
               <div className="w-full flex justify-between items-center space-x-4">
-    
-              
 
-              
-            
+
+
+
+
               </div>
             </div>
 
             {/* Tabla de encuestas */}
             <div className="w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto mt-6 overflow-x-auto">
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <table className="min-w-full">
+                <table className="w-full table-auto border-collapse">
                   <thead className="bg-blue-custom text-white">
                     <tr>
                       <th className="py-3 px-4 text-left font-medium border-r border-blue-800">ID</th>
@@ -242,7 +242,7 @@ const DashboardTable = () => {
                               <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80">
                                 <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
                               </button>
-                              <button className="p-2 bg-gren-custom rounded-full text-white hover:bg-opacity-80">
+                              <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80">
                                 <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
                               </button>
                               <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80">
@@ -270,8 +270,8 @@ const DashboardTable = () => {
               {filteredData.length > 0 && (
                 <div className="flex justify-center mt-6 mb-8">
                   <nav className="flex items-center">
-                    <button 
-                      onClick={goToPreviousPage} 
+                    <button
+                      onClick={goToPreviousPage}
                       disabled={currentPage === 1}
                       className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}`}
                     >
@@ -282,18 +282,17 @@ const DashboardTable = () => {
                         <button
                           key={number}
                           onClick={() => paginate(number)}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            currentPage === number 
-                              ? 'bg-green-500 text-white' 
+                          className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === number
+                              ? 'bg-green-500 text-white'
                               : 'bg-gray-200 hover:bg-gray-300'
-                          }`}
+                            }`}
                         >
                           {number}
                         </button>
                       ))}
                     </div>
-                    <button 
-                      onClick={goToNextPage} 
+                    <button
+                      onClick={goToNextPage}
                       disabled={currentPage === totalPages}
                       className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}`}
                     >

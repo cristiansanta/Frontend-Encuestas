@@ -69,7 +69,7 @@ const Dashboard = () => {
 
   // Definimos los filtros con clases de Tailwind personalizadas
   const filters = [
-    { id: 'active', label: 'Encuestas activas', bgClass: 'bg-gren-custom', textClass: 'text-gren-custom', borderClass: 'border-gren-custom' },
+    { id: 'active', label: 'Encuestas activas', bgClass: 'bg-green-custom', textClass: 'text-green-custom', borderClass: 'border-green-custom' },
     { id: 'ending', label: 'Próximas a finalizar', bgClass: 'bg-orange-custom', textClass: 'text-orange-custom', borderClass: 'border-orange-custom' },
     { id: 'unpublished', label: 'Encuentas sin publicar', bgClass: 'bg-celeste-custom', textClass: 'text-celeste-custom', borderClass: 'border-celeste-custom' },
     { id: 'finished', label: 'Encuestas finalizadas', bgClass: 'bg-purple-custom', textClass: 'text-purple-custom', borderClass: 'border-purple-custom' },
@@ -146,7 +146,7 @@ const Dashboard = () => {
             {/* Espaciado superior */}
             <div className="mt-12 sm:mt-16"></div>
 
-            <div className="mt-4 sm:mt-6 w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto flex flex-col gap-4 sm:gap-6 items-center">
+            <div className="mt-4 sm:mt-20 w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto flex flex-col gap-4 sm:gap-6 items-center">
               {/* Botones de acciones */}
               <div className="w-full flex justify-between items-center space-x-4">
                 {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
@@ -375,15 +375,17 @@ const Dashboard = () => {
             )}
 
             {/* Contenido principal: Cards o Tabla según el modo de vista */}
-            <div className="w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto mt-4 sm:mt-6">
-              {viewMode === 'cards' ? (
+            {viewMode === 'cards' ? (
+              // Vista de tarjetas
+              <div className="w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto mt-4 sm:mt-6">
                 <DashboardCard searchTerm={searchTerm} stateFilter={selectedFilter} />
-              ) : (
-                <div className="overflow-x-auto">
-                  <DashboardTable searchTerm={searchTerm} stateFilter={selectedFilter} />
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              // Vista de tabla - 100% de ancho y sin espaciado superior innecesario
+              <div className="w-full mx-auto mt-1">
+                <DashboardTable searchTerm={searchTerm} stateFilter={selectedFilter} />
+              </div>
+            )}
           </div>
         )}
       </div>
