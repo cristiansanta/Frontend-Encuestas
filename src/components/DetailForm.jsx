@@ -6,7 +6,7 @@ import { SurveyContext } from '../Provider/SurveyContext';
 import Filtersurvey from '../assets/img/filtersurvey.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import trashcan from '../assets/img/trashCan.svg';
-import calendar2 from '../assets/img/Calendar2.svg';
+import calendar2 from '../assets/img/calendar2.svg';
 import continues from '../assets/img/continue.svg';
 import Modal from './Modal';
 import Calendar from './Calendar'; // Importamos el calendario actualizado
