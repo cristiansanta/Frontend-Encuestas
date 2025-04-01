@@ -322,7 +322,7 @@ const Dashboard = () => {
                     </span>
                     <span className="bg-blue-custom text-white px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
                       <img src={Filter} alt="Filtrar" className="w-5 h-5 mr-4" />
-                      {viewMode === 'cards' ? 'Tablero' : 'Lista'}
+                      {viewMode === 'cards' ? 'Cambiar a vista de Tablero' : 'Cambiar a vista de Lista'}
                     </span>
                   </button>
 
@@ -335,7 +335,7 @@ const Dashboard = () => {
                   </button>
 
                   {/* Barra de Búsqueda */}
-                  <div className="relative flex items-center w-48 md:w-64 lg:w-50">
+                  <div className="relative flex items-center w-48 md:w-64 lg:w-50 rounded-lg overflow-hidden">
                     <span className="absolute left-3 flex items-center">
                       <img src={zoomIcon} alt="Zoom" className="h-5 sm:h-6" />
                     </span>
@@ -350,6 +350,7 @@ const Dashboard = () => {
                       <img src={voiceIcon} alt="Voice" className="h-5 sm:h-6" />
                     </span>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -380,7 +381,7 @@ const Dashboard = () => {
               <div className="w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto mt-4 sm:mt-6">
                 <DashboardCard searchTerm={searchTerm} stateFilter={selectedFilter} />
               </div>
-            ) : (        
+            ) : (
               <div className="w-11/12 mx-auto mt-2 px-2">
                 <br />
                 <DashboardTable searchTerm={searchTerm} stateFilter={selectedFilter} />

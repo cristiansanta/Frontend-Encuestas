@@ -1,86 +1,92 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import apiRequest from '../Provider/apiHelper.jsx';
+import DOMPurify from 'dompurify';
 
+// Icons
 import ShareIcon from '../assets/img/shareicon.svg';
 import ViewIcon from '../assets/img/viewicon.svg';
 import EditIcon from '../assets/img/editicon.svg';
 import DeleteIcon from '../assets/img/deleteicon.svg';
+import DownloadIcon from '../assets/img/downloadpdf.svg';
+import CalendarIcon from '../assets/img/calendar.svg';
+import DoneIcon from '../assets/img/done.svg';
 import Tool from '../assets/img/tool.svg';
 import CardSurvey from '../assets/img/CardImg.svg';
-import DOMPurify from 'dompurify';
 
-
+// Sample data (in a real implementation, this would come from your API)
 const surveyData = [
   { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Ve que no', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'no se si', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Por Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
+  // ... otros datos
 ];
+
+// Mapear IDs de filtro a estados de encuesta
+const mapFilterToEstado = {
+  'active': 'Activa',
+  'ending': 'Próxima a Finalizar',
+  'unpublished': 'Sin publicar',
+  'finished': 'Finalizada',
+  'all': '' // Filtro para mostrar todos
+};
 
 const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Número de elementos por página
+  const [itemsPerPage] = useState(10);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Estado para mostrar animación de carga
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Efecto para simular carga
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800); // Simular tiempo de carga
+    }, 800);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Mapear IDs de filtro a estados de encuesta
-  const mapFilterToEstado = {
-    'active': 'Activa',
-    'ending': 'Por Finalizar',
-    'unpublished': 'Sin publicar',
-    'finished': 'Finalizada',
-    'all': '' // Filtro para mostrar todos
-  };
-
   // Obtener el estado de filtro correspondiente
   const estadoFilter = mapFilterToEstado[stateFilter] || '';
 
+  // Actualizar datos con fechas de inicio y final
+  const surveyDataWithDates = surveyData.map(survey => ({
+    ...survey,
+    fechaInicio: survey.fechaCreacion,
+    fechaFinal: '15/05/2025' // Fecha ficticia para el ejemplo
+  }));
+  
   // Filtrar datos según búsqueda y filtro seleccionado
-  const filteredData = surveyData.filter(survey => {
+  const filteredData = surveyDataWithDates.filter(survey => {
     // Filtrar por estado si no es 'all'
     const passesStateFilter = stateFilter === 'all' || survey.estado === estadoFilter;
 
@@ -89,9 +95,9 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
       searchTerm === '' ||
       survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.estado.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      survey.creador.toLowerCase().includes(searchTerm.toLowerCase()) ||
       survey.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      survey.fechaCreacion.includes(searchTerm) ||
+      survey.fechaInicio.includes(searchTerm) ||
+      survey.fechaFinal.includes(searchTerm) ||
       survey.id.toString().includes(searchTerm);
 
     return passesStateFilter && passesSearchFilter;
@@ -103,37 +109,10 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Obtener clases de estilo según el estado
-  const getEstadoClasses = (estado) => {
-    switch (estado) {
-      case 'Activa':
-        return 'text-green-custom';
-      case 'Por Finalizar':
-        return 'text-orange-custom';
-      case 'Sin publicar':
-        return 'text-celeste-custom';
-      case 'Finalizada':
-        return 'text-purple-custom';
-      default:
-        return 'text-gray-500';
-    }
-  };
-
-  // Obtener color de fondo para el indicador de estado
-  const getIndicatorColor = (estado) => {
-    switch (estado) {
-      case 'Activa':
-        return 'bg-green-custom';
-      case 'Por Finalizar':
-        return 'bg-orange-custom';
-      case 'Sin publicar':
-        return 'bg-celeste-custom';
-      case 'Finalizada':
-        return 'bg-purple-custom';
-      default:
-        return 'bg-gray-500';
-    }
-  };
+  // Funciones para la paginación
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
 
   // Manejar selección de fila
   const handleRowSelect = (index) => {
@@ -146,10 +125,95 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
     });
   };
 
-  // Funciones para la paginación
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
-  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  // Obtener clases de estilo según el estado
+  const getEstadoClasses = (estado) => {
+    switch (estado) {
+      case 'Activa':
+        return 'text-green-custom border-2 border-green-custom rounded-full px-3 py-1';
+      case 'Próxima a Finalizar':
+        return 'text-orange-custom border-2 border-orange-custom rounded-full px-3 py-1';
+      case 'Sin publicar':
+        return 'text-celeste-custom border-2 border-celeste-custom rounded-full px-3 py-1';
+      case 'Finalizada':
+        return 'text-purple-custom border-2 border-purple-custom rounded-full px-3 py-1';
+      default:
+        return 'text-gray-500 border-2 border-gray-500 rounded-full px-3 py-1';
+    }
+  };
+
+  // Obtener color de fondo para el indicador de estado
+  const getIndicatorColor = (estado) => {
+    switch (estado) {
+      case 'Activa':
+        return 'bg-green-custom';
+      case 'Próxima a Finalizar':
+        return 'bg-orange-custom';
+      case 'Sin publicar':
+        return 'bg-celeste-custom';
+      case 'Finalizada':
+        return 'bg-purple-custom';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  // Función para renderizar los iconos de acción según el estado
+  const renderActionIcons = (estado) => {
+    switch (estado) {
+      case 'Finalizada':
+        return (
+          <div className="flex justify-center space-x-2">
+            <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
+            </button>
+            <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      case 'Activa':
+        return (
+          <div className="flex justify-center space-x-2">
+            <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
+            </button>
+            <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      case 'Próxima a Finalizar':
+        return (
+          <div className="flex justify-center space-x-2">
+            <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={CalendarIcon} alt="Ampliar plazo" className="w-5 h-5" />
+            </button>
+            <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      case 'Sin publicar':
+        return (
+          <div className="flex justify-center space-x-2">
+            <button className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={EditIcon} alt="Editar" className="w-5 h-5" />
+            </button>
+            <button className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={DoneIcon} alt="Publicar" className="w-5 h-5" />
+            </button>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex justify-center space-x-2">
+            <button className="p-2 bg-gray-500 rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+              <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
+            </button>
+          </div>
+        );
+    }
+  };
 
   // Configuración de animación para las filas de la tabla
   const tableRowVariants = {
@@ -158,7 +222,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.05, // Retraso escalonado basado en el índice
+        delay: i * 0.05,
         duration: 0.3,
         ease: "easeInOut"
       }
@@ -185,7 +249,6 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
   };
 
   // Si está cargando, mostrar animación de carga
-
   if (isLoading) {
     return (
       <div className="w-full flex justify-center items-center py-20">
@@ -206,31 +269,30 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
 
   return (
     <motion.div
-      className="mt-0 w-full"
+      className="mt-0 w-full mx-auto mb-10"
       initial="hidden"
       animate="visible"
       variants={tableVariants}
     >
       {/* Tabla de encuestas */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden w-full">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden w-full border border-gray-300">
         <table className="w-full table-auto border-collapse">
           <thead className="bg-blue-custom text-white">
             <tr>
-              {/* Columna para el checkbox */}
+              {/* Columna para el checkbox/indicador */}
               <th className="py-3 px-2 text-center font-medium border-r border-blue-800 w-12">
                 <div className="flex items-center justify-center">
-                  <img src={Tool} alt="Herramienta" className="w-6 h-6" />
+                  <img src={CardSurvey} alt="Imagen encuesta" className="w-6 h-6" />
                 </div>
               </th>
               <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-3/12">Título de la Encuesta</th>
-              <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-1/12">Estado</th>
-              <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-2/12">Creador</th>
+              <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-2/12">Estado</th>
               <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-2/12">Categoría</th>
-              <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-1/12">Fecha de Creación</th>
-              <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-1/12">Nº de Asignaciones</th>
+              <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-3/12">Rango de tiempo</th>
+              <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-1/12">Nº de Respuestas</th>
               <th className="py-3 px-4 text-center font-medium w-2/12">
                 <div className="flex items-center justify-center">
-                  <img src={CardSurvey} alt="Imagen encuesta" className="w-6 h-6 mr-2" />
+                  <img src={Tool} alt="Herramienta" className="w-6 h-6 mr-2" />
                   <span>Acciones</span>
                 </div>
               </th>
@@ -251,13 +313,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                   >
                     {/* Celda con checkbox e indicador de estado */}
                     <td className="border-r py-3 px-2 relative">
-                      {/* Barra vertical de color según estado - ahora más ancha y a la izquierda */}
+                      {/* Barra vertical de color según estado */}
                       <div className={`absolute left-0 top-0 bottom-0 w-4 ${getIndicatorColor(survey.estado)}`}></div>
 
                       {/* Checkbox con padding a la izquierda para compensar el indicador */}
                       <div className="flex items-center justify-center pl-6">
                         <div
-                          className={`w-5 h-5 border border-gray-300 rounded cursor-pointer flex items-center justify-center ${selectedRows.includes(index) ? 'bg-blue-500 border-blue-500' : 'bg-white'}`}
+                          className={`w-5 h-5 border border-gray-300 rounded cursor-pointer flex items-center justify-center transition-colors ${selectedRows.includes(index) ? 'bg-blue-500 border-blue-500' : 'bg-white'}`}
                           onClick={() => handleRowSelect(index)}
                         >
                           {selectedRows.includes(index) && (
@@ -280,28 +342,23 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                       </div>
                     </td>
                     <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.title)}</td>
-                    <td className={`py-3 px-4 border-r font-medium ${getEstadoClasses(survey.estado)}`}>
-                      {DOMPurify.sanitize(survey.estado)}
+                    <td className="py-3 px-4 border-r text-center">
+                      <span className={`inline-block ${getEstadoClasses(survey.estado)}`}>
+                        {DOMPurify.sanitize(survey.estado)}
+                      </span>
                     </td>
-                    <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.creador)}</td>
                     <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.categoria)}</td>
-                    <td className="py-3 px-4 border-r">{DOMPurify.sanitize(survey.fechaCreacion)}</td>
+                    <td className="py-3 px-4 border-r text-center">
+                      <div className="flex flex-col md:flex-row justify-center items-center">
+                        <span className="font-semibold mr-2"></span> {DOMPurify.sanitize(survey.fechaInicio)}
+                        <span className="mx-2 hidden md:inline">-</span>
+                        <span className="font-semibold mr-2 md:ml-2"></span> {DOMPurify.sanitize(survey.fechaFinal)}
+                      </div>
+                    </td>
                     <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
                     <td className="py-3 px-4">
-                      <div className="flex justify-center space-x-2">
-                        <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80">
-                          <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
-                        </button>
-                        <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80">
-                          <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
-                        </button>
-                        <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80">
-                          <img src={EditIcon} alt="Editar" className="w-5 h-5" />
-                        </button>
-                        <button className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80">
-                          <img src={DeleteIcon} alt="Eliminar" className="w-5 h-5" />
-                        </button>
-                      </div>
+                      {/* Renderizar los iconos de acción según el estado */}
+                      {renderActionIcons(survey.estado)}
                     </td>
                   </motion.tr>
                 ))
@@ -333,13 +390,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <button
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}`}
+              className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-custom text-white hover:bg-opacity-80 transition-all duration-300'}`}
             >
               &lt;
             </button>
             <div className="mx-4 flex space-x-2">
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                // Show first page, last page, current page, and pages around current
+                // Lógica para mostrar correctamente la paginación
                 let pageToShow;
                 if (totalPages <= 5) {
                   pageToShow = i + 1;
@@ -359,10 +416,11 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                   <button
                     key={pageToShow}
                     onClick={() => paginate(pageToShow)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentPage === pageToShow
-                        ? 'bg-green-500 text-white'
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      currentPage === pageToShow
+                        ? 'bg-green-custom text-white'
                         : 'bg-gray-200 hover:bg-gray-300'
-                      }`}
+                    }`}
                   >
                     {pageToShow}
                   </button>
@@ -372,7 +430,11 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}`}
+              className={`p-2 rounded-full ${
+                currentPage === totalPages 
+                  ? 'bg-gray-300 cursor-not-allowed' 
+                  : 'bg-green-custom text-white hover:bg-opacity-80 transition-all duration-300'
+              }`}
             >
               &gt;
             </button>
@@ -387,7 +449,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.5 }}
       >
-        <button className="bg-green-500 text-white py-2 px-6 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+        <button className="bg-green-custom text-white py-2 px-6 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-300">
           <span className="mr-2">✓</span> Finalizar
         </button>
       </motion.div>
