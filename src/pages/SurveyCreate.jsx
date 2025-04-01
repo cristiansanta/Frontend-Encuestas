@@ -17,7 +17,7 @@ const SurveyCreate = () => {
   console.log(parsedCategoryData[0][0])
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-back-custom">
       <Navbar />
       <div className="flex-1 flex flex-col items-center">
         <HeaderBanner />

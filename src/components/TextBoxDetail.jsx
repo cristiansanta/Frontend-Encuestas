@@ -55,7 +55,7 @@ const RichTextEditor = ({ value, onChange }) => {
   `;
 
   return (
-    <div className="w-full h-80 overflow-hidden bg-white rounded-lg">
+    <div className="w-full h-80 overflow-hidden bg-gray-back-custom rounded-lg">
       {/* Incluimos los estilos personalizados */}
       <style>{customStyles}</style>
       

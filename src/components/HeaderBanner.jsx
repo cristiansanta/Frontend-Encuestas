@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import bannerImage from '../assets/img/bannner_encuestas.png';
-import dashboardImage from '../assets/img/newbanner.svg';
+import dashboardImage from '../assets/img/BANNER_ENCUESTAS_2025_Step_1.svg';
 import dashboardresponsive from '../assets/img/newbanneresponsive.svg';
 import '../style/HeaderBanner.css';
 import TopBanner from '../components/TopBanner';

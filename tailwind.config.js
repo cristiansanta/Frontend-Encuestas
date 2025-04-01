@@ -15,6 +15,7 @@ export default {
         'orange-custom': '#FF730E',         
         'celeste-custom': '#00919F',         
         'gray-custom': '#D9D9D9',       
+        'gray-back-custom': '#F0F0F0',
       },
       fontFamily: {
         'work-sans': ['"Work Sans"', 'sans-serif'],
