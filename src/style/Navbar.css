@@ -5,32 +5,31 @@
 }
 
 .encuestas-container {
-  border-radius: 0 20px 20px 0; /* Bordes redondeados en el lado derecho */
+  border-radius: 0 20px 20px 0;
 }
 
 .navbar {
   background-color: #00324d;
-  border-radius: 0 35px 45px 0; /* Bordes redondeados solo en el lado derecho */
+  border-radius: 0 35px 45px 0;
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  gap: 1.5rem; /* Espaciado entre íconos */
-  height: calc(100vh - 15px); /* Mantiene la altura total pero ajustada */
+  height: calc(100vh - 15px);
   position: fixed;
-  top: 30px; /* Reduce la altura desde la parte superior */
+  top: 30px;
   width: 80px;
   transition: width 0.3s ease;
   z-index: 100;
-  overflow: hidden;
+  overflow: visible; /* Permite que las curvas se vean fuera del navbar */
 }
 
 .navbar-logo {
   width: 100%;
   text-align: center;
   padding: 1rem 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem; /* Reducido de 2rem a 1rem */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -40,7 +39,7 @@
   width: auto;
   height: 40px;
   transition: all 0.3s ease;
-  margin: 0 auto; /* Asegura centrado horizontal */
+  margin: 0 auto;
 }
 
 .navbar:not(.expanded) .navbar-logo {
@@ -53,9 +52,9 @@
 }
 
 .navbar-logo .logo-zajuna {
-  width: 180px !important; /* Ajusta el ancho según sea necesario */
-  height: auto !important; /* Mantiene la proporción de la imagen */
-  transition: all 0.3s ease !important; /* Animación suave para cambios de tamaño */
+  width: 180px !important;
+  height: auto !important;
+  transition: all 0.3s ease !important;
 }
 
 .navbar:not(.expanded) .navbar-logo img[src*="zajuna.svg"] {
@@ -70,21 +69,23 @@
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  justify-content: flex-start; /* Alinea las opciones al inicio */
-  gap: 1.5rem; /* Espaciado entre íconos */
-  margin-top: 21rem; /* Baja las opciones del navbar */
+  justify-content: center;
+  gap: 1.5rem;
+  position: relative;
+  padding-bottom: -30rem; /* Valor negativo para subir las opciones */
+  margin-top: 10rem; /* Valor negativo adicional para subir más las opciones */
 }
 
 .navbar svg,
 .navbar a svg,
 .navbar a img {
-  width: 24px; /* Standardized icon size */
+  width: 24px;
   height: 24px;
   transition: all 0.3s ease;
   min-width: 24px;
 }
 
-.navbar a {
+.navbar a.menu-item {
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -93,9 +94,10 @@
   color: #fff;
   position: relative;
   transition: all 0.3s ease;
+  z-index: 1;
 }
 
-.navbar a span {
+.navbar a.menu-item span {
   margin-left: 0.75rem;
   font-size: 0.95rem;
   opacity: 0;
@@ -103,36 +105,79 @@
   white-space: nowrap;
 }
 
-.navbar .active {
-  background-color: #fff;
-  border-radius: 25px 0 0 25px; /* Bordes redondeados menos pronunciados en el lado izquierdo */
-  width: calc(100% - 15px); /* Reduce el ancho para compensar el margen */
-  margin-left: 15px; /* Mueve el borde blanco hacia la derecha */
-  padding-left: 1.5rem;
+/* Estilos para el elemento activo */
+.navbar .menu-item.active {
+  background-color: transparent;
+  color: #00324d;
+  height: 50px; /* Altura fija del elemento activo */
   position: relative;
-  z-index: 1; /* Asegura que esté por encima de otros elementos */
-  box-shadow: -1px 0 3px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
 }
 
-.navbar .active span {
+.navbar .menu-item.active:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  z-index: -1;
+}
+
+.navbar .menu-item.active span {
   color: #00324d;
   font-weight: 600;
 }
 
-.navbar .active svg path,
-.navbar .active svg rect,
-.navbar .active svg circle {
-  stroke: #39A900; /* Cambia el color del ícono activo */
+/* Curvas para el efecto curve-outside */
+.curve-top,
+.curve-bottom {
+  position: absolute;
+  right: 0;
+  background-color: white;
+  width: 30px; /* Aumentado para mayor visibilidad */
+  height: 30px; /* Aumentado para mayor visibilidad */
+  z-index: 0;
 }
 
-.navbar a:not(.active):hover {
+.curve-top {
+  top: -30px; /* Ajustado para el nuevo tamaño */
+}
+
+.curve-top:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px; /* Aumentado para mayor visibilidad */
+  height: 30px; /* Aumentado para mayor visibilidad */
+  background-color: #00324d;
+  border-bottom-right-radius: 28px; /* Borde más marcado */
+}
+
+.curve-bottom {
+  bottom: -30px; /* Ajustado para el nuevo tamaño */
+}
+
+.curve-bottom:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px; /* Aumentado para mayor visibilidad */
+  height: 30px; /* Aumentado para mayor visibilidad */
+  background-color: #00324d;
+  border-top-right-radius: 28px; /* Borde más marcado */
+}
+
+.navbar a.menu-item:not(.active):hover {
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 30px 0 0 30px; /* Bordes redondeados menos pronunciados */
+  border-radius: 30px 0 0 30px;
   width: calc(100% + 1px);
   padding-left: 1.5rem;
 }
 
-.navbar a:not(.active)::after {
+.navbar a.menu-item:not(.active)::after {
   content: attr(data-title);
   position: absolute;
   left: 90px;
@@ -148,29 +193,29 @@
   z-index: 100;
 }
 
-.navbar a:not(.active):hover::after {
+.navbar a.menu-item:not(.active):hover::after {
   opacity: 1;
   visibility: visible;
 }
 
 .navbar.expanded {
-  width: 210px; /* Ajusta el ancho según sea necesario */
+  width: 210px;
 }
 
-.navbar.expanded .navbar-menu a span {
+.navbar.expanded .navbar-menu a.menu-item span {
   opacity: 1;
-  font-size: 0.85rem; /* Ajusta el tamaño del texto si es necesario */
+  font-size: 0.85rem;
 }
 
 .navbar.expanded .navbar-logo .logo-zajuna {
-  width: 150px; /* Ajusta el tamaño del logo si es necesario */
+  width: 150px;
 }
 
-.navbar.expanded a span {
+.navbar.expanded a.menu-item span {
   opacity: 1;
 }
 
-.navbar.expanded a:not(.active)::after {
+.navbar.expanded a.menu-item:not(.active)::after {
   display: none;
 }
 
@@ -188,7 +233,7 @@
   .mobile-navbar {
     display: flex;
     position: fixed;
-    bottom: 0; /* Changed to bottom for better mobile UX */
+    bottom: 0;
     left: 0;
     width: 100%;
     background-color: #00324d;
