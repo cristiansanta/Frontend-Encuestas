@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { useNavigate } from 'react-router-dom';
 import apiRequest from '../Provider/apiHelper';
 import { useQueryClient } from '@tanstack/react-query';
+import DOMPurify from 'dompurify'; // Importamos DOMPurify
 
 const TableSurveyList = ({ surveys }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,10 +60,10 @@ const TableSurveyList = ({ surveys }) => {
         try {
             if (userPermissions.permissions.includes('delete-users')) {
                 await apiRequest('PUT', `surveys/${selectedItem.id}`);
-                alert(`Encuesta eliminada con éxito: ${selectedItem.title}`);
+                alert(`Encuesta eliminada con éxito: ${DOMPurify.sanitize(selectedItem.title)}`);
             } else {
                 await apiRequest('PUT', `surveys/update/${selectedItem.id}`, { status: false });
-                alert(`Encuesta marcada como eliminada: ${selectedItem.title}`);
+                alert(`Encuesta marcada como eliminada: ${DOMPurify.sanitize(selectedItem.title)}`);
             }
         } catch (error) {
             console.error('Error al procesar la solicitud:', error);
@@ -128,7 +129,7 @@ const TableSurveyList = ({ surveys }) => {
 
     const handleAsignation = (item) => {
         localStorage.setItem('selectedSurveyId', item.id);
-        localStorage.setItem('selectedSurveyTitle', item.title);
+        localStorage.setItem('selectedSurveyTitle', DOMPurify.sanitize(item.title));
         navigate('/AsignationMigrate');
     };
 
@@ -154,15 +155,15 @@ const TableSurveyList = ({ surveys }) => {
                         currentItems.map((item) =>
                             item && item.id ? (
                                 <tr key={item.id} className="border-t">
-                                    <td className="px-4 py-2 text-center text-[#00324D]">{item.id}</td>
-                                    <td className="px-4 py-2 text-center text-[#00324D]">{item.title || 'Título no disponible'}</td>
+                                    <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(String(item.id))}</td>
+                                    <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.title || 'Título no disponible')}</td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">{item.status ? 'Activo' : 'Inactivo'}</td>
-                                    <td className="px-4 py-2 text-center text-[#00324D]">{item.user_create || 'Usuario'}</td>
-                                    <td className="px-4 py-2 text-center text-[#00324D]">{item.category?.title || 'Sin categoría'}</td>
+                                    <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.user_create || 'Usuario')}</td>
+                                    <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.category?.title || 'Sin categoría')}</td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">
-                                        {item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : 'Fecha no disponible'}
+                                        {item.created_at ? DOMPurify.sanitize(new Date(item.created_at).toISOString().split('T')[0]) : 'Fecha no disponible'}
                                     </td>
-                                    <td className="px-4 py-2 text-center text-[#00324D]">{item.assignments_count || 0}</td>
+                                    <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(String(item.assignments_count || 0))}</td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">Ver</td>
                                     <td className="px-4 py-2 text-center">
                                         <button
@@ -248,15 +249,15 @@ const TableSurveyList = ({ surveys }) => {
                                 currentDraftItems.map((item) =>
                                     item && item.id ? (
                                         <tr key={item.id} className="border-t">
-                                            <td className="px-4 py-2 text-center text-[#00324D]">{item.id}</td>
-                                            <td className="px-4 py-2 text-center text-[#00324D]">{item.title || 'Título no disponible'}</td>
+                                            <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(String(item.id))}</td>
+                                            <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.title || 'Título no disponible')}</td>
                                             <td className="px-4 py-2 text-center text-[#00324D]">{item.status ? 'Activo' : 'Inactivo'}</td>
-                                            <td className="px-4 py-2 text-center text-[#00324D]">{item.user_create || 'Usuario'}</td>
-                                            <td className="px-4 py-2 text-center text-[#00324D]">{item.category?.title || 'Sin categoría'}</td>
+                                            <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.user_create || 'Usuario')}</td>
+                                            <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(item.category?.title || 'Sin categoría')}</td>
                                             <td className="px-4 py-2 text-center text-[#00324D]">
-                                                {item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : 'Fecha no disponible'}
+                                                {item.created_at ? DOMPurify.sanitize(new Date(item.created_at).toISOString().split('T')[0]) : 'Fecha no disponible'}
                                             </td>
-                                            <td className="px-4 py-2 text-center text-[#00324D]">{item.assignments_count || 0}</td>
+                                            <td className="px-4 py-2 text-center text-[#00324D]">{DOMPurify.sanitize(String(item.assignments_count || 0))}</td>
                                             <td className="px-4 py-2 text-center text-[#00324D]">Ver</td>
                                             <td className="px-4 py-2 text-center">
                                                 <button
@@ -317,7 +318,7 @@ const TableSurveyList = ({ surveys }) => {
                 <Modal
                     isOpen={isModalOpen}
                     title="Eliminar Registro de encuesta"
-                    message={`¿Está seguro de que desea eliminar la encuesta "${selectedItem?.title}"?`}
+                    message={`¿Está seguro de que desea eliminar la encuesta "${DOMPurify.sanitize(selectedItem?.title)}"?`}
                     onConfirm={confirmDelete}
                     onCancel={cancelDelete}
                     confirmText="Eliminar"

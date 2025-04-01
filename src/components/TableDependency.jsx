@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import ModalQuestions from './ModalQuestions'; // Importa el modal
+import DOMPurify from 'dompurify'; // Asegúrate de importar DOMPurify
+import ModalQuestions from './ModalQuestions';
 
 const TableDependency = ({ questions, allQuestions, handleEdit, handleDelete, refresh }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,7 +18,7 @@ const TableDependency = ({ questions, allQuestions, handleEdit, handleDelete, re
         }
         setSelectedItem(item);
         const title = parentQuestion?.question?.title || 'Sin título';
-        setTitlefather(title);
+        setTitlefather(DOMPurify.sanitize(title));
         toggleModal();
     };
 
@@ -57,16 +58,16 @@ const TableDependency = ({ questions, allQuestions, handleEdit, handleDelete, re
                             return (
                                 <tr key={index} className="border-t">
                                     <td className="px-4 py-2 text-center text-[#00324D]">
-                                        {item.question?.id || 'Sin ID'}
+                                        {DOMPurify.sanitize(String(item.question?.id) || 'Sin ID')}
                                     </td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">
-                                        {item.question?.title || 'Sin título'}
+                                        {DOMPurify.sanitize(item.question?.title || 'Sin título')}
                                     </td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">
-                                        {item.question?.type?.title || 'Sin tipo'}
+                                        {DOMPurify.sanitize(item.question?.type?.title || 'Sin tipo')}
                                     </td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">
-                                        {item.question?.options?.length || 0}
+                                        {DOMPurify.sanitize(String(item.question?.options?.length || 0))}
                                     </td>
                                     <td className="px-4 py-2 text-center text-[#00324D]">
                                         {item.question?.questions_conditions ? 'Sí' : 'No'}
@@ -75,9 +76,9 @@ const TableDependency = ({ questions, allQuestions, handleEdit, handleDelete, re
                                         {item.question?.cod_padre !== 0 ? (
                                             parentQuestion ? (
                                                 <span
-                                                    title={`Condición de la pregunta principal: ${parentQuestion.question?.title} es ${item.question?.conditions?.[0]?.operation || ''} ${item.question?.conditions?.[0]?.compare || ''}`}
+                                                    title={DOMPurify.sanitize(`Condición de la pregunta principal: ${parentQuestion.question?.title} es ${item.question?.conditions?.[0]?.operation || ''} ${item.question?.conditions?.[0]?.compare || ''}`)}
                                                 >
-                                                    {`Id pregunta: ${parentQuestion.question?.id || 'N/A'} si la respuesta es: ${item.question?.conditions?.[0]?.operation || ''} ${item.question?.conditions?.[0]?.compare || ''}`}
+                                                    {DOMPurify.sanitize(`Id pregunta: ${parentQuestion.question?.id || 'N/A'} si la respuesta es: ${item.question?.conditions?.[0]?.operation || ''} ${item.question?.conditions?.[0]?.compare || ''}`)}
                                                 </span>
                                             ) : (
                                                 'Pregunta no encontrada'

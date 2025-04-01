@@ -10,6 +10,7 @@ import calendar2 from '../assets/img/calendar2.svg';
 import continues from '../assets/img/continue.svg';
 import Modal from './Modal';
 import Calendar from './Calendar'; // Importamos el calendario actualizado
+import DOMPurify from 'dompurify'; // Importamos DOMPurify
 
 const DetailForm = () => {
   const { selectedCategory } = useContext(SurveyContext);
@@ -88,6 +89,10 @@ const DetailForm = () => {
     console.log(`Navegación a: ${path}`);
     // Implementa la navegación real según tu enrutador
   };
+
+  // Sanitizar datos antes de enviarlos
+  const sanitizedTitle = title ? DOMPurify.sanitize(title) : '';
+  const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
   return (
     <div className="flex flex-col gap-4 p-6 rounded-lg bg-[#F0F0F0]">
@@ -226,12 +231,15 @@ const DetailForm = () => {
             <h2 className="font-work-sans text-4xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
           </div>
           <div className="border border-gray-300 p-2">
-            <RichTextEditor value={description} onChange={setDescription} />
+          <RichTextEditor 
+            value={description} 
+            onChange={(value) => setDescription(DOMPurify.sanitize(value))} // Sanitizar la descripción
+          />
           </div>
         </div>
 
         <div className="mt-4 flex justify-end">
-  {!title.trim() || !description.trim() ? (
+  {!sanitizedTitle.trim() || !sanitizedDescription.trim() ? (
     <button
       onClick={handleNextClick}
       className="flex items-center px-4 py-2 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
@@ -241,8 +249,8 @@ const DetailForm = () => {
     </button>
   ) : (
     <DataSender
-      title={title}
-      description={description}
+      title={sanitizedTitle}
+      description={sanitizedDescription}
       id_category={selectedCategory[0][0]}
       status={true}
       accessToken={accessToken}
@@ -268,8 +276,8 @@ const DetailForm = () => {
       {/* Modal para mensajes */}
       <Modal
         isOpen={isModalOpen}
-        title={modalTitle}
-        message={modalMessage}
+        title={DOMPurify.sanitize(modalTitle)}
+        message={DOMPurify.sanitize(modalMessage)}
         onConfirm={closeModal}
         onCancel={closeModal}
         confirmText="Cerrar"

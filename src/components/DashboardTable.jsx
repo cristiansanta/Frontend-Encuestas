@@ -10,6 +10,8 @@ import EditIcon from '../assets/img/editicon.svg';
 import DeleteIcon from '../assets/img/deleteicon.svg';
 import Tool from '../assets/img/tool.svg';
 import CardSurvey from '../assets/img/CardImg.svg';
+import DOMPurify from 'dompurify';
+
 
 const surveyData = [
   { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
@@ -277,14 +279,14 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 border-r truncate">{survey.title}</td>
+                    <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.title)}</td>
                     <td className={`py-3 px-4 border-r font-medium ${getEstadoClasses(survey.estado)}`}>
-                      {survey.estado}
+                      {DOMPurify.sanitize(survey.estado)}
                     </td>
-                    <td className="py-3 px-4 border-r truncate">{survey.creador}</td>
-                    <td className="py-3 px-4 border-r truncate">{survey.categoria}</td>
-                    <td className="py-3 px-4 border-r">{survey.fechaCreacion}</td>
-                    <td className="py-3 px-4 border-r text-center">{survey.asignaciones}</td>
+                    <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.creador)}</td>
+                    <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.categoria)}</td>
+                    <td className="py-3 px-4 border-r">{DOMPurify.sanitize(survey.fechaCreacion)}</td>
+                    <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
                     <td className="py-3 px-4">
                       <div className="flex justify-center space-x-2">
                         <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80">
