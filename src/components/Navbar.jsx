@@ -36,12 +36,6 @@ export const Navbar = () => {
       active: activePath === "/SurveyList",
       label: "Lista de encuestas",
     },
-    // {
-    //   icon: ListCategory,
-    //   path: "#/CategoryList",
-    //   active: activePath === "/CategoryList",
-    //   label: "Lista de categorías",
-    // },
     {
       icon: Statereport,
       path: "#/SectionsCreate",
@@ -89,6 +83,7 @@ export const Navbar = () => {
     <div>
       {/* Mobile navbar for small screens */}
       <div className="mobile-navbar xl:hidden">
+        <div className="mobile-navbar-background"></div>
         {menuItems.map((value, index) => (
           <a
             key={index}
