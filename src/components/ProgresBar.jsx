@@ -45,7 +45,7 @@ const ProgressBar = ({ currentView }) => {
   };
   
   return (
-    <div className="flex items-center justify-center w-full">
+    <div className="flex items-center justify-center w-full -mt-5">
       <div className="flex">
         {steps.map((step, index) => {
           // Determinar si es el primer o último elemento para aplicar bordes redondeados
@@ -82,7 +82,7 @@ const ProgressBar = ({ currentView }) => {
                     (step.completed === true && activeStep > step.id)
                       ? 'font-work-sans font-bold bg-dark-blue-custom text-white'
                       : activeStep === step.id
-                      ? 'font-work-sans font-bold bg-yellow-custom'
+                      ? 'font-work-sans font-bold bg-yellow-custom text-dark-blue-custom'
                       : 'font-work-sans bg-gray-custom'
                   }`}
                   style={{ 
