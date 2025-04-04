@@ -95,17 +95,17 @@ const DetailForm = () => {
   const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
   return (
-    <div className="flex flex-col gap-4 p-6 rounded-lg bg-[#F0F0F0]">
+    <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-xl">
       {/* Contenedor principal */}
-      <div className="border border-gray-300 p-4 rounded-lg">
+      <div className="border border-white p-4 rounded-lg">
         
         {/* Sección superior con dos elementos (título y categoría) */}
         <div className="flex justify-between mb-4">
-          <div className="w-1/3 border border-gray-300 p-2">
+          <div className="w-1/3 border border-white p-2">
             {/* Campo para el título */}
             <h1 className="font-work-sans text-5xl font-bold text-dark-blue-custom">Titulo de Encuesta</h1>
           </div>
-          <div className="w-1/3 border border-gray-300 p-2">
+          <div className="w-1/3 border border-white p-2">
             <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
                 <span className="bg-blue-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
                   <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
@@ -121,15 +121,15 @@ const DetailForm = () => {
         </div>
         
         {/* Segunda sección - Secciones de la encuesta */}
-        <div className="border border-gray-300 p-2 mb-4">
-          <div className="mb-2 border border-gray-300 p-2">
+        <div className="border border-white p-2 mb-4">
+          <div className="mb-2 border border-white p-2">
             <h2 className="font-work-sans text-4xl font-bold text-dark-blue-custom">Secciones</h2>
           </div>
           <p className="font-work-sans text-lg italic text-gray-600">
             Agrega las secciones en las que clasificaras las preguntas.
           </p>
           <div className="flex space-x-2">
-            <div className="border border-gray-300 p-2">
+            <div className="border border-white p-2">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                 <span className="bg-orange-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
                   <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -141,7 +141,7 @@ const DetailForm = () => {
                 </span>
               </button>
             </div>
-            <div className="border border-gray-300 p-2">
+            <div className="border border-white p-2">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                 <span className="bg-orange-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
                   <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -153,7 +153,7 @@ const DetailForm = () => {
                 </span>
               </button>
             </div>
-            <div className="border border-gray-300 p-2">
+            <div className="border border-white p-2">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                 <span className="bg-orange-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
                   <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -165,7 +165,7 @@ const DetailForm = () => {
                 </span>
               </button>
             </div>
-            <div className="border border-gray-300 p-2">
+            <div className="border border-white p-2">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                 <span className="bg-blue-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
                   <img src={Addsurvey} alt="Nueva sección" className="w-5 h-5" />
@@ -181,12 +181,12 @@ const DetailForm = () => {
         </div>
         
         {/* Rango de tiempo */}
-        <div className="border border-gray-300 p-2 mb-4">
-          <div className="mb-2 border border-gray-300 p-2">
+        <div className="border border-white p-2 mb-4">
+          <div className="mb-2 border border-white p-2">
             <h2 className="font-work-sans text-4xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
           </div>
           <div className="flex space-x-4">
-            <div className="border border-gray-300 p-2 relative">
+            <div className="border border-white p-2 relative">
               {/* Calendario de inicio con control de apertura/cierre */}
               <Calendar 
                 initialDate={startDate}
@@ -204,7 +204,7 @@ const DetailForm = () => {
               />
             </div>
             
-            <div className="border border-gray-300 p-2 relative">
+            <div className="border border-white p-2 relative">
               {/* Calendario de finalización con control de apertura/cierre */}
               <Calendar 
                 initialDate={endDate}
@@ -226,8 +226,8 @@ const DetailForm = () => {
         </div>
         
         {/* Sección de descripción */}
-        <div className="border border-gray-300 p-2">
-          <div className="mb-2 border border-gray-300 p-2">
+        <div className="border border-white p-2">
+          <div className="mb-2 border border-white p-2">
             <h2 className="font-work-sans text-4xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
           </div>
           <div className="border border-gray-300 p-2">
@@ -242,7 +242,7 @@ const DetailForm = () => {
   {!sanitizedTitle.trim() || !sanitizedDescription.trim() ? (
     <button
       onClick={handleNextClick}
-      className="flex items-center px-4 py-2 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
+      className="flex items-center px-4 py-2 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
     >
       <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
       <span>Guardar y continuar</span>

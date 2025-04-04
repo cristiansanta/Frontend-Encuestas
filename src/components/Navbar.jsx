@@ -78,7 +78,6 @@ export const Navbar = () => {
       throw error;
     }
   };
-
   return (
     <div>
       {/* Mobile navbar for small screens */}
