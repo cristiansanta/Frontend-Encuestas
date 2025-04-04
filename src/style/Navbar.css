@@ -5,32 +5,31 @@
 }
 
 .encuestas-container {
-  border-radius: 0 20px 20px 0; /* Bordes redondeados en el lado derecho */
+  border-radius: 0 20px 20px 0;
 }
 
 .navbar {
   background-color: #00324d;
-  border-radius: 0 35px 45px 0; /* Bordes redondeados solo en el lado derecho */
+  border-radius: 0 35px 45px 0;
   padding: 1rem 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  gap: 1.5rem; /* Espaciado entre íconos */
-  height: calc(100vh - 15px); /* Mantiene la altura total pero ajustada */
+  height: calc(100vh - 15px);
   position: fixed;
-  top: 30px; /* Reduce la altura desde la parte superior */
+  top: 30px;
   width: 80px;
   transition: width 0.3s ease;
   z-index: 100;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .navbar-logo {
   width: 100%;
   text-align: center;
   padding: 1rem 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -40,7 +39,7 @@
   width: auto;
   height: 40px;
   transition: all 0.3s ease;
-  margin: 0 auto; /* Asegura centrado horizontal */
+  margin: 0 auto;
 }
 
 .navbar:not(.expanded) .navbar-logo {
@@ -53,9 +52,9 @@
 }
 
 .navbar-logo .logo-zajuna {
-  width: 180px !important; /* Ajusta el ancho según sea necesario */
-  height: auto !important; /* Mantiene la proporción de la imagen */
-  transition: all 0.3s ease !important; /* Animación suave para cambios de tamaño */
+  width: 180px !important;
+  height: auto !important;
+  transition: all 0.3s ease !important;
 }
 
 .navbar:not(.expanded) .navbar-logo img[src*="zajuna.svg"] {
@@ -70,22 +69,23 @@
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  justify-content: flex-start; /* Alinea las opciones al inicio */
-  gap: 1.5rem; /* Espaciado entre íconos */
-  margin-top: 15rem; /* Baja las opciones del navbar */
-  margin-left: 1rem;
+  justify-content: center;
+  gap: 2rem;
+  position: relative;
+  padding-bottom: -30rem;
+  margin-top: 10rem;
 }
 
 .navbar svg,
 .navbar a svg,
 .navbar a img {
-  width: 24px; /* Standardized icon size */
+  width: 24px;
   height: 24px;
   transition: all 0.3s ease;
   min-width: 24px;
 }
 
-.navbar a {
+.navbar a.menu-item {
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -94,9 +94,11 @@
   color: #fff;
   position: relative;
   transition: all 0.3s ease;
+  z-index: 1;
+  margin-bottom: 1rem;
 }
 
-.navbar a span {
+.navbar a.menu-item span {
   margin-left: 0.75rem;
   font-size: 0.95rem;
   opacity: 0;
@@ -104,36 +106,146 @@
   white-space: nowrap;
 }
 
-.navbar .active {
-  background-color: #fff;
-  border-radius: 25px 0 0 25px; /* Bordes redondeados menos pronunciados en el lado izquierdo */
-  width: calc(100% - 15px); /* Reduce el ancho para compensar el margen */
-  margin-left: 15px; /* Mueve el borde blanco hacia la derecha */
-  padding-left: 1.5rem;
+/* Estilos para el elemento activo */
+.navbar .menu-item.active {
+  background-color: white;
+  color: #00324d;
+  border-radius: 30px 0 0 30px;
+  width: 95%;
+  padding-left: 1.25rem;
+  height: 50px;
+  display: flex;
+  align-items: center;
   position: relative;
-  z-index: 1; /* Asegura que esté por encima de otros elementos */
-  box-shadow: -1px 0 3px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  isolation: isolate;
 }
 
-.navbar .active span {
+/* Para cuando no está expandido, ajustar el elemento activo */
+.navbar:not(.expanded) .menu-item.active {
+  width: 90%;
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: 20px 0 0 20px;
+}
+
+.navbar .menu-item.active span {
   color: #00324d;
   font-weight: 600;
 }
 
-.navbar .active svg path,
-.navbar .active svg rect,
-.navbar .active svg circle {
-  stroke: #39A900; /* Cambia el color del ícono activo */
+/* Curvas para el efecto curve-outside */
+.curve-top,
+.curve-bottom {
+  position: absolute;
+  right: 0;
+  background-color: white;
+  width: 20px;
+  height: 20px;
+  z-index: 0;
+  transition: all 0.3s ease;
 }
 
-.navbar a:not(.active):hover {
+.curve-top {
+  top: -20px;
+}
+
+.curve-top:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #00324d;
+  border-bottom-right-radius: 18px;
+  transition: all 0.3s ease;
+}
+
+.curve-bottom {
+  bottom: -20px;
+}
+
+.curve-bottom:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #00324d;
+  border-top-right-radius: 18px;
+  transition: all 0.3s ease;
+}
+
+/* Ajustes para el estado expandido */
+.navbar.expanded {
+  width: 210px;
+  border-radius: 0 35px 45px 0;
+}
+
+.navbar.expanded .menu-item.active {
+  width: 100%;
+  border-radius: 30px 0 0 30px;
+  padding-left: 1.5rem;
+}
+
+.navbar.expanded .curve-top,
+.navbar.expanded .curve-bottom {
+  width: 30px;
+  height: 30px;
+}
+
+.navbar.expanded .curve-top {
+  top: -30px;
+}
+
+.navbar.expanded .curve-top:after {
+  width: 30px;
+  height: 30px;
+  border-bottom-right-radius: 28px;
+}
+
+.navbar.expanded .curve-bottom {
+  bottom: -30px;
+}
+
+.navbar.expanded .curve-bottom:after {
+  width: 30px;
+  height: 30px;
+  border-top-right-radius: 28px;
+}
+
+.navbar.expanded .navbar-menu {
+  gap: 2rem;
+}
+
+.navbar.expanded .navbar-menu a.menu-item span {
+  opacity: 1;
+  font-size: 0.85rem;
+}
+
+.navbar.expanded .navbar-logo .logo-zajuna {
+  width: 150px;
+}
+
+.navbar.expanded a.menu-item span {
+  opacity: 1;
+}
+
+.navbar.expanded a.menu-item:not(.active)::after {
+  display: none;
+}
+
+.navbar a.menu-item:not(.active):hover {
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 30px 0 0 30px; /* Bordes redondeados menos pronunciados */
+  border-radius: 30px 0 0 30px;
   width: calc(100% + 1px);
   padding-left: 1.5rem;
 }
 
-.navbar a:not(.active)::after {
+.navbar a.menu-item:not(.active)::after {
   content: attr(data-title);
   position: absolute;
   left: 90px;
@@ -149,30 +261,9 @@
   z-index: 100;
 }
 
-.navbar a:not(.active):hover::after {
+.navbar a.menu-item:not(.active):hover::after {
   opacity: 1;
   visibility: visible;
-}
-
-.navbar.expanded {
-  width: 210px; /* Ajusta el ancho según sea necesario */
-}
-
-.navbar.expanded .navbar-menu a span {
-  opacity: 1;
-  font-size: 0.85rem; /* Ajusta el tamaño del texto si es necesario */
-}
-
-.navbar.expanded .navbar-logo .logo-zajuna {
-  width: 150px; /* Ajusta el tamaño del logo si es necesario */
-}
-
-.navbar.expanded a span {
-  opacity: 1;
-}
-
-.navbar.expanded a:not(.active)::after {
-  display: none;
 }
 
 .navbar-logout {
@@ -181,63 +272,80 @@
   width: 100%;
 }
 
+/* Estilos para el navbar móvil */
 @media (max-width: 1279px) {
   .navbar {
     display: none;
   }
 
+  /* Fondo con bordes redondeados para el navbar móvil */
+  .mobile-navbar-background {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    height: calc(100% + 20px);
+    background-color: #00324d;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    z-index: -1;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+  }
+
   .mobile-navbar {
     display: flex;
     position: fixed;
-    bottom: 0; /* Changed to bottom for better mobile UX */
+    bottom: 0; /* Posicionado en la parte inferior */
     left: 0;
     width: 100%;
-    background-color: #00324d;
+    background-color: transparent;
     justify-content: space-around;
-    padding: 0.75rem 0;
+    padding: 1rem 0;
     z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   }
 
   .mobile-navbar a {
-    padding: 0.5rem;
+    padding: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    transition: transform 0.3s ease;
+    z-index: 2;
   }
 
+  /* Estilo para el elemento activo */
   .mobile-navbar a.active {
-    position: relative;
-  }
-
-  .mobile-navbar a.active::after {
-    content: "";
-    position: absolute;
-    bottom: -0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background-color: #39A900;
+    background-color: white;
     border-radius: 50%;
+    transform: translateY(-10px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
+  /* Color del ícono activo */
+  .mobile-navbar .active svg path,
+  .mobile-navbar .active svg rect,
+  .mobile-navbar .active svg circle {
+    stroke: #39A900;
+  }
+
+  /* Tooltip para el hover */
   .mobile-navbar a::before {
     content: attr(data-title);
     position: absolute;
-    top: -2rem;
+    top: -2.5rem;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #555;
+    background-color: #374151;
     color: #fff;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-size: 0.75rem;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s;
+    transition: all 0.2s ease;
     white-space: nowrap;
+    z-index: 10;
   }
 
   .mobile-navbar a:hover::before {
@@ -249,10 +357,9 @@
     width: 24px;
     height: 24px;
   }
-
-  .mobile-navbar .active svg path,
-  .mobile-navbar .active svg rect,
-  .mobile-navbar .active svg circle {
-    stroke: #39A900;
+  
+  /* Agregamos un espacio en la parte inferior para el navbar móvil */
+  body {
+    padding-bottom: 60px;
   }
 }

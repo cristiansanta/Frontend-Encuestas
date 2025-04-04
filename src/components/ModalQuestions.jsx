@@ -3,6 +3,7 @@ import axios from 'axios';
 import cancelIcon from '../assets/img/cancel.svg';
 import PlusModal from '../assets/img/PlusModal.png';
 import { useQuery } from '@tanstack/react-query';
+import DOMPurify from 'dompurify'; // Importamos DOMPurify
 
 const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refresh }) => {
   const [options, setOptions] = useState([]);
@@ -22,10 +23,13 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
  const fetchquestionsfather = async (item) => {
    
   const accessToken = localStorage.getItem('accessToken');
+  const sanitizedItemId = DOMPurify.sanitize(String(item));
+  const sanitizedQuestionId = selectedQuestion && selectedQuestion.id ? 
+    DOMPurify.sanitize(String(selectedQuestion.id)) : '';
   
-  const response = await axios.put(`${endpoint}questions/${item}`,{
-    "cod_padre": selectedQuestion.id
-}, {
+  const response = await axios.put(`${endpoint}questions/${sanitizedItemId}`, {
+    "cod_padre": sanitizedQuestionId
+  }, {
       headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: 'application/json',
@@ -37,7 +41,7 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
 
   if (!isOpen) return null;
   if (isLoading) return <div>Cargando preguntas...</div>;
-  if (error) return <div>Error al cargar preguntas</div>;
+  if (error) return <div>Error al cargar preguntas: {DOMPurify.sanitize(error.message)}</div>;
 
   const questionTitles = data?.survey_questions
     .filter((q) => q.question.questions_conditions === true)
@@ -50,12 +54,8 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
     })) || [];
 
   const handleQuestionChange = (event) => {
-  
-   
-
-    const selectedTitle = event.target.value;
+    const selectedTitle = DOMPurify.sanitize(event.target.value);
     const selectedQuestionData = questionTitles.find((q) => q.title === selectedTitle);
-   
     
     setSelectedQuestion(selectedQuestionData);
     
@@ -71,12 +71,19 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
 
   const handleSave = async () => {
     if (selectedQuestion && operation && selectedOption) {
+      const sanitizedOperation = DOMPurify.sanitize(operation);
+      const sanitizedOption = DOMPurify.sanitize(selectedOption);
+      const sanitizedQuestionId = DOMPurify.sanitize(String(selectedQuestion.id));
+      const sanitizedItemId = selectedItem && selectedItem.question ? 
+        DOMPurify.sanitize(String(selectedItem.question.id)) : '';
+      const sanitizedSurveyId = DOMPurify.sanitize(String(localStorage.getItem('id_survey')));
+      
       const payload = {
-        id_question_child: selectedItem.question.id,
-        operation: operation,
-        compare: selectedOption,
-        cod_father: selectedQuestion.id,
-        id_survey: localStorage.getItem('id_survey'),
+        id_question_child: sanitizedItemId,
+        operation: sanitizedOperation,
+        compare: sanitizedOption,
+        cod_father: sanitizedQuestionId,
+        id_survey: sanitizedSurveyId,
       };
 
       try {
@@ -88,9 +95,9 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
           },
         });
         console.log('Respuesta del servidor:', response.data);
-        fetchquestionsfather(selectedItem.question.id)
+        fetchquestionsfather(sanitizedItemId);
         toggleModal(); // Cerrar modal después de guardar y actualizar        
-        refresh()
+        refresh();
       } catch (error) {
         console.error('Error al enviar datos:', error);
       }
@@ -98,6 +105,15 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
       alert('Por favor, complete todos los campos.');
     }
   };
+
+  // Sanitizar el título del padre
+  const sanitizedTitlefather = titlefather ? DOMPurify.sanitize(titlefather) : '';
+  
+  // Verificar si hay condiciones para determinar estados deshabilitados
+  const hasConditions = selectedItem && 
+    selectedItem.question && 
+    selectedItem.question.conditions && 
+    selectedItem.question.conditions.length > 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -113,13 +129,13 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
             <label className="block mb-1 text-center text-[#003f63] font-bold">Pregunta Principal</label>
             <select
               className="border border-[#003f63] rounded-lg w-full p-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#003f63]"
-              value={selectedQuestion?.title ||''}
+              value={selectedQuestion?.title || ''}
               onChange={handleQuestionChange}
-              disabled={selectedItem.question.conditions.length>0?true:false}
+              disabled={hasConditions}
             >
-              <option>{selectedItem.question.conditions.length>0 && titlefather.length>0?titlefather:'Seleccionar'}</option>
+              <option>{hasConditions && sanitizedTitlefather ? sanitizedTitlefather : 'Seleccionar'}</option>
               {questionTitles.map((q, index) => (
-                <option key={index} value={q.title}>{q.title}</option>
+                <option key={index} value={DOMPurify.sanitize(q.title)}>{DOMPurify.sanitize(q.title)}</option>
               ))}
             </select>
           </div>
@@ -131,9 +147,13 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
                 className="border border-[#003f63] rounded-lg w-full p-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#003f63]"
                 value={operation}
                 onChange={(e) => setOperation(e.target.value)}
-                disabled={selectedItem.question.conditions.length>0?true:false}
+                disabled={hasConditions}
               >
-                <option>{selectedItem.question.conditions.length>0?selectedItem.question.conditions[0].operation:'Seleccionar'}</option>
+                <option>
+                  {hasConditions && selectedItem.question.conditions[0] ? 
+                    DOMPurify.sanitize(selectedItem.question.conditions[0].operation) : 
+                    'Seleccionar'}
+                </option>
                 <option value="igual que">Igual que</option>
                 <option value="diferente">Diferente que</option>
                 <option value="contiene">Contiene</option>
@@ -146,11 +166,17 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
                 className="border border-[#003f63] rounded-lg w-full p-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#003f63]"
                 value={selectedOption}
                 onChange={(e) => setSelectedOption(e.target.value)}
-                disabled={selectedItem.question.conditions.length>0?true:false}
+                disabled={hasConditions}
               >
-                <option>{selectedItem.question.conditions.length>0?selectedItem.question.conditions[0].compare:'Seleccionar'}</option>
+                <option>
+                  {hasConditions && selectedItem.question.conditions[0] ? 
+                    DOMPurify.sanitize(selectedItem.question.conditions[0].compare) : 
+                    'Seleccionar'}
+                </option>
                 {options.map((option, index) => (
-                  <option key={index} value={option.options}>{option.options}</option>
+                  <option key={index} value={DOMPurify.sanitize(option.options)}>
+                    {DOMPurify.sanitize(option.options)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -161,9 +187,9 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
         </div>
         <div className="mt-6 flex justify-center pb-6">
           <button 
-          onClick={handleSave}
-          disabled={selectedItem.question.conditions.length>0?true:false}
-          className="bg-[#39A900] w-56 text-white font-bold py-2 px-4 rounded">
+            onClick={handleSave}
+            disabled={hasConditions}
+            className="bg-[#39A900] w-56 text-white font-bold py-2 px-4 rounded">
             Guardar
           </button>
         </div>
@@ -173,5 +199,3 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
 };
 
 export default ModalQuestions;
- 
-

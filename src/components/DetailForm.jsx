@@ -6,10 +6,11 @@ import { SurveyContext } from '../Provider/SurveyContext';
 import Filtersurvey from '../assets/img/filtersurvey.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import trashcan from '../assets/img/trashCan.svg';
-import calendar2 from '../assets/img/Calendar2.svg';
+import calendar2 from '../assets/img/calendar2.svg';
 import continues from '../assets/img/continue.svg';
 import Modal from './Modal';
 import Calendar from './Calendar'; // Importamos el calendario actualizado
+import DOMPurify from 'dompurify'; // Importamos DOMPurify
 
 const DetailForm = () => {
   const { selectedCategory } = useContext(SurveyContext);
@@ -88,6 +89,10 @@ const DetailForm = () => {
     console.log(`Navegación a: ${path}`);
     // Implementa la navegación real según tu enrutador
   };
+
+  // Sanitizar datos antes de enviarlos
+  const sanitizedTitle = title ? DOMPurify.sanitize(title) : '';
+  const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
   return (
     <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-xl w-3/4 md:w-3/4 mx-auto">
@@ -225,11 +230,47 @@ const DetailForm = () => {
           <div className="mb-2 border border-white p-2">
             <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
           </div>
-          <div className="border border-white p-2">
-            <RichTextEditor value={description} onChange={setDescription} />
+          <div className="border border-gray-300 p-2">
+          <RichTextEditor 
+            value={description} 
+            onChange={(value) => setDescription(DOMPurify.sanitize(value))} // Sanitizar la descripción
+          />
           </div>
         </div>
 
+        <div className="mt-4 flex justify-end">
+  {!sanitizedTitle.trim() || !sanitizedDescription.trim() ? (
+    <button
+      onClick={handleNextClick}
+      className="flex items-center px-4 py-2 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
+    >
+      <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
+      <span>Guardar y continuar</span>
+    </button>
+  ) : (
+    <DataSender
+      title={sanitizedTitle}
+      description={sanitizedDescription}
+      id_category={selectedCategory[0][0]}
+      status={true}
+      accessToken={accessToken}
+      onSuccess={handleSuccess}
+      onError={() => {
+        setModalTitle('Error en el envío');
+        setModalMessage('Hubo un problema al enviar los datos.');
+        setModalStatus('error');
+        setIsModalOpen(true);
+      }}
+      buttonContent={
+        <div className="flex items-center">
+          <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
+          <span>Guardar y continuar</span>
+        </div>
+      }
+      buttonClassName="flex items-center px-4 py-2 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
+    />
+  )}
+</div>
         <div className="mt-4 flex justify-end border border-red-800 p-2">
           {!title.trim() || !description.trim() ? (
             <button
@@ -268,8 +309,8 @@ const DetailForm = () => {
       {/* Modal para mensajes */}
       <Modal
         isOpen={isModalOpen}
-        title={modalTitle}
-        message={modalMessage}
+        title={DOMPurify.sanitize(modalTitle)}
+        message={DOMPurify.sanitize(modalMessage)}
         onConfirm={closeModal}
         onCancel={closeModal}
         confirmText="Cerrar"

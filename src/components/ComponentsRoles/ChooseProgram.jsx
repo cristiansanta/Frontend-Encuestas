@@ -1,6 +1,7 @@
 // ProgramSelection.jsx
 
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify'; // Importar DOMPurify
 
 function ProgramSelection() {
   const [search, setSearch] = useState("");
@@ -52,9 +53,9 @@ function ProgramSelection() {
           {filteredPrograms.map((program) => (
             <tr key={program.id}>
               <td className="px-2 py-1"><input type="checkbox" /></td>
-              <td className="px-2 py-1">{program.id}</td>
-              <td className="px-2 py-1">{program.code}</td>
-              <td className="px-2 py-1">{program.name}</td>
+              <td className="px-2 py-1">{DOMPurify.sanitize(String(program.id))}</td>
+              <td className="px-2 py-1">{DOMPurify.sanitize(program.code)}</td>
+              <td className="px-2 py-1">{DOMPurify.sanitize(program.name)}</td>
             </tr>
           ))}
         </tbody>
