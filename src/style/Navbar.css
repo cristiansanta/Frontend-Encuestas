@@ -72,7 +72,8 @@
   flex-grow: 1;
   justify-content: flex-start; /* Alinea las opciones al inicio */
   gap: 1.5rem; /* Espaciado entre íconos */
-  margin-top: 21rem; /* Baja las opciones del navbar */
+  margin-top: 15rem; /* Baja las opciones del navbar */
+  margin-left: 1rem;
 }
 
 .navbar svg,
