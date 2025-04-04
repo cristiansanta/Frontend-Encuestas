@@ -69,10 +69,11 @@
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  justify-content: flex-start; /* Alinea las opciones al inicio */
-  gap: 1.5rem; /* Espaciado entre íconos */
-  margin-top: 15rem; /* Baja las opciones del navbar */
-  margin-left: 1rem;
+  justify-content: center;
+  gap: 2rem;
+  position: relative;
+  padding-bottom: -30rem;
+  margin-top: 10rem;
 }
 
 .navbar svg,
