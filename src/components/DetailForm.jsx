@@ -95,230 +95,199 @@ const DetailForm = () => {
   const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
   return (
-    <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-xl w-3/4 md:w-3/4 mx-auto">
-      {/* Contenedor principal */}
-      <div className="border border-white p-4 rounded-lg">
+    <>
+      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full mr-auto ml-12">
+        {/* Contenedor principal */}
+        <div className="border border-red-800 p-4 pl-5 rounded-lg">
 
-        {/* Sección superior con dos elementos (título y categoría) */}
-        <div className="flex justify-between mb-4">
-          <div className="w-1/3 border border-white p-2">
-            {/* Campo para el título */}
-            <h1 className="font-work-sans text-4xl font-bold text-dark-blue-custom">Titulo de Encuesta</h1>
-          </div>
-          <div className="w-1/3 flex justify-end border border-red-800 p-2">
-            <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
-              <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
-              </span>
-              <span className="bg-yellow-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                <span className="font-work-sans text-lg font-semibold text-blue-custom mr-2">
-                  Seleccionar Categoría
-                </span>
-                <img src={Selectsurvey} alt="Filtrar" className="w-5 h-5" />
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Segunda sección - Secciones de la encuesta */}
-        <div className="border border-white p-2 mb-4">
-          <div className="mb-2 border border-white p-2">
-            <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Secciones</h2>
-          </div>
-          <p className="font-work-sans text-lg text-gray-600">
-            Agrega las secciones en las que clasificaras las preguntas.
-          </p>
-          <div className="flex space-x-2">
-            <div className="border border-white p-2">
-              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                </span>
-                <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                    Seccion 01
-                  </span>
-                </span>
-              </button>
+          {/* Sección superior con dos elementos (título y categoría) */}
+          <div className="flex justify-between mb-2 border border-red-800">
+            <div className="w-1/3 border border-white p-2">
+              {/* Campo para el título */}
+              <h1 className="font-work-sans text-4xl font-bold text-dark-blue-custom pl-2">Titulo de Encuesta</h1>
             </div>
-            <div className="border border-white p-2">
-              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                </span>
-                <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                    Seccion 01
-                  </span>
-                </span>
-              </button>
-            </div>
-            <div className="border border-white p-2">
-              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                </span>
-                <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                    Seccion 01
-                  </span>
-                </span>
-              </button>
-            </div>
-            <div className="border border-white p-2">
-              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+            <div className="w-1/3 flex justify-end border border-red-800 p-2">
+              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
                 <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <img src={Addsurvey} alt="Nueva sección" className="w-5 h-5" />
+                  <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
                 </span>
                 <span className="bg-yellow-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                    Nueva Sección
+                  <span className="font-work-sans text-lg font-semibold text-blue-custom mr-2">
+                    Seleccionar Categoría
                   </span>
+                  <img src={Selectsurvey} alt="Filtrar" className="w-5 h-5" />
                 </span>
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Rango de tiempo */}
-        <div className="border border-white p-2 mb-4">
-          <div className="mb-2 border border-white p-2">
-            <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
+          {/* Segunda sección - Secciones de la encuesta */}
+          <div className="border border-red-800 p-2 mb-1">
+            <div className="mb-2 border border-white p-2">
+              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Secciones</h2>
+            </div>
+            <p className="font-work-sans text-lg text-gray-600 pl-3">
+              Agrega las secciones en las que clasificarás las preguntas.
+            </p>
+            <div className="flex space-x-2 mt-1">
+              <div className="border border-white p-2">
+                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
+                  </span>
+                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
+                      Información personal
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div className="border border-white p-2">
+                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
+                  </span>
+                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
+                      Experiencia Laboral
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div className="border border-white p-2">
+                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
+                  </span>
+                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
+                      Experiencia Académica
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div className="border border-white p-2">
+                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <img src={Addsurvey} alt="Nueva sección" className="w-5 h-5" />
+                  </span>
+                  <span className="bg-yellow-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
+                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
+                      Nueva Sección
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex space-x-4">
-            <div className="border border-white p-2 relative">
-              {/* Calendario de inicio con control de apertura/cierre */}
-              <Calendar
-                initialDate={startDate}
-                selectedDate={startDate}
-                onDateSelect={handleStartDateChange}
-                buttonLabel="Fecha de Inicio:"
-                calendarIcon={calendar2}
-                isEndDate={false}
-                isOpen={showStartCalendar}
-                onOpenChange={(isOpen) => {
-                  setShowStartCalendar(isOpen);
-                  // Si abrimos el calendario de inicio, cerramos el de finalización
-                  if (isOpen) setShowEndCalendar(false);
-                }}
+
+          {/* Rango de tiempo */}
+          <div className="border border-red-800 p-2 mb-1">
+            <div className="mb-2 border border-white p-0">
+              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
+            </div>
+            <div className="flex space-x-4">
+              <div className="border border-white p-2 relative">
+                {/* Calendario de inicio con control de apertura/cierre */}
+                <Calendar
+                  initialDate={startDate}
+                  selectedDate={startDate}
+                  onDateSelect={handleStartDateChange}
+                  buttonLabel="Fecha de Inicio:"
+                  calendarIcon={calendar2}
+                  isEndDate={false}
+                  isOpen={showStartCalendar}
+                  onOpenChange={(isOpen) => {
+                    setShowStartCalendar(isOpen);
+                    // Si abrimos el calendario de inicio, cerramos el de finalización
+                    if (isOpen) setShowEndCalendar(false);
+                  }}
+                />
+              </div>
+
+              <div className="border border-white p-2 relative">
+                {/* Calendario de finalización con control de apertura/cierre */}
+                <Calendar
+                  initialDate={endDate}
+                  selectedDate={endDate}
+                  onDateSelect={handleEndDateChange}
+                  buttonLabel="Fecha de Finalización:"
+                  calendarIcon={calendar2}
+                  minDate={startDate}
+                  isEndDate={true}
+                  isOpen={showEndCalendar}
+                  onOpenChange={(isOpen) => {
+                    setShowEndCalendar(isOpen);
+                    // Si abrimos el calendario de finalización, cerramos el de inicio
+                    if (isOpen) setShowStartCalendar(false);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sección de descripción */}
+          <div className="border border-red-800  p-2">
+            <div className="mb-2 border border-white p-2">
+              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
+            </div>
+            <div className="border border-white p-2">
+              <RichTextEditor
+                value={description}
+                onChange={(value) => setDescription(DOMPurify.sanitize(value))} // Sanitizar la descripción
               />
             </div>
-
-            <div className="border border-white p-2 relative">
-              {/* Calendario de finalización con control de apertura/cierre */}
-              <Calendar
-                initialDate={endDate}
-                selectedDate={endDate}
-                onDateSelect={handleEndDateChange}
-                buttonLabel="Fecha de Finalización:"
-                calendarIcon={calendar2}
-                minDate={startDate}
-                isEndDate={true}
-                isOpen={showEndCalendar}
-                onOpenChange={(isOpen) => {
-                  setShowEndCalendar(isOpen);
-                  // Si abrimos el calendario de finalización, cerramos el de inicio
-                  if (isOpen) setShowStartCalendar(false);
-                }}
-              />
-            </div>
           </div>
         </div>
 
-        {/* Sección de descripción */}
-        <div className="border border-red-800  p-2">
-          <div className="mb-2 border border-white p-2">
-            <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
-          </div>
-          <div className="border border-gray-300 p-2">
-          <RichTextEditor 
-            value={description} 
-            onChange={(value) => setDescription(DOMPurify.sanitize(value))} // Sanitizar la descripción
-          />
-          </div>
-        </div>
-
-        <div className="mt-4 flex justify-end">
-  {!sanitizedTitle.trim() || !sanitizedDescription.trim() ? (
-    <button
-      onClick={handleNextClick}
-      className="flex items-center px-4 py-2 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
-    >
-      <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-      <span>Guardar y continuar</span>
-    </button>
-  ) : (
-    <DataSender
-      title={sanitizedTitle}
-      description={sanitizedDescription}
-      id_category={selectedCategory[0][0]}
-      status={true}
-      accessToken={accessToken}
-      onSuccess={handleSuccess}
-      onError={() => {
-        setModalTitle('Error en el envío');
-        setModalMessage('Hubo un problema al enviar los datos.');
-        setModalStatus('error');
-        setIsModalOpen(true);
-      }}
-      buttonContent={
-        <div className="flex items-center">
-          <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-          <span>Guardar y continuar</span>
-        </div>
-      }
-      buttonClassName="flex items-center px-4 py-2 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
-    />
-  )}
-</div>
-        <div className="mt-4 flex justify-end border border-red-800 p-2">
-          {!title.trim() || !description.trim() ? (
-            <button
-              onClick={handleNextClick}
-              className="flex items-center px-4 py-1 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
-            >
-              <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-              <span>Guardar y continuar</span>
-            </button>
-          ) : (
-            <DataSender
-              title={title}
-              description={description}
-              id_category={selectedCategory[0][0]}
-              status={true}
-              accessToken={accessToken}
-              onSuccess={handleSuccess}
-              onError={() => {
-                setModalTitle('Error en el envío');
-                setModalMessage('Hubo un problema al enviar los datos.');
-                setModalStatus('error');
-                setIsModalOpen(true);
-              }}
-              buttonContent={
-                <div className="flex items-center">
-                  <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-                  <span>Guardar y continuar</span>
-                </div>
-              }
-              buttonClassName="flex items-center px-4 py-1 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
-            />
-          )}
-        </div>
+        {/* Modal para mensajes */}
+        <Modal
+          isOpen={isModalOpen}
+          title={DOMPurify.sanitize(modalTitle)}
+          message={DOMPurify.sanitize(modalMessage)}
+          onConfirm={closeModal}
+          onCancel={closeModal}
+          confirmText="Cerrar"
+          cancelText="Cancelar"
+          type="informative"
+          status={modalStatus}
+        />
       </div>
-
-      {/* Modal para mensajes */}
-      <Modal
-        isOpen={isModalOpen}
-        title={DOMPurify.sanitize(modalTitle)}
-        message={DOMPurify.sanitize(modalMessage)}
-        onConfirm={closeModal}
-        onCancel={closeModal}
-        confirmText="Cerrar"
-        cancelText="Cancelar"
-        type="informative"
-        status={modalStatus}
-      />
-    </div>
+      {/* Botón colocado fuera del contenedor principal */}
+      <div className="flex justify-end mt-4 pb-12 w-full mr-auto ml-12">
+        {!title.trim() || !description.trim() ? (
+          <button
+            onClick={handleNextClick}
+            className="flex items-center px-6 py-1 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-dark-green-custom transition-colors"
+          >
+            <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
+            <span>Guardar y continuar</span>
+          </button>
+        ) : (
+          <DataSender
+            title={title}
+            description={description}
+            id_category={selectedCategory[0][0]}
+            status={true}
+            accessToken={accessToken}
+            onSuccess={handleSuccess}
+            onError={() => {
+              setModalTitle('Error en el envío');
+              setModalMessage('Hubo un problema al enviar los datos.');
+              setModalStatus('error');
+              setIsModalOpen(true);
+            }}
+            buttonContent={
+              <div className="flex items-center">
+                <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
+                <span>Guardar y continuar</span>
+              </div>
+            }
+            buttonClassName="flex items-center px-6 py-1 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
+          />
+        )}
+      </div>
+    </>
   );
 };
 
