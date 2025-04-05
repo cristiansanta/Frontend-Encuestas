@@ -4,6 +4,7 @@ import HeaderBar from '../components/HeaderBar.jsx';
 import HeaderBanner from '../components/HeaderBanner.jsx';
 import ProgressBar from '../components/ProgresBar.jsx';
 import DetailForm from '../components/DetailForm.jsx';
+import BackHomeButton from '../components/BackHomeButton.jsx';
 import { SurveyContext } from '../Provider/SurveyContext'; // Importar el contexto
 
 const SurveyCreate = () => {
@@ -24,6 +25,9 @@ const SurveyCreate = () => {
         <HeaderBar props={`Configuración de la encuesta: Categoría seleccionada: ${parsedCategoryData[0][0]} ${parsedCategoryData[0][1]}`} /> {/* Mostrar la categoría seleccionada */}
         <ProgressBar currentView="SurveyCreate" />
         <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto">
+          <div className="mb-4">
+            <BackHomeButton />
+          </div>
           <DetailForm />
         </div>
       </div>

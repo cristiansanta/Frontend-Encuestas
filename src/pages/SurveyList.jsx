@@ -22,7 +22,7 @@ const SurveyList = () => {
     });
     return response.data;
   };
-  
+
   // useQuery para obtener los datos
   const { data, isLoading, error } = useQuery({
     queryKey: ['surveyDetailslist'],
@@ -40,24 +40,24 @@ const SurveyList = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex bg-gray-back-custom">
       <Navbar />
       <div className="flex-1 flex flex-col items-center mt-7">
         <HeaderBanner />
         <HeaderBar props="Listado de Encuestas" />
-          <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto flex justify-between items-center">
-              <button
-                className="bg-[#00324D] px-4 py-2 rounded-lg"
-                onClick={() => navigate('/Categorylist')}
-              >
-                <img src={bannerImage} alt="Nueva encuesta" className="h-15" />
-              </button>
-              {/* <input
+        <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto flex justify-between items-center">
+          <button
+            className="bg-[#00324D] px-4 py-2 rounded-lg"
+            onClick={() => navigate('/Categorylist')}
+          >
+            <img src={bannerImage} alt="Nueva encuesta" className="h-15" />
+          </button>
+          {/* <input
                 type="text"
                 placeholder="Buscar encuesta"
                 className="border border-gray-300 rounded-lg p-2 w-1/3"
               /> */}
-            </div>
+        </div>
         <div className="mt-10 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12">
           <TableSurveyList surveys={surveyslist} />
           {/* Contenedor del botón Finalizar al final de la tabla, alineado a la derecha */}
