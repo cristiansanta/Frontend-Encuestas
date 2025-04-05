@@ -7,7 +7,7 @@ import previsualizar from '../assets/img/previsualizar.svg';
 
 const ProgressBar = ({ currentView }) => {
   const navigate = useNavigate();
-  
+    
   const viewSteps = {
     SurveyCreate: 1,
     QuestionsCreate: 2,
