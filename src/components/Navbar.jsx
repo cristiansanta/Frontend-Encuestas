@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Listsurveys from '../assets/ListSurveys';
-import ListCategory from '../assets/ListCategory';
 import PlusIcon from '../assets/PlusIcon'; // Cambiamos Statereport por PlusIcon
 import HomeIcon from '../assets/HomeIcon';
 import ReportsIcon from '../assets/ReportsIcon';

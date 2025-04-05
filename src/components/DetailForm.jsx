@@ -183,7 +183,7 @@ const DetailForm = () => {
 
           {/* Rango de tiempo */}
           <div className="border border-red-800 p-2 mb-1">
-            <div className="mb-2 border border-white p-0">
+            <div className="mb-2 border border-white p-0 pl-3">
               <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
             </div>
             <div className="flex space-x-4">

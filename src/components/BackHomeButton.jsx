@@ -22,7 +22,7 @@ const BackHomeButton = ({ label, className }) => {
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center justify-center gap-3 bg-dark-blue-custom text-white py-1.5 px-12 rounded-full hover:bg-blue-800 transition-colors shadow-md w-full md:w-auto ${className} mr-auto ml-12`}
+      className={`flex items-center justify-center gap-2 bg-dark-blue-custom text-white py-1.5 px-12 rounded-full hover:bg-blue-800 transition-colors shadow-md w-full md:w-auto ${className} mr-auto ml-12`}
     >
       <img src={BackVector} alt="Regresar" className="w-5 h-5" />
       <span className="font-work-sans text-base font-medium">{label}</span>
