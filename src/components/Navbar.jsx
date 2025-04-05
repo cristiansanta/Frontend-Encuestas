@@ -37,12 +37,6 @@ export const Navbar = () => {
       label: "Lista de encuestas",
     },
     {
-      icon: ListCategory,
-      path: "#/CategoryList",
-      active: activePath === "/CategoryList",
-      label: "Lista de categorías",
-    },
-    {
       icon: Statereport,
       path: "#/SectionsCreate",
       active: activePath === "/SectionsCreate",
@@ -84,11 +78,11 @@ export const Navbar = () => {
       throw error;
     }
   };
-
   return (
     <div>
       {/* Mobile navbar for small screens */}
       <div className="mobile-navbar xl:hidden">
+        <div className="mobile-navbar-background"></div>
         {menuItems.map((value, index) => (
           <a
             key={index}
@@ -131,7 +125,7 @@ export const Navbar = () => {
         <div className="navbar-logo">
           <div className="logo-container">
             {isExpanded ? (
-              <img src={LogoZajuna} alt="Logo Zajuna" />
+              <img src={LogoZajuna} alt="Logo Zajuna" className="logo-zajuna" />
             ) : (
               <img src={Logo} alt="Logo Z" className="logo-icon" />
             )}
@@ -144,9 +138,16 @@ export const Navbar = () => {
             <a
               key={index}
               href={value.path}
-              className={value.active ? "active" : ""}
+              className={`menu-item ${value.active ? "active" : ""}`}
               data-title={value.label}
             >
+              {value.active && (
+                <>
+                  <div className="curve-top"></div>
+                  <div className="curve-bottom"></div>
+                </>
+              )}
+              
               <value.icon
                 strokeColor={value.active ? "#39A900" : "#FFFFFF"}
                 className="w-6 h-6"
@@ -169,7 +170,7 @@ export const Navbar = () => {
                   console.error("Error al cerrar sesión:", error);
                 });
             }}
-            className="cursor-pointer"
+            className="cursor-pointer menu-item"
             data-title="Cerrar sesión"
           >
             <LogoutIcon className="w-6 h-6" />

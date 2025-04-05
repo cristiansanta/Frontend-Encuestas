@@ -3,7 +3,7 @@ import logoGov from '../assets/img/log_gov.svg';
 
 const TopBanner = () => {
   return (
-    <div className="w-full" style={{ backgroundColor: '#3366CC' }}>
+    <div className="w-full fixed z-[1000] bg-[#3366CC]">
       <div className="py-1.5 px-4 flex items-center">
         <img 
           src={logoGov} 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
+
 
 const SurveyDetails = () => {
     const [userResponses, setUserResponses] = useState({});
@@ -96,7 +98,7 @@ const SurveyDetails = () => {
     };
 
     if (isLoading) return <div className="text-center mt-8">Cargando preguntas...</div>;
-    if (error) return <div className="text-center text-red-500 mt-8">Error al cargar preguntas: {error.message}</div>;
+    if (error) return <div className="text-center text-red-500 mt-8">Error al cargar preguntas: {DOMPurify.sanitize(error.message)}</div>;
 
     const handleFinish = () => {
         navigate('/SurveyList');
@@ -107,15 +109,15 @@ const SurveyDetails = () => {
             <div className="bg-white shadow-md rounded-lg w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-8 py-6 mx-auto">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-semibold text-[#00324D] mb-2">
-                        {survey.title || 'Detalles de la Encuesta'}
+                        {DOMPurify.sanitize(survey.title) || 'Detalles de la Encuesta'}
                     </h1>
-                    <p className="text-gray-600">{survey.subtitle || 'Por favor, completa la encuesta a continuación'}</p>
+                    <p className="text-gray-600">{DOMPurify.sanitize(survey.subtitle) || 'Por favor, completa la encuesta a continuación'}</p>
                 </div>
 
                 {survey.sections?.map((section) => (
                     <div key={section.id} className="mb-8 border-l-4 pl-4 border-[#39A900] bg-gray-100 rounded-lg p-4">
-                        <h2 className="text-xl font-semibold text-[#00324D] mb-2">{section.title}</h2>
-                        <p className="text-gray-600 mb-4">{section.descrip_sect}</p>
+                        <h2 className="text-xl font-semibold text-[#00324D] mb-2">{DOMPurify.sanitize(section.title)}</h2>
+                        <p className="text-gray-600 mb-4">{DOMPurify.sanitize(section.descrip_sect)}</p>
 
                         {survey.survey_questions
                             ?.filter((sq) => sq.section_id === section.id)
@@ -125,10 +127,10 @@ const SurveyDetails = () => {
                                 return (
                                     visibleQuestions[question.id] && (
                                         <div key={question.id} className="mb-6">
-                                            <p className="text-md font-medium text-[#00324D] mb-2">{question.title}</p>
+                                            <p className="text-md font-medium text-[#00324D] mb-2">{DOMPurify.sanitize(question.title)}</p>
                                             <div
                                                 className="text-gray-700 mb-2"
-                                                dangerouslySetInnerHTML={{ __html: question.descrip }}
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.descrip) }}
                                             />
 
                                             {question.type?.title === 'Falso y verdadero' ? (
@@ -176,14 +178,14 @@ const SurveyDetails = () => {
                                                         <input
                                                             type="radio"
                                                             name={`question-${question.id}`}
-                                                            value={option.options}
+                                                            value={DOMPurify.sanitize(option.options)}
                                                             className="mr-2 focus:ring-[#00324D]"
                                                             checked={userResponses[question.id] === option.options}
                                                             onChange={() =>
                                                                 handleResponseChange(question.id, option.options)
                                                             }
                                                         />
-                                                        <label className="text-gray-800">{option.options}</label>
+                                                        <label className="text-gray-800">{DOMPurify.sanitize(option.options)}</label>
                                                     </div>
                                                 ))
                                             )}

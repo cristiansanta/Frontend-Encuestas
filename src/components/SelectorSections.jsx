@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // Asegúrate de importar axios
+import DOMPurify from 'dompurify'; // Importamos DOMPurify para sanitizar datos
 
 const SelectorSections = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -13,8 +14,10 @@ const SelectorSections = () => {
     const fetchSections = async () => {
       const endpoint = import.meta.env.VITE_API_ENDPOINT;
       try {
+        const surveyId = localStorage.getItem('id_survey');
+        const sanitizedSurveyId = DOMPurify.sanitize(surveyId);
         
-        const response = await axios.get(endpoint + 'sections/survey/'+localStorage.getItem('id_survey'), {
+        const response = await axios.get(endpoint + 'sections/survey/' + sanitizedSurveyId, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/json',
@@ -32,6 +35,18 @@ const SelectorSections = () => {
 
     fetchSections();
   }, [accessToken]);
+
+  const handleSelectSection = (section) => {
+    const sanitizedId = DOMPurify.sanitize(String(section.id));
+    const sanitizedTitle = DOMPurify.sanitize(section.title);
+    
+    setSelectedOption({ 
+      id: sanitizedId, 
+      label: sanitizedTitle 
+    });
+    setIsOpen(false);
+    localStorage.setItem('section_id', sanitizedId); // Guarda el ID de la sección sanitizado
+  };
 
   return (
     <div className="flex flex-col gap-4 p-8 rounded-lg border border-gray-200 shadow-lg bg-white w-11/12 mx-auto mt-8">
@@ -60,14 +75,10 @@ const SelectorSections = () => {
               {sections.map((section) => (
                 <li
                   key={section.id}
-                  onClick={() => {
-                    setSelectedOption({ id: section.id, label: section.title });
-                    setIsOpen(false);
-                    localStorage.setItem('section_id', section.id); // Guarda el ID de la sección seleccionada
-                  }}
+                  onClick={() => handleSelectSection(section)}
                   className="cursor-pointer p-4 hover:bg-gray-100"
                 >
-                  <span>{section.title}</span>
+                  <span>{DOMPurify.sanitize(section.title)}</span>
                 </li>
               ))}
             </ul>

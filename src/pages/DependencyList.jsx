@@ -10,6 +10,7 @@ import Notificationpush from '../components/Notificationpush.jsx'; // Importar e
 import Modal from '../components/Modal'; // Importar el componente Modal
 import { useNavigate } from 'react-router-dom';
 import apiRequest from '../Provider/apiHelper.jsx';
+import DOMPurify from 'dompurify'; // Importamos DOMPurify
 
 const DependencyList = () => {
     const navigate = useNavigate();
@@ -85,7 +86,7 @@ const DependencyList = () => {
     }, [sections, questionsBySection]);
 
     if (isLoading) return <div>Cargando preguntas...</div>;
-    if (error) return <div>Error al cargar preguntas</div>;
+    if (error) return <div>Error al cargar preguntas: {DOMPurify.sanitize(error.message)}</div>;
 
     const handleEdit = (item) => {
         setEditItem(item);
@@ -98,7 +99,7 @@ const DependencyList = () => {
             const method = 'PUT';
             const response = await apiRequest(method, url);
 
-            setNotificationMessage('Pregunta eliminada con éxito ID', itemId);
+            setNotificationMessage(`Pregunta eliminada con éxito ID ${DOMPurify.sanitize(String(itemId))}`);
             setNotificationAction('eliminar'); // Configura la acción para "eliminar"
             setShowNotification(true);
 
@@ -160,7 +161,7 @@ const DependencyList = () => {
                             // Manejar secciones sin preguntas
                             return (
                                 <div key={section.id} className="mb-8">
-                                    <h2 className="text-xl font-bold mb-4">⚠️ {section.title}</h2>
+                                    <h2 className="text-xl font-bold mb-4">⚠️ {DOMPurify.sanitize(section.title)}</h2>
                                     <p className="mb-2 text-gray-600">
                                         Esta sección no tiene preguntas, para continuar debe incluir al menos una pregunta por sección.
                                     </p>
@@ -170,7 +171,7 @@ const DependencyList = () => {
 
                         return (
                             <div key={section.id} className="mb-8">
-                                <h2 className="text-xl font-bold mb-4">✅ {section.title}</h2>
+                                <h2 className="text-xl font-bold mb-4">✅ {DOMPurify.sanitize(section.title)}</h2>
                                 <TableDependency
                                     questions={section.questions}
                                     allQuestions={questions} // Todas las preguntas de todas las secciones
@@ -246,7 +247,7 @@ const EditForm = ({ item, onSubmit, onCancel }) => {
                 <input
                     type="text"
                     name="title"
-                    value={formData.title}
+                    value={DOMPurify.sanitize(formData.title)}
                     onChange={handleChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
@@ -257,7 +258,7 @@ const EditForm = ({ item, onSubmit, onCancel }) => {
                 </label>
                 <textarea
                     name="description"
-                    value={formData.description}
+                    value={DOMPurify.sanitize(formData.description)}
                     onChange={handleChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
