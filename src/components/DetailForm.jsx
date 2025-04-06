@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import RichTextEditor from './TextBoxDetail.jsx';
 import Addsurvey from '../assets/img/addsurvey.svg';
-import DataSender from './DataSender.jsx';
 import { SurveyContext } from '../Provider/SurveyContext';
 import Filtersurvey from '../assets/img/filtersurvey.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import trashcan from '../assets/img/trashCan.svg';
 import calendar2 from '../assets/img/calendar2.svg';
-import continues from '../assets/img/continue.svg';
 import Modal from './Modal';
-import Calendar from './Calendar'; // Importamos el calendario actualizado
-import DOMPurify from 'dompurify'; // Importamos DOMPurify
+import Calendar from './Calendar'; 
+import DOMPurify from 'dompurify';
 
-const DetailForm = () => {
+const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   const { selectedCategory } = useContext(SurveyContext);
 
   const [title, setTitle] = useState('');
@@ -22,6 +20,7 @@ const DetailForm = () => {
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
   const [modalStatus, setModalStatus] = useState('error');
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // Fecha actual para usar como mínima
   const today = new Date();
@@ -33,6 +32,17 @@ const DetailForm = () => {
   // Estados para mostrar los calendarios
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+
+  // Verificar validez del formulario
+  useEffect(() => {
+    const valid = title.trim() !== '' && description.trim() !== '';
+    setIsFormValid(valid);
+    
+    // Comunicar el cambio de validez al componente padre
+    if (onFormValidChange) {
+      onFormValidChange(valid);
+    }
+  }, [title, description, onFormValidChange]);
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -59,7 +69,7 @@ const DetailForm = () => {
     }
   }, [startDate]);
 
-  const handleNextClick = () => {
+  const showErrorMessage = () => {
     setModalTitle('Alerta');
     setModalMessage('Por favor, complete todos los campos requeridos antes de continuar.');
     setModalStatus('error');
@@ -84,6 +94,26 @@ const DetailForm = () => {
     setEndDate(date);
   };
 
+  // Función para manejar el envío de datos
+  const handleSave = () => {
+    if (!isFormValid) {
+      showErrorMessage();
+      return;
+    }
+
+    // Pasar datos al componente padre
+    if (onSaveAndContinue) {
+      onSaveAndContinue({
+        title: sanitizedTitle,
+        description: sanitizedDescription,
+        id_category: selectedCategory[0][0],
+        startDate,
+        endDate,
+        accessToken
+      });
+    }
+  };
+
   // Función auxiliar para navegar (define navigate si no está disponible)
   const navigate = (path) => {
     console.log(`Navegación a: ${path}`);
@@ -96,7 +126,7 @@ const DetailForm = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full mr-auto ml-12">
+      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full">
         {/* Contenedor principal */}
         <div className="border border-red-800 p-4 pl-5 rounded-lg">
 
@@ -252,40 +282,6 @@ const DetailForm = () => {
           type="informative"
           status={modalStatus}
         />
-      </div>
-      {/* Botón colocado fuera del contenedor principal */}
-      <div className="flex justify-end mt-4 pb-12 w-full mr-auto ml-12">
-        {!title.trim() || !description.trim() ? (
-          <button
-            onClick={handleNextClick}
-            className="flex items-center px-6 py-1 bg-green-custom text-white font-work-sans text-lg rounded-full hover:bg-dark-green-custom transition-colors"
-          >
-            <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-            <span>Guardar y continuar</span>
-          </button>
-        ) : (
-          <DataSender
-            title={title}
-            description={description}
-            id_category={selectedCategory[0][0]}
-            status={true}
-            accessToken={accessToken}
-            onSuccess={handleSuccess}
-            onError={() => {
-              setModalTitle('Error en el envío');
-              setModalMessage('Hubo un problema al enviar los datos.');
-              setModalStatus('error');
-              setIsModalOpen(true);
-            }}
-            buttonContent={
-              <div className="flex items-center">
-                <img src={continues} alt="Continuar" className="mr-3 w-5 h-5" />
-                <span>Guardar y continuar</span>
-              </div>
-            }
-            buttonClassName="flex items-center px-6 py-1 bg-green-600 text-white font-work-sans text-lg rounded-full hover:bg-green-700 transition-colors"
-          />
-        )}
       </div>
     </>
   );
