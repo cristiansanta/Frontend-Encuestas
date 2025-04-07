@@ -137,7 +137,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
               <h1 className="font-work-sans text-4xl font-bold text-dark-blue-custom pl-2">Titulo de Encuesta</h1>
             </div>
             <div className="w-1/3 flex justify-end border border-red-800 p-2">
-              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
+              <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/category-list')}>
                 <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                   <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
                 </span>

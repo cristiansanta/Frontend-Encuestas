@@ -35,7 +35,7 @@ const SurveyCreate = () => {
     setFormData(data);
     // Enviar datos al servidor o guardarlos en el contexto
     // y luego navegar a la siguiente página
-    navigate('#/QuestionsCreate');
+    navigate('/questions-create');
   };
 
   // Manejar el clic en el botón de navegación
@@ -54,7 +54,7 @@ const SurveyCreate = () => {
           id_category={id_category}
           status={true}
           accessToken={accessToken}
-          onSuccess={() => navigate('#/QuestionsCreate')}
+          onSuccess={() => navigate('/questions-create')}
           onError={(error) => console.error('Error al guardar:', error)}
         />
       );

@@ -16,7 +16,7 @@ const BackHomeButton = ({ label, className }) => {
 
   const handleClick = () => {
     // Navegar al Dashboard usando la misma lógica que utiliza el Navbar
-    window.location.href = '/login#/Dashboard';
+    window.location.href = '/dashboard';
   };
 
   return (

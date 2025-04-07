@@ -152,7 +152,7 @@ const Dashboard = () => {
                 {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
                 <div className="flex space-x-4">
                   {/* Botón Nueva Encuesta */}
-                  <button onClick={()=> navigate('/SurveyCreate')} className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  <button onClick={()=> navigate('/survey-create')} className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                     <span className="bg-blue-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
                       <img src={Addsurvey} alt="Nueva encuesta" className="w-5 h-5" />
                     </span>
@@ -162,7 +162,7 @@ const Dashboard = () => {
                   </button>
 
                   {/* Versión móvil - Solo icono */}
-                  <button onClick={()=> navigate('/SurveyCreate')} className="md:hidden bg-blue-custom text-white p-2 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105">
+                  <button onClick={()=> navigate('/survey-create')} className="md:hidden bg-blue-custom text-white p-2 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105">
                     <img src={Addsurvey} alt="Nueva encuesta" className="w-5 h-5" />
                   </button>
 

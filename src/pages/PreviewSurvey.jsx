@@ -24,7 +24,7 @@ const PreviewSurvey = () => {
     setTimeout(() => {
       setIsSaving(false);
       setShowButtons(false);
-      navigate('#/SurveyList');
+      navigate('/survey-list');
     }, 1500);
   };
 
@@ -36,7 +36,7 @@ const PreviewSurvey = () => {
     setTimeout(() => {
       setIsSaving(false);
       setShowButtons(false);
-      navigate('#/SurveyList');
+      navigate('/survey-list');
     }, 1500);
   };
 
