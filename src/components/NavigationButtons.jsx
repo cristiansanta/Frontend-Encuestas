@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import continues from '../assets/img/continue.svg';
+import Button from './Button';
 
 /**
  * Componente para mostrar los botones de navegación en el flujo de creación de encuestas
@@ -12,55 +13,60 @@ import continues from '../assets/img/continue.svg';
  * @param {string} props.className - Clases adicionales para el botón
  * @returns {JSX.Element} - Botón de navegación
  */
-const NavigationButtons = ({
-    type = 'continue',
-    onClick,
-    disabled = false,
-    className = ''
+const NavigationButtons = ({ 
+  type = 'continue',
+  onClick,
+  disabled = false,
+  className = ''
 }) => {
-    // Configuración según el tipo de botón
-    const buttonConfig = {
-        'continue': {
-            text: 'Continuar',
-            bgColor: 'bg-green-custom',
-            hoverColor: 'hover:bg-dark-green-custom',
-            icon: continues
-        },
-        'save': {
-            text: 'Guardar y continuar',
-            bgColor: 'bg-green-custom',
-            hoverColor: 'hover:bg-dark-green-custom',
-            icon: continues
-        },
-        'finish': {
-            text: 'Finalizar',
-            bgColor: 'bg-blue-custom',
-            hoverColor: 'hover:bg-dark-blue-custom',
-            icon: continues
-        }
-    };
+  // Configuración según el tipo de botón
+  const buttonConfig = {
+    'continue': {
+      text: 'Continuar',
+      variant: 'continue',
+      icon: <img src={continues} alt="Continuar" className="w-5 h-5" />
+    },
+    'save': {
+      text: 'Guardar y continuar',
+      variant: 'success',
+      icon: <img src={continues} alt="Guardar" className="w-5 h-5" />
+    },
+    'finish': {
+      text: 'Finalizar',
+      variant: 'primary',
+      icon: <img src={continues} alt="Finalizar" className="w-5 h-5" />
+    },
+    'publish': {
+      text: 'Publicar',
+      variant: 'publish'
+    },
+    'save-draft': {
+      text: 'Guardar sin publicar',
+      variant: 'save'
+    }
+  };
 
-    const config = buttonConfig[type];
+  const config = buttonConfig[type];
 
-    return (
-        <div className={`flex justify-end mt-4 pb-12 w-full ${className}`}>
-            <button
-                onClick={onClick}
-                disabled={disabled}
-                className={`flex items-center px-6 py-2 ${config.bgColor} text-white font-work-sans text-lg rounded-full ${config.hoverColor} transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                <img src={config.icon} alt={config.text} className="mr-3 w-5 h-5" />
-                <span>{config.text}</span>
-            </button>
-        </div>
-    );
+  return (
+    <div className={`flex justify-end mt-4 pb-12 w-full ${className}`}>
+      <Button
+        variant={config.variant}
+        text={config.text}
+        icon={config.icon}
+        size="md"
+        onClick={onClick}
+        disabled={disabled}
+      />
+    </div>
+  );
 };
 
 NavigationButtons.propTypes = {
-    type: PropTypes.oneOf(['continue', 'save', 'finish']),
-    onClick: PropTypes.func.isRequired,
-    disabled: PropTypes.bool,
-    className: PropTypes.string
+  type: PropTypes.oneOf(['continue', 'save', 'finish', 'publish', 'save-draft']),
+  onClick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  className: PropTypes.string
 };
 
 export default NavigationButtons;
