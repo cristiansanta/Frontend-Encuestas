@@ -39,7 +39,7 @@ export const Navbar = () => {
     {
       icon: PlusIcon,
       path: "/survey-create",
-      active: activePath === "/survey-create",
+      active: activePath === "/survey-create" || activePath === "/questions-create" || activePath === "/preview-survey",
       label: "Crear Encuesta",
     },
     {
