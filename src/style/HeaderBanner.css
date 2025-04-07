@@ -15,10 +15,11 @@
 
 .banner-image-wrapper {
   width: 100%;
-  height: 100%;
+  height: 97%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  padding-left: 50px;
 }
 
 .banner-image {

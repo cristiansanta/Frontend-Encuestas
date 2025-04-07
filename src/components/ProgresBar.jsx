@@ -7,7 +7,7 @@ import previsualizar from '../assets/img/previsualizar.svg';
 
 const ProgressBar = ({ currentView }) => {
   const navigate = useNavigate();
-  
+    
   const viewSteps = {
     SurveyCreate: 1,
     QuestionsCreate: 2,
@@ -45,7 +45,7 @@ const ProgressBar = ({ currentView }) => {
   };
   
   return (
-    <div className="flex items-center justify-center w-full -mt-5">
+    <div className="flex items-center justify-center w-full -mt-14">
       <div className="flex">
         {steps.map((step, index) => {
           // Determinar si es el primer o último elemento para aplicar bordes redondeados

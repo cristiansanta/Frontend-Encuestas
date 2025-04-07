@@ -147,7 +147,7 @@ export const Navbar = () => {
                   <div className="curve-bottom"></div>
                 </>
               )}
-              
+
               <value.icon
                 strokeColor={value.active ? "#39A900" : "#FFFFFF"}
                 className="w-6 h-6"
@@ -173,7 +173,7 @@ export const Navbar = () => {
             className="cursor-pointer menu-item"
             data-title="Cerrar sesión"
           >
-            <SettingsIcon className="w-6 h-6" />
+            <LogoutIcon className="w-6 h-6" />
             <span>Cerrar sesión</span>
           </a>
         </div>
