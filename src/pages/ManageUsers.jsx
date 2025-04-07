@@ -15,7 +15,7 @@ const ManageUsers = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex bg-gray-back-custom">
       <Navbar />
       <div className="flex-1 flex flex-col items-center mt-10">
         <Userbanner />

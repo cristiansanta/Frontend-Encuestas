@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Listsurveys from '../assets/ListSurveys';
-import ListCategory from '../assets/ListCategory';
-import Statereport from '../assets/StateReport';
+import PlusIcon from '../assets/PlusIcon'; // Cambiamos Statereport por PlusIcon
 import HomeIcon from '../assets/HomeIcon';
+import ReportsIcon from '../assets/ReportsIcon';
 import LogoutIcon from '../assets/LogoutIcon';
 import SettingsIcon from '../assets/SettingsIcon';
 import '../style/Navbar.css';
@@ -37,16 +37,16 @@ export const Navbar = () => {
       label: "Lista de encuestas",
     },
     {
-      icon: Statereport,
-      path: "#/SectionsCreate",
-      active: activePath === "/SectionsCreate",
-      label: "Reportes",
+      icon: PlusIcon, // Cambiado de Statereport a PlusIcon
+      path: "#/SurveyCreate",
+      active: activePath === "/SurveyCreate",
+      label: "Crear Encuesta",
     },
     {
-      icon: SettingsIcon,
+      icon: ReportsIcon,
       path: "#/ManageUsers",
       active: activePath === "/ManageUsers",
-      label: "Configuración",
+      label: "Reportes",
     },
   ];
 
@@ -147,7 +147,7 @@ export const Navbar = () => {
                   <div className="curve-bottom"></div>
                 </>
               )}
-              
+
               <value.icon
                 strokeColor={value.active ? "#39A900" : "#FFFFFF"}
                 className="w-6 h-6"

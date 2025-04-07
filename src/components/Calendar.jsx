@@ -178,10 +178,10 @@ const Calendar = ({
         className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
         onClick={() => onOpenChange(!isOpen)}
       >
-        <span className="bg-blue-custom text-white px-4 py-2 flex items-center justify-center hover:bg-opacity-80">
+        <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
           <span className="font-work-sans text-lg font-semibold">{buttonLabel}</span>
         </span>
-        <span className="bg-yellow-custom px-5 py-2 flex items-center justify-center hover:bg-opacity-80">
+        <span className="bg-yellow-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
           <span className="font-work-sans text-lg font-semibold text-dark-blue-custom mr-2">
             {selectedDate ? formatDate(new Date(selectedDate)) : formatDate(new Date())}
           </span>

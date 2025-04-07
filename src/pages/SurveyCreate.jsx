@@ -1,33 +1,82 @@
-import React, { useContext } from 'react';
-import Navbar from '../components/Navbar.jsx';
-import HeaderBar from '../components/HeaderBar.jsx';
-import HeaderBanner from '../components/HeaderBanner.jsx';
-import ProgressBar from '../components/ProgresBar.jsx';
-import DetailForm from '../components/DetailForm.jsx';
-import { SurveyContext } from '../Provider/SurveyContext'; // Importar el contexto
+import React, { useContext, useState } from 'react';
+import SurveyLayout from '../components/SurveyLayout';
+import DetailForm from '../components/DetailForm';
+import { SurveyContext } from '../Provider/SurveyContext';
+import { useNavigate } from 'react-router-dom';
+import DataSender from '../components/DataSender';
 
 const SurveyCreate = () => {
   const { selectedCategory } = useContext(SurveyContext);
+  const navigate = useNavigate();
+  const [formIsValid, setFormIsValid] = useState(false);
+  const [formData, setFormData] = useState(null);
+  
+  // Guardar en localStorage si hay una categoría seleccionada
   if (selectedCategory) {
     localStorage.setItem('selectedCategory', JSON.stringify(selectedCategory));
   }
-  const categorydate = localStorage.getItem('selectedCategory');
-  const parsedCategoryData = JSON.parse(categorydate);
-  console.log(typeof (parsedCategoryData))
-  console.log(parsedCategoryData[0][0])
+  
+  // Recuperar datos de categoría del localStorage
+  const categorydata = localStorage.getItem('selectedCategory');
+  const parsedCategoryData = JSON.parse(categorydata);
+  
+  // Crear el título del header basado en la categoría seleccionada
+  const headerTitle = `Configuración de la encuesta: Categoría seleccionada: ${
+    parsedCategoryData ? `${parsedCategoryData[0][0]} ${parsedCategoryData[0][1]}` : ''
+  }`;
+
+  // Manejar el cambio de validez del formulario
+  const handleFormValidChange = (isValid) => {
+    setFormIsValid(isValid);
+  };
+
+  // Manejar el guardado y continuación
+  const handleSaveAndContinue = (data) => {
+    setFormData(data);
+    // Enviar datos al servidor o guardarlos en el contexto
+    // y luego navegar a la siguiente página
+    navigate('#/QuestionsCreate');
+  };
+
+  // Manejar el clic en el botón de navegación
+  const handleNavButtonClick = () => {
+    if (formIsValid && formData) {
+      // Si tenemos los datos, podemos enviarlos
+      // Aquí se implementaría la lógica de DataSender
+      const { title, description, id_category, accessToken } = formData;
+      
+      // Ejemplo de uso de DataSender (ajustar según tu implementación)
+      // Este componente se renderizaría condicionalmente
+      return (
+        <DataSender
+          title={title}
+          description={description}
+          id_category={id_category}
+          status={true}
+          accessToken={accessToken}
+          onSuccess={() => navigate('#/QuestionsCreate')}
+          onError={(error) => console.error('Error al guardar:', error)}
+        />
+      );
+    } else {
+      // Si el formulario no es válido, activamos la validación en DetailForm
+      handleSaveAndContinue();
+    }
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-back-custom">
-      <Navbar />
-      <div className="flex-1 flex flex-col items-center">
-        <HeaderBanner />
-        <HeaderBar props={`Configuración de la encuesta: Categoría seleccionada: ${parsedCategoryData[0][0]} ${parsedCategoryData[0][1]}`} /> {/* Mostrar la categoría seleccionada */}
-        <ProgressBar currentView="SurveyCreate" />
-        <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto">
-          <DetailForm />
-        </div>
-      </div>
-    </div>
+    <SurveyLayout 
+      currentView="SurveyCreate"
+      headerTitle={headerTitle}
+      navButtonType="save"
+      onNavButtonClick={handleNavButtonClick}
+      navButtonDisabled={!formIsValid}
+    >
+      <DetailForm 
+        onFormValidChange={handleFormValidChange}
+        onSaveAndContinue={handleSaveAndContinue}
+      />
+    </SurveyLayout>
   );
 };
 

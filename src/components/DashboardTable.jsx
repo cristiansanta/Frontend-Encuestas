@@ -12,7 +12,7 @@ import Tool from '../assets/img/tool.svg';
 import CardSurvey from '../assets/img/CardImg.svg';
 import DropdownIcon from '../assets/img/tabledeploy.svg';
 
-// Sample data (in a real implementation, this would come from your API)
+// Sample data (en una implementación real, esto vendría de tu API)
 const surveyData = [
   { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
@@ -24,20 +24,6 @@ const surveyData = [
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
   // ... otros datos
 ];
 
@@ -55,7 +41,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
   const [itemsPerPage] = useState(10);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [expandedRow, setExpandedRow] = useState(null); // Para controlar qué fila tiene desplegados los iconos
 
   // Efecto para simular carga
   useEffect(() => {
@@ -64,18 +50,6 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  // Cerrar el menú desplegable al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setDropdownOpen(null);
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
   }, []);
 
   // Obtener el estado de filtro correspondiente
@@ -126,12 +100,6 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
         return [...prev, index];
       }
     });
-  };
-
-  // Toggle dropdown menu
-  const toggleDropdown = (e, index) => {
-    e.stopPropagation();
-    setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
   // Obtener clases de estilo según el estado
@@ -289,7 +257,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
           <table className="w-full table-auto border-collapse min-w-max">
             <thead className="bg-blue-custom text-white">
               <tr>
-                {/* Columna para el checkbox/indicador */}
+                {/* Columna para el checkbox/indicador - sticky left */}
                 <th className="py-3 px-2 text-center font-medium border-r border-blue-800 w-12 sticky left-0 bg-blue-custom z-10">
                   <div className="flex items-center justify-center">
                     <img src={CardSurvey} alt="Imagen encuesta" className="w-6 h-6" />
@@ -300,6 +268,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                 <th className="py-3 px-4 text-left font-medium border-r border-blue-800 w-48">Categoría</th>
                 <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-48">Rango de tiempo</th>
                 <th className="py-3 px-4 text-center font-medium border-r border-blue-800 w-32">Nº de Respuestas</th>
+                {/* Columna de acciones - sticky right */}
                 <th className="py-3 px-4 text-center font-medium w-24 sticky right-0 bg-blue-custom z-10">
                   <div className="flex items-center justify-center">
                     <img src={Tool} alt="Herramienta" className="w-6 h-6 mr-2" />
@@ -311,7 +280,9 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <AnimatePresence>
               <tbody className="divide-y divide-gray-200">
                 {currentItems.length > 0 ? (
-                  currentItems.map((survey, index) => (
+                  currentItems.map((survey, index) => {
+                    const rowBgColor = index % 2 === 0 ? 'white' : '#f9fafb';
+                    return (
                     <motion.tr
                       key={index}
                       className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-gray-100'}
@@ -321,8 +292,8 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                       animate="visible"
                       exit="exit"
                     >
-                      {/* Celda con checkbox e indicador de estado - sticky */}
-                      <td className="border-r py-3 px-2 relative sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb'}}>
+                      {/* Celda con checkbox e indicador de estado - sticky left */}
+                      <td className="border-r py-3 px-2 relative sticky left-0 z-10" style={{backgroundColor: rowBgColor}}>
                         {/* Barra vertical de color según estado */}
                         <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${getIndicatorColor(survey.estado)}`}></div>
 
@@ -366,37 +337,46 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                         </div>
                       </td>
                       <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
-                      <td className="py-3 px-4 text-center relative sticky right-0 z-10" style={{backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb'}}>
+                      
+                      {/* Celda de acciones - sticky right (MODIFICADA con botón de despliegue) */}
+                      <td className="py-3 px-4 text-center sticky right-0 z-10 transition-all duration-300" style={{backgroundColor: rowBgColor}}>
                         {/* Vista de escritorio: Mostrar botones directamente */}
                         <div className="hidden md:flex justify-center space-x-2">
                           {renderActionIcons(survey.estado)}
                         </div>
-                        {/* Vista móvil: Mostrar botón de despliegue */}
-                        <div className="flex md:hidden justify-center">
-                          <button
-                            onClick={(e) => toggleDropdown(e, index)}
-                            className={`p-2 rounded-full
-                              ${survey.estado === 'Activa' ? 'bg-green-custom' :
-                                survey.estado === 'Próxima a Finalizar' ? 'bg-orange-custom' :
-                                survey.estado === 'Sin publicar' ? 'bg-celeste-custom' :
-                                survey.estado === 'Finalizada' ? 'bg-purple-custom' : 'bg-gray-500'}
-                              text-white hover:bg-opacity-80 transition-all duration-300`}
-                          >
-                            <img src={DropdownIcon} alt="Desplegable" className="h-2 sm:h-3" />
-                          </button>
-
-                          {/* Dropdown menu */}
-                          {dropdownOpen === index && (
-                            <div className="absolute right-12 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20" onClick={(e) => e.stopPropagation()}>
-                              <ul className="py-1 text-sm text-gray-700">
-                                {renderActionIcons(survey.estado)}
-                              </ul>
-                            </div>
+                        
+                        {/* Vista móvil: Mostrar botón de despliegue o iconos de acción */}
+                        <div className="flex md:hidden relative justify-center">
+                          {expandedRow === index ? (
+                            <motion.div 
+                              className="flex justify-center space-x-2"
+                              initial={{ x: 50, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              exit={{ x: 50, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeOut" }}
+                            >
+                              {renderActionIcons(survey.estado)}
+                            </motion.div>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedRow(expandedRow === index ? null : index);
+                              }}
+                              className={`p-2 rounded-full
+                                ${survey.estado === 'Activa' ? 'bg-green-custom' :
+                                  survey.estado === 'Próxima a Finalizar' ? 'bg-orange-custom' :
+                                  survey.estado === 'Sin publicar' ? 'bg-celeste-custom' :
+                                  survey.estado === 'Finalizada' ? 'bg-purple-custom' : 'bg-gray-500'}
+                                text-white hover:bg-opacity-80 transition-all duration-300`}
+                            >
+                              <img src={DropdownIcon} alt="Desplegar acciones" className="h-2 sm:h-3" />
+                            </button>
                           )}
                         </div>
                       </td>
                     </motion.tr>
-                  ))
+                  )})
                 ) : (
                   <motion.tr
                     initial={{ opacity: 0 }}
