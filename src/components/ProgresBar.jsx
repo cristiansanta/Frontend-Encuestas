@@ -59,7 +59,7 @@ const ProgressBar = ({ currentView }) => {
                 onClick={() => handleStepClick(step.route)}>
                 
                 {/* Círculo con el ícono */}
-                <div className={`absolute z-50 -left-12 size-16 shadow-md p-3 border border-4 border-gray ${
+                <div className={`absolute z-50 -left-12 size-16 shadow-md p-3 border-4 border-gray ${
                   (step.completed === true && activeStep > step.id) 
                   ? 'bg-dark-blue-custom'
                   : activeStep === step.id

@@ -126,17 +126,15 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full">
-        {/* Contenedor principal */}
-        <div className="border border-red-800 p-4 pl-5 rounded-lg">
+      <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white shadow-2xl w-full">
 
           {/* Sección superior con dos elementos (título y categoría) */}
-          <div className="flex justify-between mb-2 border border-red-800">
-            <div className="w-1/3 border border-white p-2">
+          <div className="flex justify-between items-center mb-2">
+            <div className="w-2/3">
               {/* Campo para el título */}
-              <h1 className="font-work-sans text-4xl font-bold text-dark-blue-custom pl-2">Titulo de Encuesta</h1>
+              <h1 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Titulo de Encuesta</h1>
             </div>
-            <div className="w-1/3 flex justify-end border border-red-800 p-2">
+            <div className="w-1/3 flex justify-end">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
                 <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                   <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
@@ -152,15 +150,15 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           </div>
 
           {/* Segunda sección - Secciones de la encuesta */}
-          <div className="border border-red-800 p-2 mb-1">
-            <div className="mb-2 border border-white p-2">
-              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Secciones</h2>
+          <div className="mb-4">
+            <div className="mb-1 border border-white">
+              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Secciones</h2>
             </div>
-            <p className="font-work-sans text-lg text-gray-600 pl-3">
+            <p className="font-work-sans text-sm mb-3 text-gray-600">
               Agrega las secciones en las que clasificarás las preguntas.
             </p>
             <div className="flex space-x-2 mt-1">
-              <div className="border border-white p-2">
+              <div className="border border-white">
                 <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                   <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                     <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -172,7 +170,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   </span>
                 </button>
               </div>
-              <div className="border border-white p-2">
+              <div className="border border-white">
                 <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                   <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                     <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -184,7 +182,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   </span>
                 </button>
               </div>
-              <div className="border border-white p-2">
+              <div className="border border-white">
                 <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                   <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                     <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
@@ -196,7 +194,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   </span>
                 </button>
               </div>
-              <div className="border border-white p-2">
+              <div className="border border-white">
                 <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                   <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                     <img src={Addsurvey} alt="Nueva sección" className="w-5 h-5" />
@@ -212,12 +210,12 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           </div>
 
           {/* Rango de tiempo */}
-          <div className="border border-red-800 p-2 mb-1">
-            <div className="mb-2 border border-white p-0 pl-3">
-              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
+          <div className="mb-4">
+            <div className="mb-1 border border-white p-0">
+              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
             </div>
             <div className="flex space-x-4">
-              <div className="border border-white p-2 relative">
+              <div className="border border-white relative">
                 {/* Calendario de inicio con control de apertura/cierre */}
                 <Calendar
                   initialDate={startDate}
@@ -235,7 +233,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                 />
               </div>
 
-              <div className="border border-white p-2 relative">
+              <div className="border border-white relative">
                 {/* Calendario de finalización con control de apertura/cierre */}
                 <Calendar
                   initialDate={endDate}
@@ -257,18 +255,18 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           </div>
 
           {/* Sección de descripción */}
-          <div className="border border-red-800  p-2">
-            <div className="mb-2 border border-white p-2">
-              <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
+          <div className="mb-4">
+            <div className="mb-2 border border-white">
+              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
             </div>
-            <div className="border border-white p-2">
+            <div className="border border-white">
               <RichTextEditor
                 value={description}
                 onChange={(value) => setDescription(DOMPurify.sanitize(value))} // Sanitizar la descripción
               />
             </div>
           </div>
-        </div>
+        
 
         {/* Modal para mensajes */}
         <Modal
