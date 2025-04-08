@@ -6,23 +6,57 @@ import { useNavigate } from 'react-router-dom';
 import Seccion from '../assets/img/seccion.svg';
 import SeccionWhite from '../assets/img/seccionwhite.svg';
 import Calendar from '../assets/img/calendar2.svg';
+import { motion, AnimatePresence } from 'framer-motion';
+import Select from '../assets/img/select.svg';
 
 const PreviewSurvey = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
   const [expandedSections, setExpandedSections] = useState({
-    personal: true,
-    laboral: true,
-    academica: true
+    personal: false,
+    laboral: false,
+    academica: false
   });
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Detectar el scroll para mostrar/ocultar el botón y actualizar la barra de progreso
+  useEffect(() => {
+    const handleScroll = () => {
+      // Calcular el progreso del scroll
+      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const currentProgress = window.scrollY / totalHeight;
+      setScrollProgress(currentProgress);
+      
+      // Mostrar/ocultar el botón basado en la posición del scroll
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  
+  // Función para volver arriba con animación suave
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   // Recuperar datos de categoría del localStorage
   const categoryData = JSON.parse(localStorage.getItem('selectedCategory'));
 
   // Crear el título del header
-  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[0][0]} ${categoryData[0][1]}` : 'Perfil Personal y Profesional'
-    }`;
+  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[0][0]} ${categoryData[0][1]}` : 'Perfil Personal y Profesional'}`;
 
   // Manejar la publicación de la encuesta
   const handlePublish = () => {
@@ -59,30 +93,58 @@ const PreviewSurvey = () => {
   // Componente para secciones colapsables
   const CollapsibleSection = ({ title, isOpen, onToggle, icon, children }) => (
     <div className="mb-6">
-      <div
-        className="bg-dark-blue-custom text-white p-4 rounded-lg flex justify-between items-center cursor-pointer"
+      <motion.div
+        className="bg-dark-blue-custom text-white p-4 rounded-xl flex justify-between items-center cursor-pointer"
         onClick={onToggle}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
         <div className="flex items-center">
-          <span className="mr-2">{icon}</span>
-          <span className="font-work-sans text-lg font-semibold">{title}</span>
+          {icon}
+          <span className="font-work-sans text-lg font-semibold ml-2">{title}</span>
         </div>
-        <span>{isOpen ? '▲' : '▼'}</span>
-      </div>
-      {isOpen && (
-        <div className="border border-gray-200 rounded-b-lg bg-gray-100 p-4">
-          {children}
-        </div>
-      )}
+        <motion.span
+          initial={false}
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <img src={Select} alt="Selector" className="w-5 h-5" />
+        </motion.span>
+      </motion.div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="border border-gray-200 rounded-b-xl bg-gray-100 p-4 shadow-inner">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 
   // Componente para preguntas
   const SurveyQuestion = ({ question, hasIndent = false }) => (
-    <div className={`border bg-gray-50 rounded-lg p-4 mb-3 flex justify-between items-center ${hasIndent ? 'ml-8' : ''}`}>
+    <motion.div
+      className={`border bg-gray-50 rounded-xl p-4 mb-3 flex justify-between items-center ${hasIndent ? 'ml-8' : ''}`}
+      whileHover={{ scale: 1.01, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    >
       <span className="text-dark-blue-custom font-medium">{question}</span>
-      <span className="text-dark-blue-custom">▼</span>
-    </div>
+      <motion.span
+        className="text-dark-blue-custom"
+        whileHover={{ rotate: 90 }}
+        transition={{ duration: 0.2 }}
+      >
+      </motion.span>
+    </motion.div>
   );
 
   return (
@@ -91,6 +153,12 @@ const PreviewSurvey = () => {
       headerTitle={headerTitle}
       showNavButton={false}
     >
+      {/* Barra de progreso de scroll */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-blue-custom origin-left z-50"
+        style={{ scaleX: scrollProgress }}
+      />
+      
       {/* Contenedor superior con instrucciones y botones */}
       <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
         <h1 className="text-2xl font-bold text-dark-blue-custom mb-4">
@@ -154,40 +222,52 @@ const PreviewSurvey = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones</h2>
           <div className="flex flex-wrap gap-4">
-            <div className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200">
+            <motion.div
+              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
+              whileHover={{ scale: 1.05 }}
+            >
               <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
               <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Información Personal</span>
-            </div>
-            <div className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200">
+            </motion.div>
+            <motion.div
+              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
+              whileHover={{ scale: 1.05 }}
+            >
               <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
               <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Laboral</span>
-            </div>
-            <div className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200">
+            </motion.div>
+            <motion.div
+              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
+              whileHover={{ scale: 1.05 }}
+            >
               <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
               <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Académica</span>
-            </div>
+            </motion.div>
           </div>
         </div>
-
 
         {/* Rango de tiempo */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Rango de tiempo</h2>
           <div className="flex gap-6">
-            <div className="flex items-center border border-gray-300 rounded-lg">
+            <motion.div
+              className="flex items-center border border-gray-300 rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
+            >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de inicio:</span>
-              <span className="border-r border-gray-300 px-4 py-2">{/* Fecha de inicio */}02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
-            </div>
-            <div className="flex items-center border border-gray-300 rounded-lg">
+            </motion.div>
+            <motion.div
+              className="flex items-center border border-gray-300 rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
+            >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de finalización:</span>
-              <span className="border-r border-gray-300 px-4 py-2">{/* Fecha de finalización */}02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
-            </div>
+            </motion.div>
           </div>
         </div>
-
-
 
         {/* Descripción de la Encuesta */}
         <div className="mb-6">
@@ -248,22 +328,49 @@ const PreviewSurvey = () => {
         </div>
 
         {/* Información para volver arriba */}
-        <div className="flex justify-between items-center mt-8">
+        <div className="flex justify-center mt-8">
           <div>
             <p className="text-dark-blue-custom">
-              Para <span className="font-bold">Publicar</span> y <span className="font-bold">Guardar</span> sin publicar regresa al inicio de esta página: <a href="#" className="text-green-600 underline">click aquí</a>.
+              Para <span className="font-bold">Publicar</span> y <span className="font-bold">Guardar</span> sin publicar regresa al inicio de esta página: 
+              <a 
+                href="#" 
+                onClick={(e) => {e.preventDefault(); scrollToTop();}} 
+                className="text-green-600 underline ml-1"
+              >
+                click aquí
+              </a>.
             </p>
           </div>
         </div>
 
         {/* Botón flotante para volver arriba */}
-        <div className="fixed bottom-8 right-8">
-          <button className="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-green-600 transition-all">
-            <span className="text-2xl">↑</span>
-          </button>
-        </div>
+        <motion.div 
+          className="fixed bottom-8 right-8 z-50"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ 
+            opacity: showScrollButton ? 1 : 0,
+            scale: showScrollButton ? 1 : 0,
+            y: showScrollButton ? 0 : 20
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.button 
+            className="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-green-600 transition-all"
+            onClick={scrollToTop}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <motion.img 
+              src={Select} 
+              alt="Volver arriba" 
+              className="w-5 h-5 rotate-180" 
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2 }}
+            />
+          </motion.button>
+        </motion.div>
       </div>
-    </SurveyLayout>
+    </SurveyLayout> 
   );
 };
 
