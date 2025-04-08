@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // Importar TanStack Query
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
 import SurveyCreate from './pages/SurveyCreate.jsx';
 import Login from './pages/Login.jsx';
@@ -13,56 +13,53 @@ import SurveyList from './pages/SurveyList.jsx';
 import Register from './pages/Register.jsx';
 import { SurveyProvider } from './Provider/SurveyContext.jsx'; 
 import ProtectedRoute from './components/ProtectedRoute'; 
-import SurveyDetails  from './pages/SurveyDetails.jsx'
+import SurveyDetails from './pages/SurveyDetails.jsx';
 import ManageUsers from './pages/ManageUsers.jsx';
-import RolesAsignation from './pages/RolesAsignation.jsx'
-import AsignationMigrate from './pages/AsignationMigrate'
-import SurveyView from './pages/SurveyView'
-import SurveyCompletion from './pages/SurveyCompletion.jsx'
-import SurveyExpired from './pages/SurveyExpired.jsx'
-import SurveyReplied from './pages/SurveyReplied.jsx'
-import SurveyEdit from './pages/SurveyEdit.jsx'
-import DashboardTable from './components/DashboardTable.jsx'
+import RolesAsignation from './pages/RolesAsignation.jsx';
+import AsignationMigrate from './pages/AsignationMigrate.jsx';
+import SurveyView from './pages/SurveyView.jsx';
+import SurveyCompletion from './pages/SurveyCompletion.jsx';
+import SurveyExpired from './pages/SurveyExpired.jsx';
+import SurveyReplied from './pages/SurveyReplied.jsx';
+import SurveyEdit from './pages/SurveyEdit.jsx';
+import DashboardTable from './components/DashboardTable.jsx';
+import PreviewSurvey from './pages/PreviewSurvey.jsx';
 
-
-
-const queryClient = new QueryClient(); // Crear el cliente de consulta
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}> {/* Envolver las rutas con QueryClientProvider */}
-      <SurveyProvider> {/* Envolver las rutas con SurveyProvider */}
+    <QueryClientProvider client={queryClient}>
+      <SurveyProvider>
         <div>
           <Routes>
             <Route path="/" element={<Login />} />
-            <Route path="/Register" element={<Register />} />
-            <Route path="/Dashboard"  element={<Dashboard />}  />
-            <Route path="/SurveyCreate" element={<ProtectedRoute element={<SurveyCreate />} />} />
-            <Route path="/SurveyList" element={<ProtectedRoute element={<SurveyList />} />} />
-            <Route path="/CategoryList" element={<ProtectedRoute element={<CategoryList />} />} />
-            <Route path="/CategoryCreate" element={<ProtectedRoute element={<CategoryCreate />} />} />
-            <Route path="/SectionsCreate" element={<ProtectedRoute element={<SectionsCreate />} />} />
-            <Route path="/QuestionsList" element={<ProtectedRoute element={<QuestionsList />} />} />
-            <Route path="/QuestionsCreate" element={<ProtectedRoute element={<QuestionsCreate />} />} />
-            <Route path="/DependencyList" element={<ProtectedRoute element={<DependencyList />} />} />
-            <Route path="/SurveyDetails" element={<ProtectedRoute element={<SurveyDetails />} />} />
-            <Route path="/ManageUsers"  element={<ManageUsers />}  />
-            <Route path="/RolesAsignation"  element={<RolesAsignation />}  />
-            <Route path="/AsignationMigrate"  element={<AsignationMigrate />}  />
-            <Route path="/SurveyView"  element={<SurveyView />}  />
-
-            <Route path="/DashboardTable"  element={<DashboardTable />}  />
-
-            <Route path="/SurveyCompletion"  element={<SurveyCompletion />}  />
-            <Route path="/SurveyExpired"  element={<SurveyExpired />}  />
-            <Route path="/SurveyReplied"  element={<SurveyReplied />}  />
-            <Route path="/SurveyEdit"  element={<SurveyEdit />}  />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/survey-create" element={<ProtectedRoute element={<SurveyCreate />} />} />
+            <Route path="/survey-list" element={<ProtectedRoute element={<SurveyList />} />} />
+            <Route path="/category-list" element={<ProtectedRoute element={<CategoryList />} />} />
+            <Route path="/category-create" element={<ProtectedRoute element={<CategoryCreate />} />} />
+            <Route path="/sections-create" element={<ProtectedRoute element={<SectionsCreate />} />} />
+            <Route path="/questions-list" element={<ProtectedRoute element={<QuestionsList />} />} />
+            <Route path="/questions-create" element={<ProtectedRoute element={<QuestionsCreate />} />} />
+            <Route path="/dependency-list" element={<ProtectedRoute element={<DependencyList />} />} />
+            <Route path="/survey-details" element={<ProtectedRoute element={<SurveyDetails />} />} />
+            <Route path="/manage-users" element={<ManageUsers />} />
+            <Route path="/roles-asignation" element={<RolesAsignation />} />
+            <Route path="/asignation-migrate" element={<AsignationMigrate />} />
+            <Route path="/survey-view" element={<SurveyView />} />
+            <Route path="/dashboard-table" element={<DashboardTable />} />
+            <Route path="/survey-completion" element={<SurveyCompletion />} />
+            <Route path="/survey-expired" element={<SurveyExpired />} />
+            <Route path="/survey-replied" element={<SurveyReplied />} />
+            <Route path="/survey-edit" element={<SurveyEdit />} />
+            <Route path="/preview-survey" element={<PreviewSurvey />} />
           </Routes>
         </div>
       </SurveyProvider>
-    </QueryClientProvider>  
+    </QueryClientProvider>
   );
 }
 
 export default App;
-SurveyView

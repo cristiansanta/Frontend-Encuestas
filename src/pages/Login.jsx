@@ -166,7 +166,7 @@ const Login = () => {
           localStorage.setItem('userName', response.data.user.name);
           localStorage.setItem('id_user', response.data.user.id);
           localStorage.setItem('active', response.data.user.active);
-          navigate('Dashboard');
+          navigate('dashboard');
         } else {
           setError(
             'La cuenta con la que intenta acceder está inactiva. Por favor, contacte al administrador del sistema.'

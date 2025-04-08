@@ -15,22 +15,19 @@ const NavigationBackButton = ({ currentView, className = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Configuración de navegación según la vista actual
+  // Configuración de navegación según la vista actual (actualizada para usar rutas normales)
   const navigationConfig = {
     'SurveyCreate': {
-      label: 'Regresar al Home',
-      target: '/Dashboard',
-      isHashRoute: true
+      label: 'Regresar al Dashboard',
+      target: '/dashboard'
     },
     'QuestionsCreate': {
       label: 'Regresar a Datos Generales',
-      target: '/SurveyCreate',
-      isHashRoute: true
+      target: '/survey-create'
     },
     'PreviewSurvey': {
       label: 'Regresar a Preguntas',
-      target: '/QuestionsCreate',
-      isHashRoute: true
+      target: '/questions-create'
     }
   };
 
@@ -42,13 +39,11 @@ const NavigationBackButton = ({ currentView, className = '' }) => {
     }
     
     // Si no, intentar detectar automáticamente basado en la URL
-    const path = location.hash 
-      ? location.hash.substring(1) 
-      : location.pathname;
+    const path = location.pathname;
     
-    if (path.includes('SurveyCreate')) return navigationConfig['SurveyCreate'];
-    if (path.includes('QuestionsCreate')) return navigationConfig['QuestionsCreate'];
-    if (path.includes('PreviewSurvey')) return navigationConfig['PreviewSurvey'];
+    if (path.includes('survey-create')) return navigationConfig['SurveyCreate'];
+    if (path.includes('questions-create')) return navigationConfig['QuestionsCreate'];
+    if (path.includes('preview-survey')) return navigationConfig['PreviewSurvey'];
     
     // Por defecto, volver al Dashboard
     return navigationConfig['SurveyCreate'];
@@ -57,11 +52,7 @@ const NavigationBackButton = ({ currentView, className = '' }) => {
   const config = getCurrentConfig();
 
   const handleClick = () => {
-    if (config.isHashRoute) {
-      window.location.href = `/login#${config.target}`;
-    } else {
-      navigate(config.target);
-    }
+    navigate(config.target);
   };
 
   return (

@@ -31,7 +31,7 @@ const FormatCorreo = (correo, surveyId) => {
     Te invitamos a responder la encuesta en el siguiente enlace. En caso de que el enlace no cargue, por favor contacta con el soporte técnico.
   </p>
   <p style="text-align: center; margin: 20px 0;">
-    <a href="${apiEndpoint}/#/SurveyView?data=${encodedData}" style="color: #39a900; font-weight: bold; text-decoration: none;">
+    <a href="${apiEndpoint}/survey-view?data=${encodedData}" style="color: #39a900; font-weight: bold; text-decoration: none;">
       Responder Encuesta
     </a>
   </p>

@@ -23,7 +23,7 @@ const QuestionsCreate = () => {
     // Por ejemplo, verificar que haya al menos una pregunta creada
     
     // Navegar a la página de previsualización
-    navigate('#/PreviewSurvey');
+    navigate('/preview-survey');
   };
 
   // Recibir el estado de validez desde el formulario de preguntas

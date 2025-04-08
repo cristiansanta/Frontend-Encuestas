@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Listsurveys from '../assets/ListSurveys';
-import PlusIcon from '../assets/PlusIcon'; // Cambiamos Statereport por PlusIcon
+import PlusIcon from '../assets/PlusIcon';
 import HomeIcon from '../assets/HomeIcon';
 import ReportsIcon from '../assets/ReportsIcon';
 import LogoutIcon from '../assets/LogoutIcon';
 import SettingsIcon from '../assets/SettingsIcon';
 import '../style/Navbar.css';
 import apiRequest from '../Provider/apiHelper';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Logo from '../assets/img/zajuna.svg';
 import LogoZajuna from '../assets/img/zajuna_navbar.svg';
 
@@ -19,33 +19,33 @@ export const Navbar = () => {
 
   // Update active path when location changes
   useEffect(() => {
-    const currentPath = location.hash ? location.hash.substring(1) : location.pathname;
+    const currentPath = location.pathname;
     setActivePath(currentPath);
   }, [location]);
 
   const menuItems = [
     {
       icon: HomeIcon,
-      path: "#/Dashboard",
-      active: activePath === "/Dashboard",
+      path: "/dashboard",
+      active: activePath === "/dashboard",
       label: "Inicio",
     },
     {
       icon: Listsurveys,
-      path: "#/SurveyList",
-      active: activePath === "/SurveyList",
+      path: "/survey-list",
+      active: activePath === "/survey-list",
       label: "Lista de encuestas",
     },
     {
-      icon: PlusIcon, // Cambiado de Statereport a PlusIcon
-      path: "#/SurveyCreate",
-      active: activePath === "/SurveyCreate",
+      icon: PlusIcon,
+      path: "/survey-create",
+      active: activePath === "/survey-create" || activePath === "/questions-create" || activePath === "/preview-survey",
       label: "Crear Encuesta",
     },
     {
       icon: ReportsIcon,
-      path: "#/ManageUsers",
-      active: activePath === "/ManageUsers",
+      path: "/manage-users",
+      active: activePath === "/manage-users",
       label: "Reportes",
     },
   ];
@@ -84,9 +84,9 @@ export const Navbar = () => {
       <div className="mobile-navbar xl:hidden">
         <div className="mobile-navbar-background"></div>
         {menuItems.map((value, index) => (
-          <a
+          <Link
             key={index}
-            href={value.path}
+            to={value.path}
             className={value.active ? "active" : ""}
             data-title={value.label}
           >
@@ -94,7 +94,7 @@ export const Navbar = () => {
               className="w-6 h-6"
               strokeColor={value.active ? "#39A900" : "#FFFFFF"}
             />
-          </a>
+          </Link>
         ))}
 
         <a
@@ -135,9 +135,9 @@ export const Navbar = () => {
         {/* Menu items */}
         <div className="navbar-menu">
           {menuItems.map((value, index) => (
-            <a
+            <Link
               key={index}
-              href={value.path}
+              to={value.path}
               className={`menu-item ${value.active ? "active" : ""}`}
               data-title={value.label}
             >
@@ -153,7 +153,7 @@ export const Navbar = () => {
                 className="w-6 h-6"
               />
               <span>{value.label}</span>
-            </a>
+            </Link>
           ))}
         </div>
 

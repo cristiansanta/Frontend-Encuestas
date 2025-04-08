@@ -232,7 +232,7 @@ const handleDelete = async (id) => {
      idname.push([selectedCategoryId, selectedCategoryName])
      console.log(idname)
       setSelectedCategory(idname ); 
-      navigate("/SurveyCreate");
+      navigate("/survey-create");
     }
   };
 

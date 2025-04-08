@@ -48,7 +48,7 @@ const SurveyList = () => {
         <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto flex justify-between items-center">
           <button
             className="bg-[#00324D] px-4 py-2 rounded-lg"
-            onClick={() => navigate('/Categorylist')}
+            onClick={() => navigate('/category-list')}
           >
             <img src={bannerImage} alt="Nueva encuesta" className="h-15" />
           </button>

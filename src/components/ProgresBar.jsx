@@ -21,21 +21,21 @@ const ProgressBar = ({ currentView }) => {
       id: 1,
       label: 'Datos Generales', 
       completed: activeStep >= 1, 
-      route: '/SurveyCreate', 
+      route: '/survey-create', 
       icon: datosgenerales
     },
     { 
       id: 2, 
       label: 'Preguntas', 
       completed: activeStep >= 2, 
-      route: '/QuestionsCreate', 
+      route: '/questions-create', 
       icon: preguntas 
     },
     { 
       id: 3, 
       label: 'Previsualizar', 
       completed: activeStep >= 3, 
-      route: '/PreviewSurvey', 
+      route: '/preview-survey', 
       icon: previsualizar 
     },
   ];
@@ -45,7 +45,7 @@ const ProgressBar = ({ currentView }) => {
   };
   
   return (
-    <div className="flex items-center justify-center w-full -mt-14">
+    <div className="flex items-center justify-center w-full -mt-5">
       <div className="flex">
         {steps.map((step, index) => {
           // Determinar si es el primer o último elemento para aplicar bordes redondeados
@@ -96,7 +96,7 @@ const ProgressBar = ({ currentView }) => {
                 >
                   {/* Texto dentro del fondo rectangular, con padding para dejar espacio al círculo */}
                   <div 
-                    className="py-1.5 text-xl pl-5 w-full border border-4 border-gray"
+                    className="py-1.5 text-xl pl-5 w-full border-4 border-gray"
                     style={{ 
                       borderRadius: isFirst 
                         ? '0 20px 20px 0' // Primer elemento: redondeado a la derecha
@@ -116,5 +116,4 @@ const ProgressBar = ({ currentView }) => {
     </div>
   );
 };
-
 export default ProgressBar;
