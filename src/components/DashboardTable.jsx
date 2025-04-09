@@ -252,13 +252,12 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
       variants={tableVariants}
     >
       {/* Tabla de encuestas con scroll horizontal */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden w-full border border-gray-300">
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse min-w-max">
-            <thead className="bg-blue-custom text-white">
+      <div className="overflow-hidden w-full px-8 py-2">
+        <div className="overflow-x-auto rounded-xl">
+          <table className="w-full table-auto border-collapse min-w-max rounded-xl overflow-hidden">
+            <thead className="bg-blue-custom text-white rounded-t-xl">
               <tr>
-                {/* Columna para el checkbox/indicador - sticky left */}
-                <th className="py-3 px-2 text-center font-medium border-r border-blue-800 w-12 sticky left-0 bg-blue-custom z-10">
+                <th className="py-3 px-2 text-center font-medium border-r border-blue-800 w-12 sticky left-0 bg-blue-custom z-10 first:rounded-tl-xl">
                   <div className="flex items-center justify-center">
                     <img src={CardSurvey} alt="Imagen encuesta" className="w-6 h-6" />
                   </div>
@@ -283,100 +282,101 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                   currentItems.map((survey, index) => {
                     const rowBgColor = index % 2 === 0 ? 'white' : '#f9fafb';
                     return (
-                    <motion.tr
-                      key={index}
-                      className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-gray-100'}
-                      custom={index}
-                      variants={tableRowVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                    >
-                      {/* Celda con checkbox e indicador de estado - sticky left */}
-                      <td className="border-r py-3 px-2 relative sticky left-0 z-10" style={{backgroundColor: rowBgColor}}>
-                        {/* Barra vertical de color según estado */}
-                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${getIndicatorColor(survey.estado)}`}></div>
+                      <motion.tr
+                        key={index}
+                        className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-gray-100'}
+                        custom={index}
+                        variants={tableRowVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        {/* Celda con checkbox e indicador de estado - sticky left */}
+                        <td className="border-r py-3 px-2 relative sticky left-0 z-10" style={{ backgroundColor: rowBgColor }}>
+                          {/* Barra vertical de color según estado */}
+                          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${getIndicatorColor(survey.estado)}`}></div>
 
-                        {/* Checkbox con padding a la izquierda para compensar el indicador */}
-                        <div className="flex items-center justify-center pl-6">
-                          <div
-                            className={`w-5 h-5 border border-gray-300 rounded cursor-pointer flex items-center justify-center transition-colors ${selectedRows.includes(index) ? 'bg-blue-500 border-blue-500' : 'bg-white'}`}
-                            onClick={() => handleRowSelect(index)}
-                          >
-                            {selectedRows.includes(index) && (
-                              <svg
-                                className="w-4 h-4 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
+                          {/* Checkbox con padding a la izquierda para compensar el indicador */}
+                          <div className="flex items-center justify-center pl-6">
+                            <div
+                              className={`w-5 h-5 border border-gray-300 rounded cursor-pointer flex items-center justify-center transition-colors ${selectedRows.includes(index) ? 'bg-blue-500 border-blue-500' : 'bg-white'}`}
+                              onClick={() => handleRowSelect(index)}
+                            >
+                              {selectedRows.includes(index) && (
+                                <svg
+                                  className="w-4 h-4 text-white"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M5 13l4 4L19 7"
+                                  ></path>
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.title)}</td>
+                        <td className="py-3 px-4 border-r text-center">
+                          <span className={`inline-block ${getEstadoClasses(survey.estado)}`}>
+                            {DOMPurify.sanitize(survey.estado)}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.categoria)}</td>
+                        <td className="py-3 px-4 border-r text-center">
+                          <div className="flex flex-col md:flex-row justify-center items-center">
+                            <span>{DOMPurify.sanitize(survey.fechaInicio)}</span>
+                            <span className="mx-2 hidden md:inline">-</span>
+                            <span>{DOMPurify.sanitize(survey.fechaFinal)}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
+
+                        {/* Celda de acciones - sticky right (MODIFICADA con botón de despliegue) */}
+                        <td className="py-3 px-4 text-center sticky right-0 z-10 transition-all duration-300" style={{ backgroundColor: rowBgColor }}>
+                          {/* Vista de escritorio: Mostrar botones directamente */}
+                          <div className="hidden md:flex justify-center space-x-2">
+                            {renderActionIcons(survey.estado)}
+                          </div>
+
+                          {/* Vista móvil: Mostrar botón de despliegue o iconos de acción */}
+                          <div className="flex md:hidden relative justify-center">
+                            {expandedRow === index ? (
+                              <motion.div
+                                className="flex justify-center space-x-2"
+                                initial={{ x: 50, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: 50, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
                               >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M5 13l4 4L19 7"
-                                ></path>
-                              </svg>
+                                {renderActionIcons(survey.estado)}
+                              </motion.div>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedRow(expandedRow === index ? null : index);
+                                }}
+                                className={`p-2 rounded-full
+                                ${survey.estado === 'Activa' ? 'bg-green-custom' :
+                                    survey.estado === 'Próxima a Finalizar' ? 'bg-orange-custom' :
+                                      survey.estado === 'Sin publicar' ? 'bg-celeste-custom' :
+                                        survey.estado === 'Finalizada' ? 'bg-purple-custom' : 'bg-gray-500'}
+                                text-white hover:bg-opacity-80 transition-all duration-300`}
+                              >
+                                <img src={DropdownIcon} alt="Desplegar acciones" className="h-2 sm:h-3" />
+                              </button>
                             )}
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.title)}</td>
-                      <td className="py-3 px-4 border-r text-center">
-                        <span className={`inline-block ${getEstadoClasses(survey.estado)}`}>
-                          {DOMPurify.sanitize(survey.estado)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 border-r truncate">{DOMPurify.sanitize(survey.categoria)}</td>
-                      <td className="py-3 px-4 border-r text-center">
-                        <div className="flex flex-col md:flex-row justify-center items-center">
-                          <span>{DOMPurify.sanitize(survey.fechaInicio)}</span>
-                          <span className="mx-2 hidden md:inline">-</span>
-                          <span>{DOMPurify.sanitize(survey.fechaFinal)}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
-                      
-                      {/* Celda de acciones - sticky right (MODIFICADA con botón de despliegue) */}
-                      <td className="py-3 px-4 text-center sticky right-0 z-10 transition-all duration-300" style={{backgroundColor: rowBgColor}}>
-                        {/* Vista de escritorio: Mostrar botones directamente */}
-                        <div className="hidden md:flex justify-center space-x-2">
-                          {renderActionIcons(survey.estado)}
-                        </div>
-                        
-                        {/* Vista móvil: Mostrar botón de despliegue o iconos de acción */}
-                        <div className="flex md:hidden relative justify-center">
-                          {expandedRow === index ? (
-                            <motion.div 
-                              className="flex justify-center space-x-2"
-                              initial={{ x: 50, opacity: 0 }}
-                              animate={{ x: 0, opacity: 1 }}
-                              exit={{ x: 50, opacity: 0 }}
-                              transition={{ duration: 0.3, ease: "easeOut" }}
-                            >
-                              {renderActionIcons(survey.estado)}
-                            </motion.div>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setExpandedRow(expandedRow === index ? null : index);
-                              }}
-                              className={`p-2 rounded-full
-                                ${survey.estado === 'Activa' ? 'bg-green-custom' :
-                                  survey.estado === 'Próxima a Finalizar' ? 'bg-orange-custom' :
-                                  survey.estado === 'Sin publicar' ? 'bg-celeste-custom' :
-                                  survey.estado === 'Finalizada' ? 'bg-purple-custom' : 'bg-gray-500'}
-                                text-white hover:bg-opacity-80 transition-all duration-300`}
-                            >
-                              <img src={DropdownIcon} alt="Desplegar acciones" className="h-2 sm:h-3" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </motion.tr>
-                  )})
+                        </td>
+                      </motion.tr>
+                    )
+                  })
                 ) : (
                   <motion.tr
                     initial={{ opacity: 0 }}
@@ -432,11 +432,10 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                   <button
                     key={pageToShow}
                     onClick={() => paginate(pageToShow)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                      currentPage === pageToShow
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${currentPage === pageToShow
                         ? 'bg-green-custom text-white'
                         : 'bg-gray-200 hover:bg-gray-300'
-                    }`}
+                      }`}
                   >
                     {pageToShow}
                   </button>
@@ -446,11 +445,10 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-full ${
-                currentPage === totalPages
+              className={`p-2 rounded-full ${currentPage === totalPages
                   ? 'bg-gray-300 cursor-not-allowed'
                   : 'bg-green-custom text-white hover:bg-opacity-80 transition-all duration-300'
-              }`}
+                }`}
             >
               &gt;
             </button>

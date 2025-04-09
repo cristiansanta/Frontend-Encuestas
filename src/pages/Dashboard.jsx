@@ -126,7 +126,7 @@ const Dashboard = () => {
     <div className="flex flex-col min-h-screen bg-gray-back-custom">
       <Navbar />
 
-      <div className="flex-1 flex flex-col items-center">
+      <div className="flex-1 flex flex-col items-center ">
         {/* Banner */}
         <div className="w-full relative h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72">
           <HeaderBanner showDashboardBanner={showDashboardBanner} username={username} />
@@ -150,7 +150,7 @@ const Dashboard = () => {
               {/* Botones de acciones */}
               <div className="w-full flex justify-between items-center space-x-4">
                 {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 pl-7">
                   {/* Botón Nueva Encuesta */}
                   <button onClick={()=> navigate('/survey-create')} className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
                     <span className="bg-blue-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
@@ -311,7 +311,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Lado derecho: Vista de Lista y Barra de Búsqueda */}
-                <div className="flex space-x-4 items-center">
+                <div className="flex space-x-4 items-center pr-7">
                   {/* Botón para alternar entre vistas */}
                   <button
                     className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
@@ -342,7 +342,7 @@ const Dashboard = () => {
                     <input
                       type="text"
                       placeholder="Buscar encuesta"
-                      className="border border-gray-300 rounded-lg p-2 pl-10 pr-10 w-full"
+                      className="border border-gray-300 rounded-full p-2 pl-10 pr-10 w-full"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -382,8 +382,7 @@ const Dashboard = () => {
                 <DashboardCard searchTerm={searchTerm} stateFilter={selectedFilter} />
               </div>
             ) : (
-              <div className="w-11/12 mx-auto mt-2 px-2">
-                <br />
+              <div className="w-11/12 sm:w-5/6 md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto mt-4 sm:mt-6">
                 <DashboardTable searchTerm={searchTerm} stateFilter={selectedFilter} />
               </div>
             )}
