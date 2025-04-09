@@ -76,7 +76,7 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
   };
 
   return (
-    <div className="mt-6 w-full mx-auto mb-10">
+    <div className="flex flex-col gap-4 p-12 w-full -mt-8">
       {filteredCards.length === 0 ? (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
