@@ -171,13 +171,13 @@ const QuestionsForm = forwardRef((props, ref) => {
               </span>
             </button>
 
-            <div className="rounded-full">
+            <div className="rounded-full flex items-center">
               <button
                 onClick={toggleCollapse}
                 className="focus:outline-none transform transition-transform duration-300"
                 style={{ transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
               >
-                <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-8 h-8" />
+                <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-7 h-7" />
               </button>
             </div>
           </div>
@@ -223,18 +223,18 @@ const QuestionsForm = forwardRef((props, ref) => {
                 Selecciona la sección a la que pertene la pregunta
               </p>
               <button
-              className="flex items-center bg-blue-custom rounded-full overflow-hidden"
-              onClick={() => console.log("Importar desde banco")}
-            >
-              <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
-                <img src={AddCategory} alt="Importar" className="w-5 h-5 mr-2" />
-              </span>
-              <span className="bg-yellow-custom px-4 py-1">
-                <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                Elegir sección
+                className="flex items-center bg-blue-custom rounded-full overflow-hidden"
+                onClick={() => console.log("Importar desde banco")}
+              >
+                <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
+                  <img src={AddCategory} alt="Importar" className="w-5 h-5 mr-2" />
                 </span>
-              </span>
-            </button>
+                <span className="bg-yellow-custom px-4 py-1">
+                  <span className="font-work-sans text-sm font-semibold text-blue-custom">
+                    Elegir sección
+                  </span>
+                </span>
+              </button>
             </div>
 
             {/* Descripción de la Pregunta */}
@@ -284,7 +284,7 @@ const QuestionsForm = forwardRef((props, ref) => {
         >
           <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta</span>
           <div className="absolute right-4">
-            <img src={AddCategory1} alt="Agregar" className="w-6 h-6" />
+            <img src={AddCategory1} alt="Agregar" className="w-8 h-8" />
           </div>
         </button>
       </div>

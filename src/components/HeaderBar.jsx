@@ -68,7 +68,7 @@ function HeaderBar({ username }) {
           <div className="absolute top-full left-[-170px] mt-4 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50 animate-fadeIn">
             <button
               onClick={() => window.open("https://zajuna.sena.edu.co/", "_blank")}
-              className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left flex items-center"
+              className="px-4 py-2 text-white hover:bg-gray-700 w-full text-left flex items-center"
             >
               <img src={Logo} alt="Logo" className="h-4 w-4 mr-2" />
               Ir a Zajuna
@@ -84,7 +84,7 @@ function HeaderBar({ username }) {
             </div>
             <button
               onClick={handleLogout}
-              className="block px-4 py-2 text-white hover:bg-gray-700 w-full text-left flex items-center"
+              className="px-4 py-2 text-white hover:bg-gray-700 w-full text-left flex items-center"
             >
               <img src={Logout} alt="Cerrar sesión" className="h-4 w-4 mr-2" />
               Cerrar sesión
