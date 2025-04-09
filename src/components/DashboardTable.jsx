@@ -252,8 +252,8 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
       variants={tableVariants}
     >
       {/* Tabla de encuestas con scroll horizontal */}
-      <div className="overflow-hidden w-full px-8 py-2">
-        <div className="overflow-x-auto rounded-xl">
+      <div className="overflow-hidden w-full px-8 py-4">
+        <div className="overflow-x-auto rounded-xl p-4">
           <table className="w-full table-auto border-collapse min-w-max rounded-xl overflow-hidden">
             <thead className="bg-blue-custom text-white rounded-t-xl">
               <tr>
@@ -455,18 +455,6 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
           </nav>
         </motion.div>
       )}
-
-      {/* Botón de finalizar */}
-      <motion.div
-        className="flex justify-end mt-2 mb-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-      >
-        <button className="bg-green-custom text-white py-2 px-6 rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all duration-300">
-          <span className="mr-2">✓</span> Finalizar
-        </button>
-      </motion.div>
     </motion.div>
   );
 };
