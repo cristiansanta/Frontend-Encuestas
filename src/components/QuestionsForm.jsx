@@ -67,6 +67,11 @@ const QuestionsForm = forwardRef((props, ref) => {
     setSelectedSection("Sección seleccionada");
   };
 
+  // Manejar cambio en el input del título
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+
   const handleSubmit = async () => {
     const selectedOptionId = localStorage.getItem("selectedOptionId");
 
@@ -151,10 +156,16 @@ const QuestionsForm = forwardRef((props, ref) => {
   return (
     <>
       <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full">
-        {/* Título de la pregunta */}
+        {/* Título de la pregunta - Convertido a input */}
         <div className="flex items-center mb-4">
           <div className="w-2/3">
-            <h2 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Titulo de pregunta</h2>
+            <input
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+              placeholder="Titulo de pregunta"
+              className="font-work-sans text-3xl font-bold text-dark-blue-custom w-full border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
+            />
           </div>
           <div className="w-1/3 flex items-center justify-end gap-3">
             <button
