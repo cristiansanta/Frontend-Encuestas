@@ -78,6 +78,10 @@ const PreviewSurvey = () => {
     }, 1500);
   };
 
+  const handlePreviewSurvey = () => {
+    navigate('/survey-details'); // Redirige a la ruta de SurveyDetails
+  };
+
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -368,7 +372,10 @@ const PreviewSurvey = () => {
           <h1 className="text-3xl font-bold text-dark-blue-custom">
             Encuesta sobre tu Perfil Personal y Profesional
           </h1>
-          <button className="flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+          <button
+            className="flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
+            onClick={handlePreviewSurvey} // Llama a la función para redirigir
+          >
             <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
               <img src={ViewIcon} alt="Previsualizar encuesta" className="w-5 h-5" />
             </span>
