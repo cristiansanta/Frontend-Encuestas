@@ -3,23 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import BackgroundImg from '../assets/img/backgroundsurvey.svg';
 
-const defaultSurveyData = {
-    title: "Encuesta Integral de Prueba Inicial",
-    subtitle: "Esta encuesta está cargando...",
-    sections: [],
-    survey_questions: [],
-    expirationDate: "fecha por determinar"
-};
-
 const SurveyDetails = () => {
+    // Estados básicos del componente
     const [userResponses, setUserResponses] = useState({});
     const [visibleQuestions, setVisibleQuestions] = useState({});
     const [currentSection, setCurrentSection] = useState(0);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [termsAccepted, setTermsAccepted] = useState(false); // Agregado para manejar el checkbox de términos
+    const [termsAccepted, setTermsAccepted] = useState(false);
     const navigate = useNavigate();
 
+    // Datos de la encuesta
     const surveyData = {
         title: "Encuesta Integral de Prueba Inicial",
         subtitle: "Lea con atención las preguntas. Esta encuesta está diseñada para recopilar información detallada sobre tu experiencia laboral y académica, con el fin de obtener una visión más completa de tu trayectoria profesional y educativa.",
@@ -44,132 +38,128 @@ const SurveyDetails = () => {
         expirationDate: "2 de octubre de 2025"
     };
 
+    // Inicialización al montar el componente
     useEffect(() => {
-        if (!surveyData) return;
-
+        // Inicializar visibilidad de preguntas
         const initialVisibility = {};
-        const initialResponses = {};
-
         surveyData.survey_questions.forEach((sq) => {
             const question = sq.question;
-            const conditions = question.conditions || [];
-
-            initialVisibility[question.id] = conditions.length === 0;
-
-            if (question.cod_padre === 0 && question.type?.title === 'Falso y verdadero') {
-                initialResponses[question.id] = null;
-            } else if (question.cod_padre === 0) {
-                initialResponses[question.id] = null;
-            }
+            initialVisibility[question.id] = question.conditions.length === 0;
         });
-
         setVisibleQuestions(initialVisibility);
-        setUserResponses(initialResponses);
-    }, [surveyData]);
 
-    const handleResponseChange = (questionId, value) => {
-        console.log("Cambiando respuesta:", questionId, value); // Log para depuración
-        
-        // Para campos de texto, aseguramos no exceder el límite de 100 caracteres
-        if (typeof value === 'string' && value.length > 100) {
-            value = value.substring(0, 100);
-        }
-        
-        setUserResponses(prevResponses => {
-            const updatedResponses = { ...prevResponses, [questionId]: value };
-
-            // Actualizar visibilidad de preguntas condicionales
-            const updatedVisibility = { ...visibleQuestions };
-
-            surveyData.survey_questions.forEach((sq) => {
-                const question = sq.question;
-                const conditions = question.conditions || [];
-
-                if (conditions.length > 0) {
-                    const condition = conditions[0];
-                    const parentAnswer = updatedResponses[condition.cod_father];
-
-                    if (condition.operation === 'igual que') {
-                        updatedVisibility[question.id] = parentAnswer === condition.compare;
-                    } else if (condition.operation === 'diferente') {
-                        updatedVisibility[question.id] = parentAnswer !== condition.compare;
-                    } else {
-                        updatedVisibility[question.id] = false;
-                    }
-                }
-            });
-
-            setVisibleQuestions(updatedVisibility);
-            return updatedResponses;
+        // Inicializar respuestas de usuario vacías
+        const initialResponses = {};
+        surveyData.survey_questions.forEach((sq) => {
+            initialResponses[sq.question.id] = "";
         });
+        setUserResponses(initialResponses);
+    }, []);
+
+    // ----- MANEJADORES DE EVENTOS (SIMPLIFICADOS PARA MÁXIMA COMPATIBILIDAD) -----
+
+    // Manejador para cambios en texto
+    const handleTextChange = (e, questionId) => {
+        const newValue = e.target.value;
+        const newResponses = {...userResponses};
+        newResponses[questionId] = newValue;
+        setUserResponses(newResponses);
+        updateVisibility(newResponses);
     };
 
-    // Manejador para el checkbox de términos y condiciones
-    const handleTermsAcceptChange = (e) => {
-        console.log("Términos aceptados:", e.target.checked); // Log para depuración
+    // Manejador para opciones (radio buttons)
+    const handleOptionChange = (questionId, value) => {
+        const newResponses = {...userResponses};
+        newResponses[questionId] = value;
+        setUserResponses(newResponses);
+        updateVisibility(newResponses);
+    };
+
+    // Manejador para checkbox de términos
+    const handleTermsChange = (e) => {
         setTermsAccepted(e.target.checked);
     };
 
-    const handleContinue = () => {
-        if (!surveyData || !surveyData.sections) return;
+    // Función auxiliar para actualizar visibilidad de preguntas condicionales
+    const updateVisibility = (responses) => {
+        const newVisibility = {...visibleQuestions};
+        
+        surveyData.survey_questions.forEach((sq) => {
+            const question = sq.question;
+            
+            // Si no tiene condiciones, siempre es visible
+            if (question.conditions.length === 0) {
+                newVisibility[question.id] = true;
+                return;
+            }
+            
+            // Verificar condiciones
+            const condition = question.conditions[0];
+            const parentResponse = responses[condition.cod_father];
+            
+            if (condition.operation === 'igual que') {
+                newVisibility[question.id] = parentResponse === condition.compare;
+            } else if (condition.operation === 'diferente') {
+                newVisibility[question.id] = parentResponse !== condition.compare && parentResponse !== "";
+            } else {
+                newVisibility[question.id] = false;
+            }
+        });
+        
+        setVisibleQuestions(newVisibility);
+    };
 
-        // Si estamos en la primera pantalla, verificar que se aceptaron los términos
+    // ----- NAVEGACIÓN -----
+
+    // Continuar a la siguiente sección
+    const handleContinue = () => {
         if (currentSection === 0) {
             if (!termsAccepted) {
                 alert("Por favor acepta los términos y condiciones para continuar.");
                 return;
             }
             setCurrentSection(1);
-            window.scrollTo(0, 0);
         } else if (currentSection < surveyData.sections.length) {
-            // Validar campos actuales si es necesario
             setCurrentSection(currentSection + 1);
-            window.scrollTo(0, 0);
         } else {
-            // Mostrar modal de confirmación para finalizar la encuesta
             setShowConfirmModal(true);
         }
+        window.scrollTo(0, 0);
     };
 
+    // Volver a la sección anterior
     const handlePrevious = () => {
         if (currentSection > 1) {
             setCurrentSection(currentSection - 1);
-            window.scrollTo(0, 0);
         } else if (currentSection === 1) {
             setCurrentSection(0);
-            window.scrollTo(0, 0);
         }
+        window.scrollTo(0, 0);
     };
 
+    // Confirmar envío
     const handleSubmit = () => {
-        // Aquí podrías implementar la lógica para enviar los datos al servidor
-        // Por ejemplo: await axios.post('/api/submit-survey', userResponses);
-        
-        // Cerramos el modal primero
+        // Cerrar modal de confirmación
         setShowConfirmModal(false);
         
-        // Marcamos como enviado para mostrar la pantalla de éxito
+        // Marcar como enviado para mostrar pantalla de éxito
         setIsSubmitted(true);
         
-        // Redirección a survey-list después de 3 segundos
+        // Redirección después de 3 segundos
         setTimeout(() => {
             navigate('/survey-list');
         }, 3000);
     };
 
+    // Finalizar y redireccionar inmediatamente
     const handleFinish = () => {
         navigate('/survey-list');
     };
 
-    const ProgressBar = () => {
-        if (!surveyData || !surveyData.sections) {
-            return (
-                <div className="w-full h-8 overflow-hidden mb-6 relative rounded-full border-4 border-white">
-                    <div className="bg-yellow-400 h-full w-full"></div>
-                </div>
-            );
-        }
+    // ----- COMPONENTES UI -----
 
+    // Barra de progreso
+    const ProgressBar = () => {
         const adjustedSection = currentSection === 0 ? 0 : currentSection;
         const progressPercentage = (adjustedSection / surveyData.sections.length) * 100;
 
@@ -189,6 +179,7 @@ const SurveyDetails = () => {
         );
     };
 
+    // Modal de confirmación
     const ConfirmModal = () => {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -202,7 +193,7 @@ const SurveyDetails = () => {
                         <button 
                             className="bg-purple-600 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-purple-700 transition-colors" 
                             onClick={() => setShowConfirmModal(false)}
-                            aria-label="Cancelar envío"
+                            type="button"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -212,7 +203,7 @@ const SurveyDetails = () => {
                         <button 
                             className="bg-green-500 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-green-600 transition-colors" 
                             onClick={handleSubmit}
-                            aria-label="Enviar respuestas"
+                            type="button"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -225,6 +216,7 @@ const SurveyDetails = () => {
         );
     };
 
+    // Pantalla de éxito
     const SuccessSubmitScreen = () => {
         const today = new Date();
         const day = today.getDate();
@@ -257,7 +249,11 @@ const SurveyDetails = () => {
                         Respuestas enviadas con éxito el <span className="font-semibold">{formattedDate}</span>
                     </p>
                 </div>
-                <button className="bg-green-500 text-white font-bold py-3 px-8 rounded-full inline-flex items-center justify-center shadow-md hover:bg-green-600 transition-colors" onClick={handleFinish}>
+                <button 
+                    className="bg-green-500 text-white font-bold py-3 px-8 rounded-full inline-flex items-center justify-center shadow-md hover:bg-green-600 transition-colors" 
+                    onClick={handleFinish}
+                    type="button"
+                >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -267,25 +263,7 @@ const SurveyDetails = () => {
         );
     };
 
-    if (isSubmitted) {
-        return (
-            <div className="min-h-screen flex flex-col items-center py-10" style={{ backgroundImage: `url(${BackgroundImg})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
-                <div className="w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-4 mx-auto">
-                    <ProgressBar />
-                    <SuccessSubmitScreen />
-                </div>
-            </div>
-        );
-    }
-
-    const currentSectionData = (currentSection > 0 && surveyData && surveyData.sections) ?
-        surveyData.sections.find(section => section.id === currentSection) :
-        { title: "", descrip_sect: "", icon: "" };
-
-    const currentQuestions = (currentSection > 0 && surveyData && surveyData.survey_questions) ?
-        surveyData.survey_questions.filter(sq => sq.section_id === currentSection) :
-        [];
-
+    // Íconos para secciones
     const getSectionIcon = (iconName) => {
         switch (iconName) {
             case 'tag':
@@ -316,8 +294,30 @@ const SurveyDetails = () => {
         }
     };
 
+    // Si la encuesta fue enviada, mostrar pantalla de éxito
+    if (isSubmitted) {
+        return (
+            <div className="min-h-screen flex flex-col items-center py-10" style={{ backgroundImage: `url(${BackgroundImg})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
+                <div className="w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-4 mx-auto">
+                    <ProgressBar />
+                    <SuccessSubmitScreen />
+                </div>
+            </div>
+        );
+    }
+
+    // Obtener los datos para la sección actual
+    const currentSectionData = currentSection === 0 ? null : 
+        surveyData.sections.find(section => section.id === currentSection) || { title: "", descrip_sect: "", icon: "" };
+
+    // Filtrar preguntas para la sección actual
+    const currentQuestions = currentSection === 0 ? [] : 
+        surveyData.survey_questions.filter(sq => sq.section_id === currentSection);
+
+    // ----- RENDERIZADO PRINCIPAL -----
     return (
         <div className="min-h-screen flex flex-col items-center py-10" style={{ backgroundImage: `url(${BackgroundImg})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
+            {/* Modal de confirmación (solo visible si showConfirmModal es true) */}
             {showConfirmModal && <ConfirmModal />}
 
             <div className="w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-4 mx-auto">
@@ -325,6 +325,7 @@ const SurveyDetails = () => {
 
                 <div className="bg-white shadow-lg rounded-3xl px-8 py-6 mb-8">
                     {currentSection === 0 ? (
+                        // PANTALLA DE BIENVENIDA
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-blue-800 mb-4">
                                 ¡Bienvenido!
@@ -339,7 +340,7 @@ const SurveyDetails = () => {
                             <div className="bg-gray-50 rounded-lg p-4 mb-8">
                                 <h3 className="text-lg font-semibold text-blue-800 mb-3">La encuesta constará de tres secciones</h3>
                                 <div className="flex flex-wrap gap-3 justify-center">
-                                    {surveyData && surveyData.sections && surveyData.sections.map(section => (
+                                    {surveyData.sections.map(section => (
                                         <div key={section.id} className="py-2 px-4 rounded-full flex items-center bg-gray-100 text-blue-800">
                                             <span className="mr-2">{getSectionIcon(section.icon)}</span>
                                             <span>{section.title}</span>
@@ -352,7 +353,7 @@ const SurveyDetails = () => {
                                 <svg className="w-5 h-5 mr-2 text-blue-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
-                                <p className="text-gray-600">Esta encuesta estará disponible hasta el <span className="font-semibold">{surveyData?.expirationDate || 'fecha de vencimiento'}</span></p>
+                                <p className="text-gray-600">Esta encuesta estará disponible hasta el <span className="font-semibold">{surveyData.expirationDate}</span></p>
                             </div>
 
                             <div className="mb-8">
@@ -361,7 +362,7 @@ const SurveyDetails = () => {
                                         type="checkbox" 
                                         className="w-5 h-5 mr-3 checked:bg-green-500 focus:ring-green-500" 
                                         checked={termsAccepted}
-                                        onChange={handleTermsAcceptChange}
+                                        onChange={handleTermsChange}
                                     />
                                     <span className="text-sm text-gray-700">
                                         He leído y acepto los <span className="text-green-600 underline cursor-pointer">términos y condiciones</span>.
@@ -379,6 +380,7 @@ const SurveyDetails = () => {
                                     className={`bg-green-500 text-white font-medium py-3 px-6 rounded-full flex items-center shadow-md hover:bg-green-600 transition-colors ${!termsAccepted ? 'opacity-50 cursor-not-allowed' : ''}`} 
                                     onClick={handleContinue}
                                     disabled={!termsAccepted}
+                                    type="button"
                                 >
                                     Continuar
                                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -388,131 +390,150 @@ const SurveyDetails = () => {
                             </div>
                         </div>
                     ) : (
+                        // SECCIONES DE LA ENCUESTA
                         <div>
                             <div className="mb-6">
                                 <h2 className="text-xl font-semibold mb-2 flex items-center text-blue-800">
                                     <span className="mr-2">
-                                        {getSectionIcon(currentSectionData.icon)}
+                                        {currentSectionData && getSectionIcon(currentSectionData.icon)}
                                     </span>
-                                    {currentSectionData.title}
+                                    {currentSectionData && currentSectionData.title}
                                 </h2>
-                                <p className="text-gray-600 mb-4">{DOMPurify.sanitize(currentSectionData.descrip_sect)}</p>
+                                <p className="text-gray-600 mb-4">
+                                    {currentSectionData && DOMPurify.sanitize(currentSectionData.descrip_sect)}
+                                </p>
                             </div>
 
+                            {/* Preguntas de la sección actual */}
                             {currentQuestions.map((sq) => {
                                 const question = sq.question;
-
+                                
+                                // Solo mostrar preguntas que deben ser visibles
+                                if (visibleQuestions[question.id] === false) {
+                                    return null;
+                                }
+                                
                                 return (
-                                    visibleQuestions[question.id] && (
-                                        <div key={question.id} className="mb-8 bg-yellow-50 p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
-                                            <p className="text-md font-semibold text-blue-800 mb-2">{DOMPurify.sanitize(question.title)}</p>
-                                            <div className="text-gray-600 mb-4 text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.descrip) }} />
-
-                                            {question.type?.title === 'Falso y verdadero' ? (
-                                                <div className="flex items-center space-x-6">
-                                                    <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
-                                                        <input 
-                                                            type="radio" 
-                                                            name={`question-${question.id}`} 
-                                                            value="Verdadero" 
-                                                            className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
-                                                            checked={userResponses[question.id] === 'Verdadero'} 
-                                                            onChange={() => handleResponseChange(question.id, 'Verdadero')} 
-                                                        />
-                                                        <span className="text-gray-800">Verdadero</span>
-                                                    </label>
-                                                    <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
-                                                        <input 
-                                                            type="radio" 
-                                                            name={`question-${question.id}`} 
-                                                            value="Falso" 
-                                                            className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
-                                                            checked={userResponses[question.id] === 'Falso'} 
-                                                            onChange={() => handleResponseChange(question.id, 'Falso')} 
-                                                        />
-                                                        <span className="text-gray-800">Falso</span>
-                                                    </label>
-                                                </div>
-                                                ) : question.type?.title === 'Abierta' ? (
-                                                    <div className="relative">
-                                                        <input
-                                                            type="text"
-                                                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            placeholder={
-                                                                question.id === 1 ? "Ej: Luis Perez Gomez" : 
-                                                                question.id === 2 ? "DD/MM/AAAA" : 
-                                                                "Escribe tu respuesta aquí"
-                                                            }
-                                                            value={userResponses[question.id] || ''}
-                                                            onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                                                            maxLength={100}
-                                                        />
-                                                        <div className="absolute right-3 bottom-3 text-gray-400 text-sm">
-                                                            {userResponses[question.id]?.length || 0}/100
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-2">
-                                                        {question.options.map((option) => (
-                                                            <div key={option.id} className="flex items-center mb-2">
-                                                                <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 w-full hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name={`question-${question.id}`}
-                                                                        value={DOMPurify.sanitize(option.options)}
-                                                                        className="mr-3 focus:ring-blue-800 w-5 h-5 text-green-500"
-                                                                        checked={userResponses[question.id] === option.options}
-                                                                        onChange={() => handleResponseChange(question.id, option.options)}
-                                                                    />
-                                                                    <span className="text-gray-800">{DOMPurify.sanitize(option.options)}</span>
-                                                                </label>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                    <div key={question.id} className="mb-8 bg-yellow-50 p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
+                                        <p className="text-md font-semibold text-blue-800 mb-2">
+                                            {DOMPurify.sanitize(question.title)}
+                                        </p>
+                                        <div className="text-gray-600 mb-4 text-sm" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.descrip) }} />
+                                        
+                                        {/* TIPO DE PREGUNTA: Falso y verdadero */}
+                                        {question.type?.title === 'Falso y verdadero' && (
+                                            <div className="flex items-center space-x-6">
+                                                <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
+                                                    <input 
+                                                        type="radio" 
+                                                        name={`question-${question.id}`} 
+                                                        value="Verdadero" 
+                                                        className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
+                                                        checked={userResponses[question.id] === 'Verdadero'} 
+                                                        onChange={() => handleOptionChange(question.id, 'Verdadero')} 
+                                                    />
+                                                    <span className="text-gray-800">Verdadero</span>
+                                                </label>
+                                                <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
+                                                    <input 
+                                                        type="radio" 
+                                                        name={`question-${question.id}`} 
+                                                        value="Falso" 
+                                                        className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
+                                                        checked={userResponses[question.id] === 'Falso'} 
+                                                        onChange={() => handleOptionChange(question.id, 'Falso')} 
+                                                    />
+                                                    <span className="text-gray-800">Falso</span>
+                                                </label>
                                             </div>
-                                        )
-                                    );
-                                })}
-    
-                                <div className="mt-6 flex justify-between">
-                                    <button
-                                        className="bg-gray-500 text-white font-medium py-2 px-5 rounded-full flex items-center shadow-md hover:bg-gray-600 transition-colors"
-                                        onClick={handlePrevious}
-                                    >
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                        Anterior
-                                    </button>
-    
-                                    <button
-                                        className="bg-green-500 text-white font-medium py-2 px-6 rounded-full flex items-center shadow-md hover:bg-green-600 transition-colors"
-                                        onClick={handleContinue}
-                                    >
-                                        {(surveyData && surveyData.sections && currentSection < surveyData.sections.length) ? (
-                                            <>
-                                                Continuar
-                                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                Finalizar
-                                            </>
                                         )}
-                                    </button>
-                                </div>
+                                        
+                                        {/* TIPO DE PREGUNTA: Abierta (campo de texto) */}
+                                        {question.type?.title === 'Abierta' && (
+                                            <div className="relative">
+                                                <input
+                                                    type={question.id === 2 ? "date" : "text"}
+                                                    className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder={
+                                                        question.id === 1 ? "Ej: Luis Perez Gomez" : 
+                                                        question.id === 2 ? "DD/MM/AAAA" : 
+                                                        "Escribe tu respuesta aquí"
+                                                    }
+                                                    value={userResponses[question.id] || ''}
+                                                    onChange={(e) => handleTextChange(e, question.id)}
+                                                    maxLength={100}
+                                                />
+                                                <div className="absolute right-3 bottom-3 text-gray-400 text-sm">
+                                                    {(userResponses[question.id]?.length || 0)}/100
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {/* TIPO DE PREGUNTA: Opción múltiple */}
+                                        {question.type?.title === 'Opción múltiple' && (
+                                            <div className="space-y-2">
+                                                {question.options.map((option) => (
+                                                    <div key={option.id} className="flex items-center mb-2">
+                                                        <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 w-full hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
+                                                            <input
+                                                                type="radio"
+                                                                name={`question-${question.id}`}
+                                                                value={option.options}
+                                                                className="mr-3 focus:ring-blue-800 w-5 h-5 text-green-500"
+                                                                checked={userResponses[question.id] === option.options}
+                                                                onChange={() => handleOptionChange(question.id, option.options)}
+                                                            />
+                                                            <span className="text-gray-800">{DOMPurify.sanitize(option.options)}</span>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Botones de navegación */}
+                            <div className="mt-6 flex justify-between">
+                                <button
+                                    className="bg-gray-500 text-white font-medium py-2 px-5 rounded-full flex items-center shadow-md hover:bg-gray-600 transition-colors"
+                                    onClick={handlePrevious}
+                                    type="button"
+                                >
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                    Anterior
+                                </button>
+
+                                <button
+                                    className="bg-green-500 text-white font-medium py-2 px-6 rounded-full flex items-center shadow-md hover:bg-green-600 transition-colors"
+                                    onClick={handleContinue}
+                                    type="button"
+                                >
+                                    {currentSection < surveyData.sections.length ? (
+                                        <>
+                                            Continuar
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Finalizar
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
-        );
-    };
-    
-    export default SurveyDetails;
+        </div>
+    );
+};
+
+export default SurveyDetails;

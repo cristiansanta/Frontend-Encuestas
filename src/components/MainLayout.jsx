@@ -27,7 +27,7 @@ const MainLayout = ({
       <div className="flex-1 flex flex-col items-center">
         {showHeaderBanner && <HeaderBanner username={localStorage.getItem('userName')}/>}
         {headerTitle && <HeaderBar props={headerTitle} />}
-        <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto">
+        <div className="container mx-auto">
           {children}
         </div>
       </div>
