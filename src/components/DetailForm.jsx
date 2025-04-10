@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import RichTextEditor from './TextBoxDetail.jsx';
 import Addsurvey from '../assets/img/addsurvey.svg';
 import { SurveyContext } from '../Provider/SurveyContext';
-import Filtersurvey from '../assets/img/filtersurvey.svg';
+import selectCategory from '../assets/img/selectCategory.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import trashcan from '../assets/img/trashCan.svg';
 import calendar2 from '../assets/img/calendar2.svg';
@@ -124,6 +124,11 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   const sanitizedTitle = title ? DOMPurify.sanitize(title) : '';
   const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
+  // Manejar cambio en el input del título
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white shadow-2xl w-full">
@@ -131,13 +136,19 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           {/* Sección superior con dos elementos (título y categoría) */}
           <div className="flex justify-between items-center mb-2">
             <div className="w-2/3">
-              {/* Campo para el título */}
-              <h1 className="font-work-sans text-3xl font-bold text-dark-blue-custom">Titulo de Encuesta</h1>
+              {/* Campo para el título - Convertido de h1 a input */}
+              <input
+                type="text"
+                value={title}
+                onChange={handleTitleChange}
+                placeholder="Titulo de Encuesta"
+                className="font-work-sans text-3xl font-bold text-dark-blue-custom w-full border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
+              />
             </div>
             <div className="w-1/3 flex justify-end">
               <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105" onClick={() => navigate('/Categorylist')}>
                 <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                  <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
+                  <img src={selectCategory} alt="Filtrar" className="w-5 h-5" />
                 </span>
                 <span className="bg-yellow-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
                   <span className="font-work-sans text-lg font-semibold text-blue-custom mr-2">
