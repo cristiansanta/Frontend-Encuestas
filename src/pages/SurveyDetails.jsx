@@ -285,23 +285,23 @@ const SurveyDetails = () => {
         }, 3000);
     };
 
-    const     handleFinish = () => {
+    const handleFinish = () => {
         navigate('/survey-list');
     };
 
     // Componente Progress Bar
     const ProgressBar = () => {
         const progressPercentage = (currentSection / surveyData.sections.length) * 100;
-        
+
         return (
             <div className="w-full h-6 bg-white rounded-full overflow-hidden mb-6 shadow-md">
                 <div className="flex h-full">
-                    <div 
-                        className="bg-blue-800 h-full" 
+                    <div
+                        className="bg-blue-800 h-full"
                         style={{ width: `${progressPercentage}%` }}
                     ></div>
-                    <div 
-                        className="bg-yellow-400 h-full" 
+                    <div
+                        className="bg-yellow-400 h-full"
                         style={{ width: `${100 - progressPercentage}%` }}
                     ></div>
                 </div>
@@ -311,13 +311,13 @@ const SurveyDetails = () => {
 
     // Componente de confirmación modal
     const ConfirmModal = () => {
-        return (            
+        return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                
+
                 <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
                     <h2 className="text-2xl font-bold text-center mb-4 text-blue-800">¿Estás listo para enviar?</h2>
                     <p className="text-center mb-6 text-gray-600">
-                        Si aun debes corregir alguna de tus respuestas da click en "cancelar", si estas listo da click en "enviar", 
+                        Si aun debes corregir alguna de tus respuestas da click en "cancelar", si estas listo da click en "enviar",
                         no podras corregir tus respuestas despues de enviarlas.
                     </p>
                     <div className="flex justify-center space-x-6">
@@ -352,12 +352,12 @@ const SurveyDetails = () => {
         const month = today.getMonth() + 1;
         const year = today.getFullYear();
         const formattedDate = `${day} de ${getMonthName(month)} de ${year}`;
-        
+
         function getMonthName(month) {
             const monthNames = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
             return monthNames[month - 1];
         }
-        
+
         return (
             <div className="bg-white shadow-lg rounded-3xl w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-8 py-12 mx-auto text-center">
                 <div className="mb-6">
@@ -367,7 +367,7 @@ const SurveyDetails = () => {
                 </div>
                 <h1 className="text-2xl font-bold text-blue-800 mb-6">Encuesta enviada con éxito</h1>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                    Queremos agradecerte sinceramente por dedicar tu tiempo y compartir tu opinión con nosotros. 
+                    Queremos agradecerte sinceramente por dedicar tu tiempo y compartir tu opinión con nosotros.
                     Tu participación es fundamental para mejorar nuestros servicios y ofrecerte una experiencia más personalizada.
                 </p>
                 <div className="flex items-center justify-center mb-8 bg-gray-50 py-3 px-4 rounded-lg">
@@ -394,8 +394,8 @@ const SurveyDetails = () => {
     // Si la encuesta fue enviada, mostrar pantalla de éxito
     if (isSubmitted) {
         return (
-            <div className="min-h-screen flex flex-col items-center py-10" style={{ 
-                backgroundImage: `url(${BackgroundImg})`, 
+            <div className="min-h-screen flex flex-col items-center py-10" style={{
+                backgroundImage: `url(${BackgroundImg})`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center'
@@ -415,10 +415,10 @@ const SurveyDetails = () => {
 
     // Obtener datos de la sección actual
     const currentSectionData = surveyData.sections.find(section => section.id === currentSection);
-    
+
     // Definir iconos para las secciones
     const getSectionIcon = (iconName) => {
-        switch(iconName) {
+        switch (iconName) {
             case 'tag':
                 return (
                     <svg className="w-5 h-5 text-blue-800" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -458,11 +458,11 @@ const SurveyDetails = () => {
         return (
             <div className="flex justify-center mb-4">
                 {surveyData.sections.map((section) => (
-                    <div 
-                        key={section.id} 
+                    <div
+                        key={section.id}
                         className={`mx-3 flex flex-col items-center ${currentSection === section.id ? 'text-blue-800' : 'text-gray-400'}`}
                     >
-                        <div 
+                        <div
                             className={`flex items-center justify-center w-10 h-10 rounded-full mb-1 ${currentSection === section.id ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-500'}`}
                         >
                             {currentSection > section.id ? (
@@ -481,18 +481,18 @@ const SurveyDetails = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center py-10" style={{ 
-            backgroundImage: `url(${BackgroundImg})`, 
+        <div className="min-h-screen flex flex-col items-center py-10" style={{
+            backgroundImage: `url(${BackgroundImg})`,
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'
         }}>
             {showConfirmModal && <ConfirmModal />}
-            
+
             <div className="w-full md:w-3/4 lg:w-2/4 xl:w-2/5 px-4 mx-auto">
                 <SectionNav />
                 <ProgressBar />
-                
+
                 <div className="bg-white shadow-lg rounded-3xl px-8 py-6 mb-8">
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-blue-800 mb-4">
@@ -503,35 +503,45 @@ const SurveyDetails = () => {
                         </h2>
                         <p className="text-gray-600 text-sm leading-relaxed">
                             {DOMPurify.sanitize(surveyData.subtitle)}
-                        </p>
-                        <div className="flex items-center justify-center bg-white rounded-lg p-3 mb-8 text-gray-600 shadow-md">
-                    <svg className="w-5 h-5 mr-2 text-blue-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p>Esta encuesta estará disponible hasta el <span className="font-semibold">{surveyData.expirationDate}</span></p>
-                </div>
-                
-                {/* Secciones disponibles - muestra visual de todas las secciones */}
-                <div className="bg-white rounded-lg p-4 mb-8 shadow-md">
-                    <h3 className="text-lg font-semibold text-blue-800 mb-3">La encuesta constará de tres secciones</h3>
-                    <div className="flex flex-wrap gap-3 justify-center">
-                        {surveyData.sections.map(section => (
-                            <div 
-                                key={section.id}
-                                className={`py-2 px-4 rounded-full flex items-center ${
-                                    currentSection === section.id 
-                                        ? 'bg-blue-800 text-white' 
-                                        : 'bg-gray-100 text-blue-800'
-                                }`}
-                            >
-                                <span className="mr-2">{getSectionIcon(section.icon)}</span>
-                                <span>{section.title}</span>
+                        </p>                     
+
+                        {/* Secciones disponibles - muestra visual de todas las secciones */}
+                        <div className="bg-white rounded-lg p-4 mb-8">
+                            <h3 className="text-lg font-semibold text-blue-800 mb-3">La encuesta constará de tres secciones</h3>
+                            <div className="flex flex-wrap gap-3 justify-center">
+                                {surveyData.sections.map(section => (
+                                    <div
+                                        key={section.id}
+                                        className={`py-2 px-4 rounded-full flex items-center ${currentSection === section.id
+                                                ? 'bg-blue-800 text-white'
+                                                : 'bg-gray-100 text-blue-800'
+                                            }`}
+                                    >
+                                        <span className="mr-2">{getSectionIcon(section.icon)}</span>
+                                        <span>{section.title}</span>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+                        <div className="flex items-center justify-center bg-white rounded-lg p-3 mb-8 text-gray-600">
+                            <svg className="w-5 h-5 mr-2 text-blue-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p>Esta encuesta estará disponible hasta el <span className="font-semibold">{surveyData.expirationDate}</span></p>
+                        </div>
                     </div>
-                </div>
-                    </div>
-                    
+
+                    {currentSection === 1 && (
+                        <div className="mb-6 mt-4">
+                            <label className="flex items-center cursor-pointer">
+                                <input type="checkbox" className="w-5 h-5 mr-3 checked:bg-green-500 focus:ring-green-500" />
+                                <span className="text-sm text-gray-700">
+                                    He leído y acepto los <span className="text-green-600 underline">términos y condiciones</span>.
+                                </span>
+                            </label>
+                        </div>
+                    )}
+
                     <div className="mb-6">
                         <h2 className="text-xl font-semibold mb-2 flex items-center text-blue-800">
                             <span className="mr-2">
@@ -544,7 +554,7 @@ const SurveyDetails = () => {
 
                     {currentQuestions.map((sq) => {
                         const question = sq.question;
-                        
+
                         return (
                             visibleQuestions[question.id] && (
                                 <div key={question.id} className="mb-8 bg-yellow-50 p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
@@ -616,18 +626,7 @@ const SurveyDetails = () => {
                             )
                         );
                     })}
-
-                    {currentSection === 1 && (
-                        <div className="mb-6 mt-4">
-                            <label className="flex items-center cursor-pointer">
-                                <input type="checkbox" className="w-5 h-5 mr-3 checked:bg-green-500 focus:ring-green-500" />
-                                <span className="text-sm text-gray-700">
-                                    He leído y acepto los <span className="text-green-600 underline">términos y condiciones</span>.
-                                </span>
-                            </label>
-                        </div>
-                    )}
-                    
+            
                     <div className="mt-4 flex justify-between">
                         {currentSection > 1 ? (
                             <button
@@ -642,14 +641,14 @@ const SurveyDetails = () => {
                         ) : (
                             <div></div>
                         )}
-                        
+
                         <button
                             className="bg-green-500 text-white font-medium py-2 px-6 rounded-full flex items-center shadow-md hover:bg-green-600 transition-colors"
                             onClick={handleContinue}
                         >
                             {currentSection < surveyData.sections.length ? (
                                 <>
-                                    Continuar 
+                                    Continuar
                                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
@@ -664,7 +663,7 @@ const SurveyDetails = () => {
                             )}
                         </button>
                     </div>
-                </div>            
+                </div>
             </div>
         </div>
     );
