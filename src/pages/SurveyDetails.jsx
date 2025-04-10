@@ -68,9 +68,17 @@ const SurveyDetails = () => {
     }, [surveyData]);
 
     const handleResponseChange = (questionId, value) => {
-        setUserResponses((prevResponses) => {
+        console.log("Cambiando respuesta:", questionId, value); // Log para depuración
+        
+        // Para campos de texto, aseguramos no exceder el límite de 100 caracteres
+        if (typeof value === 'string' && value.length > 100) {
+            value = value.substring(0, 100);
+        }
+        
+        setUserResponses(prevResponses => {
             const updatedResponses = { ...prevResponses, [questionId]: value };
 
+            // Actualizar visibilidad de preguntas condicionales
             const updatedVisibility = { ...visibleQuestions };
 
             surveyData.survey_questions.forEach((sq) => {
@@ -98,6 +106,7 @@ const SurveyDetails = () => {
 
     // Manejador para el checkbox de términos y condiciones
     const handleTermsAcceptChange = (e) => {
+        console.log("Términos aceptados:", e.target.checked); // Log para depuración
         setTermsAccepted(e.target.checked);
     };
 
@@ -113,9 +122,11 @@ const SurveyDetails = () => {
             setCurrentSection(1);
             window.scrollTo(0, 0);
         } else if (currentSection < surveyData.sections.length) {
+            // Validar campos actuales si es necesario
             setCurrentSection(currentSection + 1);
             window.scrollTo(0, 0);
         } else {
+            // Mostrar modal de confirmación para finalizar la encuesta
             setShowConfirmModal(true);
         }
     };
@@ -131,7 +142,15 @@ const SurveyDetails = () => {
     };
 
     const handleSubmit = () => {
+        // Aquí podrías implementar la lógica para enviar los datos al servidor
+        // Por ejemplo: await axios.post('/api/submit-survey', userResponses);
+        
+        // Cerramos el modal primero
+        setShowConfirmModal(false);
+        
+        // Marcamos como enviado para mostrar la pantalla de éxito
         setIsSubmitted(true);
+        
         // Redirección a survey-list después de 3 segundos
         setTimeout(() => {
             navigate('/survey-list');
@@ -180,13 +199,21 @@ const SurveyDetails = () => {
                         no podrás corregir tus respuestas después de enviarlas.
                     </p>
                     <div className="flex justify-center space-x-6">
-                        <button className="bg-purple-600 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-purple-700 transition-colors" onClick={() => setShowConfirmModal(false)}>
+                        <button 
+                            className="bg-purple-600 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-purple-700 transition-colors" 
+                            onClick={() => setShowConfirmModal(false)}
+                            aria-label="Cancelar envío"
+                        >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             Cancelar
                         </button>
-                        <button className="bg-green-500 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-green-600 transition-colors" onClick={handleSubmit}>
+                        <button 
+                            className="bg-green-500 text-white px-8 py-3 rounded-full flex items-center justify-center shadow-md hover:bg-green-600 transition-colors" 
+                            onClick={handleSubmit}
+                            aria-label="Enviar respuestas"
+                        >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -337,9 +364,14 @@ const SurveyDetails = () => {
                                         onChange={handleTermsAcceptChange}
                                     />
                                     <span className="text-sm text-gray-700">
-                                        He leído y acepto los <span className="text-green-600 underline">términos y condiciones</span>.
+                                        He leído y acepto los <span className="text-green-600 underline cursor-pointer">términos y condiciones</span>.
                                     </span>
                                 </label>
+                                {!termsAccepted && (
+                                    <p className="text-xs text-red-500 text-center mt-2">
+                                        Debes aceptar los términos y condiciones para continuar
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex justify-center">
@@ -379,11 +411,25 @@ const SurveyDetails = () => {
                                             {question.type?.title === 'Falso y verdadero' ? (
                                                 <div className="flex items-center space-x-6">
                                                     <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
-                                                        <input type="radio" name={`question-${question.id}`} value="Verdadero" className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" checked={userResponses[question.id] === 'Verdadero'} onChange={() => handleResponseChange(question.id, 'Verdadero')} />
+                                                        <input 
+                                                            type="radio" 
+                                                            name={`question-${question.id}`} 
+                                                            value="Verdadero" 
+                                                            className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
+                                                            checked={userResponses[question.id] === 'Verdadero'} 
+                                                            onChange={() => handleResponseChange(question.id, 'Verdadero')} 
+                                                        />
                                                         <span className="text-gray-800">Verdadero</span>
                                                     </label>
                                                     <label className="flex items-center bg-white p-2 px-3 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-md transition-all cursor-pointer">
-                                                        <input type="radio" name={`question-${question.id}`} value="Falso" className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" checked={userResponses[question.id] === 'Falso'} onChange={() => handleResponseChange(question.id, 'Falso')} />
+                                                        <input 
+                                                            type="radio" 
+                                                            name={`question-${question.id}`} 
+                                                            value="Falso" 
+                                                            className="mr-2 focus:ring-blue-800 w-5 h-5 text-green-500" 
+                                                            checked={userResponses[question.id] === 'Falso'} 
+                                                            onChange={() => handleResponseChange(question.id, 'Falso')} 
+                                                        />
                                                         <span className="text-gray-800">Falso</span>
                                                     </label>
                                                 </div>
