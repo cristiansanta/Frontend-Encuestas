@@ -162,16 +162,18 @@ data-title="Cerrar sesión"
 {/* Sidebar for large screens - con optimizaciones */}
 <div
 ref={menuRef}
-className={`navbar hidden xl:flex hover:w-[210px] group`}
-
+className={`navbar hidden xl:flex ${isExpanded ? "expanded" : ""}`}
+onMouseEnter={handleExpand}
+onMouseLeave={handleCollapse}
 >
+
 {/* Elemento invisible para aumentar el área de detección del hover */}
 <div className="navbar-hover-extension"></div>
 {/* Logo section - con ambos logos siempre presentes */}
 <div className="navbar-logo">
 <div className="logo-container">
-<img src={Logo} alt="Logo Z" className="logo-icon group-hover:!hidden" />
-<img src={LogoZajuna} alt="Logo Zajuna" className="logo-zajuna group-hover:!visible group-hover:!opacity-1" />
+<img src={Logo} alt="Logo Z" className="logo-icon" />
+<img src={LogoZajuna} alt="Logo Zajuna" className="logo-zajuna" />
 </div>
 </div>
 
