@@ -1,7 +1,9 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import RichTextEditor from './TextBoxDetail.jsx';
 import InputSlide from './InputSlide.jsx';
 import Modal from './Modal';
+import SectionSelector from './SectionSelector'; // Componente actualizado
+import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage.js'; // Importamos funciones de almacenamiento
 import DOMPurify from 'dompurify';
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -37,10 +39,53 @@ const QuestionsForm = forwardRef((props, ref) => {
   const [modalStatus, setModalStatus] = useState('default');
   const [selectedQuestionType, setSelectedQuestionType] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
+  // Estado para las secciones disponibles - Cargamos desde localStorage
+  const [availableSections, setAvailableSections] = useState([]);
   // Añadir el estado para controlar el colapso
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const endpoint = import.meta.env.VITE_API_ENDPOINT + 'questions/store';
+
+  // Cargamos las secciones al inicio desde localStorage
+  useEffect(() => {
+    const loadSections = () => {
+      // Obtener secciones guardadas
+      const storedSections = getSections();
+      
+      if (storedSections.length > 0) {
+        setAvailableSections(storedSections);
+        
+        // Intentar cargar la sección seleccionada previamente
+        const savedSection = getSelectedSection();
+        if (savedSection) {
+          setSelectedSection(savedSection);
+        }
+      } else {
+        // Si no hay secciones guardadas, usamos datos de ejemplo
+        const mockSections = [
+          { id: 1, name: 'Información Personal' },
+          { id: 2, name: 'Experiencia Laboral' },
+          { id: 3, name: 'Experiencia Académica' }
+        ];
+        setAvailableSections(mockSections);
+      }
+    };
+    
+    loadSections();
+    
+    // También configuramos un listener para detectar cambios en localStorage
+    // realizados por otras ventanas/pestañas
+    const handleStorageChange = (e) => {
+      if (e.key === 'survey_sections') {
+        loadSections();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   // Función para alternar el estado de colapso
   const toggleCollapse = () => {
@@ -62,9 +107,10 @@ const QuestionsForm = forwardRef((props, ref) => {
     localStorage.setItem("selectedOptionId", typeId);
   };
 
-  const handleSelectSection = () => {
-    // Lógica para seleccionar sección
-    setSelectedSection("Sección seleccionada");
+  // Manejar la selección de sección
+  const handleSectionSelect = (section) => {
+    setSelectedSection(section);
+    saveSelectedSection(section.id); // Guardar en localStorage
   };
 
   // Manejar cambio en el input del título
@@ -85,12 +131,20 @@ const QuestionsForm = forwardRef((props, ref) => {
     // Validación de datos
     if (!title.trim() || stripEdgeHtmlTags(description).trim() === '<br>') {
       setErrorMessage('Faltan datos por diligenciar.');
+      setModalStatus('error');
       setIsModalOpen(true);
       return;
     }
 
     if (!selectedOptionId) {
       setErrorMessage('Debe seleccionar un tipo de respuesta e ingresar los datos.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+
+    if (!selectedSection) {
+      setErrorMessage('Debe seleccionar una sección para la pregunta.');
       setModalStatus('error');
       setIsModalOpen(true);
       return;
@@ -107,6 +161,7 @@ const QuestionsForm = forwardRef((props, ref) => {
       cod_padre: 0,
       bank: addToBank,
       type_questions_id: selectedOptionId,
+      section_id: selectedSection.id,
       questions_conditions: isParentQuestion,
       creator_id: 1,
     };
@@ -135,9 +190,17 @@ const QuestionsForm = forwardRef((props, ref) => {
       setAddToBank(false);
       setIsParentQuestion(false);
       setSelectedQuestionType(null);
+      // No reseteamos selectedSection para mantener la sección al agregar múltiples preguntas
+      
+      // Mostrar mensaje de éxito
+      setErrorMessage('Pregunta agregada correctamente.');
+      setModalStatus('success');
+      setIsModalOpen(true);
 
     } catch (error) {
       console.error('Error al guardar los datos:', error);
+      setErrorMessage('Error al guardar la pregunta. Intente nuevamente.');
+      setModalStatus('error');
       setIsModalOpen(true);
     }
   };
@@ -227,25 +290,17 @@ const QuestionsForm = forwardRef((props, ref) => {
               </div>
             </div>
 
-            {/* Sección */}
+            {/* Sección con el nuevo selector */}
             <div className="mb-4">
               <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom mb-1">Seccion</h2>
               <p className="text-gray-600 text-sm mb-3">
                 Selecciona la sección a la que pertene la pregunta
               </p>
-              <button
-                className="flex items-center bg-blue-custom rounded-full overflow-hidden"
-                onClick={() => console.log("Importar desde banco")}
-              >
-                <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
-                  <img src={AddCategory} alt="Importar" className="w-5 h-5 mr-2" />
-                </span>
-                <span className="bg-yellow-custom px-4 py-1">
-                  <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                    Elegir sección
-                  </span>
-                </span>
-              </button>
+              <SectionSelector 
+                sections={availableSections}
+                onSectionSelect={handleSectionSelect}
+                initialSelectedSection={selectedSection}
+              />
             </div>
 
             {/* Descripción de la Pregunta */}
@@ -277,11 +332,12 @@ const QuestionsForm = forwardRef((props, ref) => {
           </>
         )}
 
-        {/* Modal para mostrar mensajes de error */}
+        {/* Modal para mostrar mensajes */}
         <Modal
           isOpen={isModalOpen}
-          title="Error"
+          title={modalStatus === 'error' ? "Error" : "Éxito"}
           message={DOMPurify.sanitize(errorMessage)}
+          onConfirm={closeModal}
           onCancel={closeModal}
           type="informative"
           status={modalStatus}

@@ -1,4 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { 
+  getSections, 
+  updateSections, 
+  addSection, 
+  removeSection 
+} from '../services/SectionsStorage'; // Importamos las funciones de almacenamiento
 
 const SectionDropdown = ({ 
   isOpen, 
@@ -8,7 +14,12 @@ const SectionDropdown = ({
   existingSections = [],
   anchorRef // Referencia al botón para posicionar el dropdown
 }) => {
-  const [sections, setSections] = useState(existingSections);
+  // Inicializamos con las secciones del localStorage o las proporcionadas
+  const [sections, setSections] = useState(() => {
+    const storedSections = getSections();
+    return storedSections.length > 0 ? storedSections : existingSections;
+  });
+  
   const [newSectionName, setNewSectionName] = useState('');
   const [selectedSections, setSelectedSections] = useState([]);
   const dropdownRef = useRef(null);
@@ -21,9 +32,21 @@ const SectionDropdown = ({
     accept: false
   });
   
-  // Inicializar secciones cuando cambian externamente
+  // Sincronizar con existingSections si cambian
   useEffect(() => {
-    setSections(existingSections);
+    if (existingSections.length > 0) {
+      const combinedSections = [...sections];
+      
+      // Añadir secciones que no existan en combinedSections
+      existingSections.forEach(newSection => {
+        if (!combinedSections.some(s => s.id === newSection.id)) {
+          combinedSections.push(newSection);
+        }
+      });
+      
+      setSections(combinedSections);
+      updateSections(combinedSections); // Actualizar en localStorage
+    }
   }, [existingSections]);
   
   // Enfocar el input cuando se abre el dropdown
@@ -62,11 +85,16 @@ const SectionDropdown = ({
         id: Date.now(), // Genera un ID único
         name: newSectionName.trim()
       };
-      setSections([...sections, newSection]);
+      
+      const updatedSections = [...sections, newSection];
+      setSections(updatedSections);
       setNewSectionName(''); // Limpiar el input
       
+      // Guardar en localStorage
+      addSection(newSection);
+      
       // También actualizar las secciones en el componente padre
-      onAddSections([...sections, newSection]);
+      onAddSections(updatedSections);
     }
   };
   
@@ -88,6 +116,9 @@ const SectionDropdown = ({
 
   // Confirmar la acción
   const handleAccept = () => {
+    // Sincronizar con localStorage antes de cerrar
+    updateSections(sections);
+    
     onAddSections(sections);
     onOpenChange(false);
     setSelectedSections([]);
@@ -105,6 +136,9 @@ const SectionDropdown = ({
     if (selectedSections.length > 0) {
       const updatedSections = sections.filter(section => !selectedSections.includes(section.id));
       setSections(updatedSections);
+      
+      // Actualizar en localStorage
+      selectedSections.forEach(id => removeSection(id));
       
       // También actualizar las secciones en el componente padre
       onAddSections(updatedSections);
