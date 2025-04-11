@@ -2,8 +2,8 @@ import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'rea
 import RichTextEditor from './TextBoxDetail.jsx';
 import InputSlide from './InputSlide.jsx';
 import Modal from './Modal';
-import SectionSelector from './SectionSelector'; // Componente actualizado
-import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage.js'; // Importamos funciones de almacenamiento
+import SectionSelector from './SectionSelector';
+import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
 import DOMPurify from 'dompurify';
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -28,7 +28,7 @@ const SwitchOption = ({ value, onChange, label }) => (
   </div>
 );
 
-const QuestionsForm = forwardRef((props, ref) => {
+const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [mandatory, setMandatory] = useState(false);
@@ -116,6 +116,42 @@ const QuestionsForm = forwardRef((props, ref) => {
   // Manejar cambio en el input del título
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
+  };
+
+  // Función para manejar clic en "Agregar pregunta hija"
+  const handleAddChildQuestion = () => {
+    // Verificar que se haya seleccionado un tipo de pregunta
+    if (!selectedQuestionType) {
+      setErrorMessage('Debe seleccionar un tipo de respuesta antes de agregar una pregunta hija.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+    
+    // Verificar que se haya ingresado título
+    if (!title.trim()) {
+      setErrorMessage('Debe ingresar un título para la pregunta antes de agregar una pregunta hija.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+    
+    // Verificar que se haya seleccionado una sección
+    if (!selectedSection) {
+      setErrorMessage('Debe seleccionar una sección para la pregunta antes de agregar una pregunta hija.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+    
+    // Si todo está bien, llamar a la función para añadir pregunta hija
+    if (onAddChildQuestion) {
+      onAddChildQuestion({
+        parentTitle: title,
+        parentType: selectedQuestionType,
+        parentSection: selectedSection
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -343,6 +379,26 @@ const QuestionsForm = forwardRef((props, ref) => {
           status={modalStatus}
         />
       </div>
+
+      {/* Botón para agregar pregunta hija (condicional) */}
+      {isParentQuestion && (
+        <div className="mt-4">
+          <button
+            className="w-full py-3 bg-yellow-custom rounded-xl flex items-center justify-start pl-6 gap-2 hover:bg-yellow-400 transition-colors relative"
+            onClick={handleAddChildQuestion}
+          >
+            <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta hija</span>
+            <div className="absolute right-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-custom">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+      )}
+      
       {/* Botón para agregar pregunta */}
       <div className="mt-4">
         <button
