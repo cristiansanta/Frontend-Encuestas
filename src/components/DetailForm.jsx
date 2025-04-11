@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import RichTextEditor from './TextBoxDetail.jsx';
 import Addsurvey from '../assets/img/addsurvey.svg';
 import { SurveyContext } from '../Provider/SurveyContext';
@@ -8,6 +8,7 @@ import trashcan from '../assets/img/trashCan.svg';
 import calendar2 from '../assets/img/calendar2.svg';
 import Modal from './Modal';
 import Calendar from './Calendar'; 
+import SectionDropdown from './SectionDropdown'; // Importamos el componente ajustado
 import DOMPurify from 'dompurify';
 
 const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
@@ -32,6 +33,19 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Estados para mostrar los calendarios
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+  
+  // Estado para el dropdown de secciones
+  const [showSectionDropdown, setShowSectionDropdown] = useState(false);
+  
+  // Referencia al botón "Nueva Sección" para posicionar el dropdown
+  const newSectionButtonRef = useRef(null);
+  
+  // Estado para almacenar las secciones
+  const [sections, setSections] = useState([
+    { id: 1, name: 'Información personal' },
+    { id: 2, name: 'Experiencia Laboral' },
+    { id: 3, name: 'Experiencia Académica' }
+  ]);
 
   // Verificar validez del formulario
   useEffect(() => {
@@ -69,6 +83,13 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     }
   }, [startDate]);
 
+  // Cerrar el dropdown de sección si se abre algún calendario
+  useEffect(() => {
+    if (showStartCalendar || showEndCalendar) {
+      setShowSectionDropdown(false);
+    }
+  }, [showStartCalendar, showEndCalendar]);
+
   const showErrorMessage = () => {
     setModalTitle('Alerta');
     setModalMessage('Por favor, complete todos los campos requeridos antes de continuar.');
@@ -93,6 +114,17 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   const handleEndDateChange = (date) => {
     setEndDate(date);
   };
+  
+  // Función para manejar la adición/actualización de secciones
+  const handleUpdateSections = (updatedSections) => {
+    setSections(updatedSections);
+  };
+  
+  // Función para eliminar una sección específica
+  const handleRemoveSection = (id, e) => {
+    if (e) e.stopPropagation();
+    setSections(sections.filter(section => section.id !== id));
+  };
 
   // Función para manejar el envío de datos
   const handleSave = () => {
@@ -109,6 +141,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
         id_category: selectedCategory[0][0],
         startDate,
         endDate,
+        sections,
         accessToken
       });
     }
@@ -127,6 +160,15 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Manejar cambio en el input del título
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
+  };
+
+  // Manejar el clic en "Nueva Sección"
+  const handleSectionButtonClick = () => {
+    // Cerrar calendarios si están abiertos
+    setShowStartCalendar(false);
+    setShowEndCalendar(false);
+    // Alternar el dropdown de secciones
+    setShowSectionDropdown(!showSectionDropdown);
   };
 
   return (
@@ -168,45 +210,34 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             <p className="font-work-sans text-sm mb-3 text-gray-600">
               Agrega las secciones en las que clasificarás las preguntas.
             </p>
-            <div className="flex space-x-2 mt-1">
-              <div className="border border-white">
-                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                  </span>
-                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                      Información personal
+            <div className="flex flex-wrap gap-2 mt-1">
+              {sections.map(section => (
+                <div 
+                  key={section.id} 
+                  className="border border-white relative"
+                >
+                  <div className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                    <span 
+                      className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80 cursor-pointer"
+                      onClick={(e) => handleRemoveSection(section.id, e)}
+                    >
+                      <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
                     </span>
-                  </span>
-                </button>
-              </div>
-              <div className="border border-white">
-                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                  </span>
-                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                      Experiencia Laboral
+                    <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
+                      <span className="font-work-sans text-lg font-semibold text-blue-custom">
+                        {section.name}
+                      </span>
                     </span>
-                  </span>
-                </button>
-              </div>
-              <div className="border border-white">
-                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
-                  <span className="bg-orange-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
-                  </span>
-                  <span className="bg-gray-custom px-5 py-1 flex items-center justify-center hover:bg-opacity-80">
-                    <span className="font-work-sans text-lg font-semibold text-blue-custom">
-                      Experiencia Académica
-                    </span>
-                  </span>
-                </button>
-              </div>
-              <div className="border border-white">
-                <button className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105">
+                  </div>
+                </div>
+              ))}
+              
+              <div className="border border-white relative">
+                <button 
+                  ref={newSectionButtonRef}
+                  className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
+                  onClick={handleSectionButtonClick}
+                >
                   <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
                     <img src={Addsurvey} alt="Nueva sección" className="w-5 h-5" />
                   </span>
@@ -216,6 +247,16 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                     </span>
                   </span>
                 </button>
+                
+                {/* Dropdown de secciones (aparece bajo el botón) */}
+                <SectionDropdown
+                  isOpen={showSectionDropdown}
+                  onOpenChange={setShowSectionDropdown}
+                  onAddSections={handleUpdateSections}
+                  onCancel={() => setShowSectionDropdown(false)}
+                  existingSections={sections}
+                  anchorRef={newSectionButtonRef}
+                />
               </div>
             </div>
           </div>
@@ -238,8 +279,11 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   isOpen={showStartCalendar}
                   onOpenChange={(isOpen) => {
                     setShowStartCalendar(isOpen);
-                    // Si abrimos el calendario de inicio, cerramos el de finalización
-                    if (isOpen) setShowEndCalendar(false);
+                    // Si abrimos el calendario de inicio, cerramos el de finalización y el dropdown de secciones
+                    if (isOpen) {
+                      setShowEndCalendar(false);
+                      setShowSectionDropdown(false);
+                    }
                   }}
                 />
               </div>
@@ -257,8 +301,11 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   isOpen={showEndCalendar}
                   onOpenChange={(isOpen) => {
                     setShowEndCalendar(isOpen);
-                    // Si abrimos el calendario de finalización, cerramos el de inicio
-                    if (isOpen) setShowStartCalendar(false);
+                    // Si abrimos el calendario de finalización, cerramos el de inicio y el dropdown de secciones
+                    if (isOpen) {
+                      setShowStartCalendar(false);
+                      setShowSectionDropdown(false);
+                    }
                   }}
                 />
               </div>
@@ -278,7 +325,6 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             </div>
           </div>
         
-
         {/* Modal para mensajes */}
         <Modal
           isOpen={isModalOpen}
