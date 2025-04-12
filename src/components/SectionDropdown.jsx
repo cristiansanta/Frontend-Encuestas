@@ -4,34 +4,105 @@ import {
   updateSections, 
   addSection, 
   removeSection 
-} from '../services/SectionsStorage'; // Importamos las funciones de almacenamiento
+} from '../services/SectionsStorage';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+// Componente para el elemento arrastrable
+const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => {
+  const ref = useRef(null);
+  
+  // Configuración para arrastrar
+  const [{ isDragging }, drag] = useDrag({
+    type: 'SECTION_ITEM',
+    item: { id, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+  
+  // Configuración para soltar
+  const [, drop] = useDrop({
+    accept: 'SECTION_ITEM',
+    hover: (item, monitor) => {
+      if (!ref.current) return;
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      
+      // No reemplazar elementos consigo mismos
+      if (dragIndex === hoverIndex) return;
+      
+      // Mover el elemento
+      moveItem(dragIndex, hoverIndex);
+      
+      // Actualizar el índice del elemento arrastrado
+      item.index = hoverIndex;
+    },
+  });
+  
+  // Combinar las referencias
+  drag(drop(ref));
+  
+  return (
+    <div 
+      ref={ref}
+      className={`flex items-center justify-between py-3 border-b border-gray-200 ${
+        isDragging ? 'opacity-50' : 'opacity-100'
+      }`}
+    >
+      <div className="flex items-center">
+        {/* Puntos para arrastrar */}
+        <span className="text-gray-400 mr-2 cursor-grab">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="4" cy="5" r="1.5"/>
+            <circle cx="4" cy="10" r="1.5"/>
+            <circle cx="4" cy="15" r="1.5"/>
+            <circle cx="10" cy="5" r="1.5"/>
+            <circle cx="10" cy="10" r="1.5"/>
+            <circle cx="10" cy="15" r="1.5"/>
+          </svg>
+        </span>
+        <span className="text-dark-blue-custom">
+          {section.name}
+        </span>
+      </div>
+      
+      {/* Checkbox */}
+      <div 
+        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${
+          selected ? 'bg-dark-blue-custom' : 'bg-white'
+        }`}
+        onClick={() => onSelect(section.id)}
+      >
+        {selected && (
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const SectionDropdown = ({ 
   isOpen, 
   onOpenChange, 
   onAddSections,
-  onCancel,
   existingSections = [],
-  anchorRef // Referencia al botón para posicionar el dropdown
+  anchorRef
 }) => {
-  // Inicializamos con las secciones del localStorage o las proporcionadas
+  // Inicializamos con las secciones existentes o las del localStorage
   const [sections, setSections] = useState(() => {
     const storedSections = getSections();
-    // Siempre priorizar las secciones de localStorage
     return storedSections.length > 0 ? storedSections : existingSections;
   });
   
   const [newSectionName, setNewSectionName] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [selectedSections, setSelectedSections] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
-  
-  // Estado para el hover en los botones
-  const [hoverState, setHoverState] = useState({
-    cancel: false,
-    delete: false,
-    accept: false
-  });
   
   // Sincronizar con existingSections si cambian
   useEffect(() => {
@@ -46,7 +117,7 @@ const SectionDropdown = ({
       });
       
       setSections(combinedSections);
-      updateSections(combinedSections); // Actualizar en localStorage
+      updateSections(combinedSections);
     }
   }, [existingSections]);
   
@@ -73,61 +144,33 @@ const SectionDropdown = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onOpenChange, anchorRef]);
-  useEffect(() => {
-    // Función para actualizar las secciones cuando cambia localStorage
-    const handleSectionChange = () => {
-      const storedSections = getSections();
-      setSections(storedSections);
-    };
-    
-    // Función para manejar el evento personalizado de eliminación
-    const handleSectionRemoved = (event) => {
-      setSections(event.detail.updatedSections);
-    };
-    
-    // Escuchar cambios en localStorage
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'survey_sections') {
-        handleSectionChange();
-      }
-    });
-    
-    // Escuchar el evento personalizado
-    window.addEventListener('sectionRemoved', handleSectionRemoved);
-    
-    // Limpiar event listeners al desmontar
-    return () => {
-      window.removeEventListener('storage', handleSectionChange);
-      window.removeEventListener('sectionRemoved', handleSectionRemoved);
-    };
-  }, []);
+  
   // Manejar entrada de texto
   const handleInputChange = (e) => {
     setNewSectionName(e.target.value);
+    setSearchText(e.target.value);
   };
 
-  // Añadir nueva sección inmediatamente
+  // Añadir nueva sección
   const handleAddSection = () => {
     if (newSectionName.trim() !== '') {
       const newSection = {
-        id: Date.now(), // Genera un ID único
+        id: Date.now(),
         name: newSectionName.trim()
       };
       
       const updatedSections = [...sections, newSection];
       setSections(updatedSections);
-      setNewSectionName(''); // Limpiar el input
+      setNewSectionName('');
+      setSearchText('');
       
       // Guardar en localStorage
       addSection(newSection);
-      updateSections(updatedSections); // Asegurar que todo esté sincronizado
-      
-      // También actualizar las secciones en el componente padre
-      onAddSections(updatedSections);
+      updateSections(updatedSections);
     }
   };
   
-  // Manejar tecla Enter en input de nueva sección
+  // Manejar tecla Enter en input
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && newSectionName.trim() !== '') {
       handleAddSection();
@@ -138,9 +181,24 @@ const SectionDropdown = ({
   const handleSectionSelect = (sectionId) => {
     if (selectedSections.includes(sectionId)) {
       setSelectedSections(selectedSections.filter(id => id !== sectionId));
+      setSelectAll(false);
     } else {
       setSelectedSections([...selectedSections, sectionId]);
+      // Verificar si todos están seleccionados después de esta selección
+      if (selectedSections.length + 1 === filteredSections.length) {
+        setSelectAll(true);
+      }
     }
+  };
+
+  // Manejar seleccionar/deseleccionar todos
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedSections([]);
+    } else {
+      setSelectedSections(filteredSections.map(section => section.id));
+    }
+    setSelectAll(!selectAll);
   };
 
   // Confirmar la acción
@@ -150,14 +208,6 @@ const SectionDropdown = ({
     
     onAddSections(sections);
     onOpenChange(false);
-    setSelectedSections([]);
-  };
-
-  // Cancelar
-  const handleCancel = () => {
-    onCancel();
-    onOpenChange(false);
-    setSelectedSections([]);
   };
 
   // Eliminar secciones seleccionadas
@@ -168,14 +218,30 @@ const SectionDropdown = ({
       
       // Actualizar en localStorage
       selectedSections.forEach(id => removeSection(id));
-      updateSections(updatedSections); // Asegurar que todo esté sincronizado
-      
-      // También actualizar las secciones en el componente padre
-      onAddSections(updatedSections);
+      updateSections(updatedSections);
       
       setSelectedSections([]);
+      setSelectAll(false);
     }
   };
+  
+  // Mover un elemento de una posición a otra
+  const moveItem = (fromIndex, toIndex) => {
+    const updatedSections = [...sections];
+    const movedItem = updatedSections[fromIndex];
+    updatedSections.splice(fromIndex, 1);
+    updatedSections.splice(toIndex, 0, movedItem);
+    setSections(updatedSections);
+  };
+  
+  // Filtrar secciones basado en la búsqueda
+  const filteredSections = sections.filter(section => 
+    section.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+  
+  // Verificar si el texto de búsqueda podría ser una nueva sección
+  const isNewSection = newSectionName.trim() !== '' && 
+    !sections.some(section => section.name.toLowerCase() === newSectionName.toLowerCase().trim());
 
   // Si no está abierto, no mostrar
   if (!isOpen) return null;
@@ -198,89 +264,74 @@ const SectionDropdown = ({
         para continuar da click en aceptar.
       </p>
       
-      {/* Barra de búsqueda/input con botón + */}
-      <div className="relative mb-4 flex items-center border border-gray-300 rounded-full px-4 py-2">
+      {/* Input para buscar/agregar sección */}
+      <div className="relative mb-4">
         <input 
           ref={inputRef}
           type="text" 
           value={newSectionName}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="flex-grow outline-none text-gray-700 text-sm"
-          placeholder="Buscar seccion o agregar una nueva"
+          className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 outline-none"
+          placeholder="Escriba el nombre de la nueva sección"
         />
-        <button 
-          onClick={handleAddSection}
-          disabled={newSectionName.trim() === ''}
-          className={`rounded-full p-1 ml-2 transition-opacity ${
-            newSectionName.trim() === '' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          }`}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="#0A3761" strokeWidth="2"/>
-            <path d="M12 8V16" stroke="#0A3761" strokeWidth="2" strokeLinecap="round"/>
-            <path d="M8 12H16" stroke="#0A3761" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </div>
-      
-      {/* Título para lista de secciones */}
-      <div className="font-bold text-dark-blue-custom mb-2">
-        Nombre de sección
-      </div>
-      
-      {/* Lista de secciones con checkbox a la DERECHA */}
-      <div className="max-h-48 overflow-y-auto mb-4">
-        {sections.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No hay secciones creadas</p>
-        ) : (
-          sections.map((section) => (
-            <div 
-              key={section.id} 
-              className="flex items-center justify-between py-2 border-b border-gray-200"
-            >
-              <span className="text-dark-blue-custom text-sm">
-                {section.name}
-              </span>
-              
-              {/* Checkbox a la derecha */}
-              <div 
-                className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${
-                  selectedSections.includes(section.id) ? 'bg-dark-blue-custom' : 'bg-white'
-                }`}
-                onClick={() => handleSectionSelect(section.id)}
-              >
-                {selectedSections.includes(section.id) && (
-                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </div>
-            </div>
-          ))
+        {isNewSection && (
+          <button 
+            onClick={handleAddSection}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-dark-blue-custom"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
         )}
       </div>
       
-      {/* Botones de acción */}
-      <div className="flex justify-between">
-        <button 
-          onClick={handleCancel}
-          onMouseEnter={() => setHoverState({...hoverState, cancel: true})}
-          onMouseLeave={() => setHoverState({...hoverState, cancel: false})}
-          className={`bg-purple-custom text-white py-1.5 px-4 rounded-full flex items-center text-sm transition-colors ${
-            hoverState.cancel ? 'bg-purple-800' : ''
+      {/* Encabezado con título y checkbox "seleccionar todos" */}
+      <div className="flex items-center justify-between font-bold text-dark-blue-custom mb-2">
+        <span>Nombre de sección</span>
+        <div 
+          className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${
+            selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
           }`}
+          onClick={handleSelectAll}
         >
-          <span className="mr-1">✕</span> Cancelar
-        </button>
-        
+          {selectAll && filteredSections.length > 0 && (
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </div>
+      </div>
+      
+      {/* Lista de secciones con DnD */}
+      <DndProvider backend={HTML5Backend}>
+        <div className="max-h-48 overflow-y-auto mb-4">
+          {filteredSections.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No hay secciones creadas</p>
+          ) : (
+            filteredSections.map((section, index) => (
+              <DraggableItem
+                key={section.id}
+                id={section.id}
+                index={index}
+                section={section}
+                selected={selectedSections.includes(section.id)}
+                onSelect={handleSectionSelect}
+                moveItem={moveItem}
+              />
+            ))
+          )}
+        </div>
+      </DndProvider>
+      
+      {/* Botones de acción */}
+      <div className="flex justify-between mt-4">
         <button 
           onClick={handleAccept}
-          onMouseEnter={() => setHoverState({...hoverState, accept: true})}
-          onMouseLeave={() => setHoverState({...hoverState, accept: false})}
-          className={`bg-green-custom text-white py-1.5 px-4 rounded-full flex items-center text-sm transition-colors ${
-            hoverState.accept ? 'bg-green-700' : ''
-          }`}
+          className="bg-green-custom text-white py-1.5 px-8 rounded-full flex items-center text-sm hover:bg-green-700 transition-colors"
         >
           <span className="mr-1">✓</span> Aceptar
         </button>
@@ -288,14 +339,10 @@ const SectionDropdown = ({
         <button 
           onClick={handleDeleteSelectedSections}
           disabled={selectedSections.length === 0}
-          onMouseEnter={() => setHoverState({...hoverState, delete: true})}
-          onMouseLeave={() => setHoverState({...hoverState, delete: false})}
-          className={`py-1.5 px-4 rounded-full flex items-center text-sm transition-colors ${
+          className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${
             selectedSections.length === 0 
               ? 'bg-gray-400 text-white cursor-not-allowed' 
-              : hoverState.delete 
-                ? 'bg-orange-700 text-white'
-                : 'bg-orange-custom text-white'
+              : 'bg-orange-custom text-white hover:bg-orange-700'
           }`}
         >
           <svg className="mr-1" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
