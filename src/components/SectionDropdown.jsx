@@ -17,6 +17,7 @@ const SectionDropdown = ({
   // Inicializamos con las secciones del localStorage o las proporcionadas
   const [sections, setSections] = useState(() => {
     const storedSections = getSections();
+    // Siempre priorizar las secciones de localStorage
     return storedSections.length > 0 ? storedSections : existingSections;
   });
   
@@ -72,7 +73,34 @@ const SectionDropdown = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onOpenChange, anchorRef]);
-
+  useEffect(() => {
+    // Función para actualizar las secciones cuando cambia localStorage
+    const handleSectionChange = () => {
+      const storedSections = getSections();
+      setSections(storedSections);
+    };
+    
+    // Función para manejar el evento personalizado de eliminación
+    const handleSectionRemoved = (event) => {
+      setSections(event.detail.updatedSections);
+    };
+    
+    // Escuchar cambios en localStorage
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'survey_sections') {
+        handleSectionChange();
+      }
+    });
+    
+    // Escuchar el evento personalizado
+    window.addEventListener('sectionRemoved', handleSectionRemoved);
+    
+    // Limpiar event listeners al desmontar
+    return () => {
+      window.removeEventListener('storage', handleSectionChange);
+      window.removeEventListener('sectionRemoved', handleSectionRemoved);
+    };
+  }, []);
   // Manejar entrada de texto
   const handleInputChange = (e) => {
     setNewSectionName(e.target.value);
@@ -92,6 +120,7 @@ const SectionDropdown = ({
       
       // Guardar en localStorage
       addSection(newSection);
+      updateSections(updatedSections); // Asegurar que todo esté sincronizado
       
       // También actualizar las secciones en el componente padre
       onAddSections(updatedSections);
@@ -139,6 +168,7 @@ const SectionDropdown = ({
       
       // Actualizar en localStorage
       selectedSections.forEach(id => removeSection(id));
+      updateSections(updatedSections); // Asegurar que todo esté sincronizado
       
       // También actualizar las secciones en el componente padre
       onAddSections(updatedSections);

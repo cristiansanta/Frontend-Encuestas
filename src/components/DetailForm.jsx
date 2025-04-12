@@ -9,6 +9,7 @@ import calendar2 from '../assets/img/calendar2.svg';
 import Modal from './Modal';
 import Calendar from './Calendar'; 
 import SectionDropdown from './SectionDropdown'; // Importamos el componente ajustado
+import { getSections, updateSections, removeSection } from '../services/SectionsStorage';
 import DOMPurify from 'dompurify';
 
 const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
@@ -49,14 +50,27 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
 
   // Verificar validez del formulario
   useEffect(() => {
-    const valid = title.trim() !== '' && description.trim() !== '';
-    setIsFormValid(valid);
-    
-    // Comunicar el cambio de validez al componente padre
-    if (onFormValidChange) {
-      onFormValidChange(valid);
+    // Cargar el token de acceso
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setAccessToken(token);
+    } else {
+      console.error('No se encontró el token de acceso. Inicia sesión nuevamente.');
+      setModalTitle('Error de autenticación');
+      setModalMessage('No se encontró el token de acceso. Por favor, inicia sesión de nuevo.');
+      setModalStatus('error');
+      setIsModalOpen(true);
     }
-  }, [title, description, onFormValidChange]);
+  
+    // Cargar secciones desde localStorage
+    const storedSections = getSections();
+    if (storedSections.length > 0) {
+      setSections(storedSections);
+    } else if (sections.length > 0) {
+      // Si no hay secciones guardadas pero tenemos secciones por defecto, guardarlas
+      updateSections(sections);
+    }
+  }, []);
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -118,12 +132,27 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Función para manejar la adición/actualización de secciones
   const handleUpdateSections = (updatedSections) => {
     setSections(updatedSections);
+    // Sincronizar con localStorage
+    updateSections(updatedSections);
   };
   
   // Función para eliminar una sección específica
   const handleRemoveSection = (id, e) => {
     if (e) e.stopPropagation();
-    setSections(sections.filter(section => section.id !== id));
+    
+    // Actualizar el estado local
+    const updatedSections = sections.filter(section => section.id !== id);
+    setSections(updatedSections);
+    
+    // CRUCIAL: Eliminar la sección y actualizar completamente localStorage
+    removeSection(id);
+    updateSections(updatedSections);
+    
+    // Disparar un evento para que otros componentes se actualicen
+    const event = new CustomEvent('sectionRemoved', { 
+      detail: { id, updatedSections } 
+    });
+    window.dispatchEvent(event);
   };
 
   // Función para manejar el envío de datos
