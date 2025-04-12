@@ -74,7 +74,7 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
 
       {/* Checkbox - Con ancho fijo para mantener alineación */}
       <div
-        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 ${selected ? 'bg-dark-blue-custom' : 'bg-white'
+        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 mr-3 ${selected ? 'bg-dark-blue-custom' : 'bg-white'
           }`}
         style={{ minWidth: "20px" }} // Asegura ancho mínimo
         onClick={() => onSelect(section.id)}
@@ -392,7 +392,7 @@ const SectionDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-96"
+      className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[450px]"
       style={{
         top: anchorRef.current ? anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 5 : '0px',
         left: anchorRef.current ? anchorRef.current.offsetLeft : '0px'
@@ -440,7 +440,7 @@ const SectionDropdown = ({
       <div className="flex items-center justify-between font-bold text-dark-blue-custom mb-2">
         <span>Nombre de sección</span>
         <div
-          className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
+          className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer mr-3 ${selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
             }`}
           style={{ minWidth: "20px" }} // Asegura ancho mínimo
           onClick={handleSelectAll}
