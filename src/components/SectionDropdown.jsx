@@ -9,7 +9,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // Constante para la longitud máxima del nombre de sección
-const MAX_SECTION_NAME_LENGTH = 30;
+const MAX_SECTION_NAME_LENGTH = 50;
 
 // Componente para el elemento arrastrable
 const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => {
