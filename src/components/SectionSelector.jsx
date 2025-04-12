@@ -210,8 +210,21 @@ const SectionSelector = ({
 
   // Confirmar la selección
   const handleAccept = () => {
+    // Si hay un nuevo nombre de sección válido, añadirlo primero
+    if (newSectionName.trim() !== '' && !inputError) {
+      handleAddSection();
+      // Como handleAddSection ya establece la sección recién creada como seleccionada,
+      // podemos proceder directamente a notificar al componente padre y cerrar
+      if (selectedSection) {
+        saveSelectedSection(selectedSection.id);
+        onSectionSelect(selectedSection);
+      }
+      setIsDropdownOpen(false);
+      return;
+    }
+    
+    // Comportamiento original cuando hay una sección seleccionada
     if (selectedSection) {
-      // Guardar en localStorage antes de cerrar
       saveSelectedSection(selectedSection.id);
       onSectionSelect(selectedSection);
     }
