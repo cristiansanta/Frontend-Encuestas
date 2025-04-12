@@ -8,6 +8,9 @@ import {
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
+// Constante para la longitud máxima del nombre de sección
+const MAX_SECTION_NAME_LENGTH = 30;
+
 // Componente para el elemento arrastrable
 const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => {
   const ref = useRef(null);
@@ -50,9 +53,9 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
         isDragging ? 'opacity-50' : 'opacity-100'
       }`}
     >
-      <div className="flex items-center">
+      <div className="flex items-center max-w-[80%]">
         {/* Puntos para arrastrar */}
-        <span className="text-gray-400 mr-2 cursor-grab">
+        <span className="text-gray-400 mr-2 cursor-grab flex-shrink-0">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <circle cx="4" cy="5" r="1.5"/>
             <circle cx="4" cy="10" r="1.5"/>
@@ -62,14 +65,17 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
             <circle cx="10" cy="15" r="1.5"/>
           </svg>
         </span>
-        <span className="text-dark-blue-custom">
+        <span 
+          className="text-dark-blue-custom truncate"
+          title={section.name.length > 20 ? section.name : ''}
+        >
           {section.name}
         </span>
       </div>
       
       {/* Checkbox */}
       <div 
-        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${
+        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 ${
           selected ? 'bg-dark-blue-custom' : 'bg-white'
         }`}
         onClick={() => onSelect(section.id)}
@@ -88,6 +94,7 @@ const SectionDropdown = ({
   isOpen, 
   onOpenChange, 
   onAddSections,
+  onCancel, // Añadido del segundo código
   existingSections = [],
   anchorRef
 }) => {
@@ -101,8 +108,15 @@ const SectionDropdown = ({
   const [searchText, setSearchText] = useState('');
   const [selectedSections, setSelectedSections] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [inputError, setInputError] = useState('');
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Estado para el hover en los botones (del segundo código)
+  const [hoverState, setHoverState] = useState({
+    delete: false,
+    accept: false
+  });
   
   // Sincronizar con existingSections si cambian
   useEffect(() => {
@@ -120,6 +134,42 @@ const SectionDropdown = ({
       updateSections(combinedSections);
     }
   }, [existingSections]);
+  
+  // Importante: Añadido del segundo código para escuchar cambios en localStorage
+  useEffect(() => {
+    // Función para actualizar las secciones cuando cambia localStorage
+    const handleSectionChange = () => {
+      const storedSections = getSections();
+      setSections(storedSections);
+    };
+    
+    // Función para manejar el evento personalizado de eliminación
+    const handleSectionRemoved = (event) => {
+      setSections(event.detail.updatedSections);
+    };
+    
+    // Escuchar cambios en localStorage
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'survey_sections') {
+        handleSectionChange();
+      }
+    });
+    
+    // Escuchar el evento personalizado
+    window.addEventListener('sectionRemoved', handleSectionRemoved);
+    
+    // Limpiar event listeners al desmontar
+    return () => {
+      window.removeEventListener('storage', handleSectionChange);
+      window.removeEventListener('sectionRemoved', handleSectionRemoved);
+    };
+  }, []);
+  
+  // Función para validar y formatear el nombre de sección
+  const validateSectionName = (name) => {
+    // Eliminar espacios adicionales y limitar longitud
+    return name.trim().replace(/\s+/g, ' ').substring(0, MAX_SECTION_NAME_LENGTH);
+  };
   
   // Enfocar el input cuando se abre el dropdown
   useEffect(() => {
@@ -145,34 +195,70 @@ const SectionDropdown = ({
     };
   }, [onOpenChange, anchorRef]);
   
-  // Manejar entrada de texto
+  // Manejar entrada de texto con validación
   const handleInputChange = (e) => {
-    setNewSectionName(e.target.value);
-    setSearchText(e.target.value);
+    const value = e.target.value;
+    setNewSectionName(value);
+    setSearchText(value);
+    
+    // Validar longitud en tiempo real
+    if (value.length > MAX_SECTION_NAME_LENGTH) {
+      setInputError(`El nombre no debe exceder ${MAX_SECTION_NAME_LENGTH} caracteres`);
+    } else if (value.trim() === '') {
+      setInputError('');
+    } else {
+      // Verificar si ya existe una sección con este nombre
+      const normalizedName = value.trim().toLowerCase();
+      if (sections.some(s => s.name.toLowerCase() === normalizedName)) {
+        setInputError('Ya existe una sección con este nombre');
+      } else {
+        setInputError('');
+      }
+    }
   };
 
-  // Añadir nueva sección
+  // Añadir nueva sección con validación
   const handleAddSection = () => {
-    if (newSectionName.trim() !== '') {
-      const newSection = {
-        id: Date.now(),
-        name: newSectionName.trim()
-      };
-      
-      const updatedSections = [...sections, newSection];
-      setSections(updatedSections);
-      setNewSectionName('');
-      setSearchText('');
-      
-      // Guardar en localStorage
-      addSection(newSection);
-      updateSections(updatedSections);
+    if (newSectionName.trim() === '') {
+      setInputError('El nombre no puede estar vacío');
+      return;
     }
+    
+    if (newSectionName.length > MAX_SECTION_NAME_LENGTH) {
+      setInputError(`El nombre no debe exceder ${MAX_SECTION_NAME_LENGTH} caracteres`);
+      return;
+    }
+    
+    // Verificar si ya existe una sección con el mismo nombre
+    const normalizedName = newSectionName.trim().toLowerCase();
+    if (sections.some(s => s.name.toLowerCase() === normalizedName)) {
+      setInputError('Ya existe una sección con este nombre');
+      return;
+    }
+    
+    const formattedName = validateSectionName(newSectionName);
+    const newSection = {
+      id: Date.now(),
+      name: formattedName
+    };
+    
+    const updatedSections = [...sections, newSection];
+    setSections(updatedSections);
+    setNewSectionName('');
+    setSearchText('');
+    setInputError('');
+    
+    // Guardar en localStorage
+    addSection(newSection);
+    updateSections(updatedSections);
+    
+    // También actualizar las secciones en el componente padre (del segundo código)
+    onAddSections(updatedSections);
   };
   
   // Manejar tecla Enter en input
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && newSectionName.trim() !== '') {
+    if (e.key === 'Enter' && newSectionName.trim() !== '' && !inputError) {
       handleAddSection();
     }
   };
@@ -208,6 +294,16 @@ const SectionDropdown = ({
     
     onAddSections(sections);
     onOpenChange(false);
+    setSelectedSections([]); // Del segundo código
+  };
+
+  // Cancelar - del segundo código
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
+    onOpenChange(false);
+    setSelectedSections([]);
   };
 
   // Eliminar secciones seleccionadas
@@ -219,6 +315,9 @@ const SectionDropdown = ({
       // Actualizar en localStorage
       selectedSections.forEach(id => removeSection(id));
       updateSections(updatedSections);
+      
+      // También actualizar las secciones en el componente padre (del segundo código)
+      onAddSections(updatedSections);
       
       setSelectedSections([]);
       setSelectAll(false);
@@ -232,6 +331,10 @@ const SectionDropdown = ({
     updatedSections.splice(fromIndex, 1);
     updatedSections.splice(toIndex, 0, movedItem);
     setSections(updatedSections);
+    
+    // Importante: actualizar también el localStorage y notificar al componente padre
+    updateSections(updatedSections);
+    onAddSections(updatedSections);
   };
   
   // Filtrar secciones basado en la búsqueda
@@ -241,7 +344,8 @@ const SectionDropdown = ({
   
   // Verificar si el texto de búsqueda podría ser una nueva sección
   const isNewSection = newSectionName.trim() !== '' && 
-    !sections.some(section => section.name.toLowerCase() === newSectionName.toLowerCase().trim());
+    !sections.some(section => section.name.toLowerCase() === newSectionName.toLowerCase().trim()) &&
+    !inputError;
 
   // Si no está abierto, no mostrar
   if (!isOpen) return null;
@@ -272,9 +376,13 @@ const SectionDropdown = ({
           value={newSectionName}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 outline-none"
+          className={`w-full border ${inputError ? 'border-red-500' : 'border-gray-300'} rounded-full px-4 py-2 pr-10 outline-none`}
           placeholder="Escriba el nombre de la nueva sección"
+          maxLength={MAX_SECTION_NAME_LENGTH}
         />
+        {inputError && (
+          <p className="text-red-500 text-xs mt-1 ml-2">{inputError}</p>
+        )}
         {isNewSection && (
           <button 
             onClick={handleAddSection}
@@ -331,7 +439,11 @@ const SectionDropdown = ({
       <div className="flex justify-between mt-4">
         <button 
           onClick={handleAccept}
-          className="bg-green-custom text-white py-1.5 px-8 rounded-full flex items-center text-sm hover:bg-green-700 transition-colors"
+          onMouseEnter={() => setHoverState({...hoverState, accept: true})}
+          onMouseLeave={() => setHoverState({...hoverState, accept: false})}
+          className={`bg-green-custom text-white py-1.5 px-8 rounded-full flex items-center text-sm hover:bg-green-700 transition-colors ${
+            hoverState.accept ? 'bg-green-700' : ''
+          }`}
         >
           <span className="mr-1">✓</span> Aceptar
         </button>
@@ -339,10 +451,14 @@ const SectionDropdown = ({
         <button 
           onClick={handleDeleteSelectedSections}
           disabled={selectedSections.length === 0}
+          onMouseEnter={() => setHoverState({...hoverState, delete: true})}
+          onMouseLeave={() => setHoverState({...hoverState, delete: false})}
           className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${
             selectedSections.length === 0 
               ? 'bg-gray-400 text-white cursor-not-allowed' 
-              : 'bg-orange-custom text-white hover:bg-orange-700'
+              : hoverState.delete 
+                ? 'bg-orange-700 text-white'
+                : 'bg-orange-custom text-white'
           }`}
         >
           <svg className="mr-1" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
