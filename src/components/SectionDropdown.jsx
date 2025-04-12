@@ -53,7 +53,7 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
         isDragging ? 'opacity-50' : 'opacity-100'
       }`}
     >
-      <div className="flex items-center max-w-[80%]">
+      <div className="flex items-center" style={{ maxWidth: "calc(100% - 30px)" }}>
         {/* Puntos para arrastrar */}
         <span className="text-gray-400 mr-2 cursor-grab flex-shrink-0">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -73,11 +73,12 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
         </span>
       </div>
       
-      {/* Checkbox */}
+      {/* Checkbox - Con ancho fijo para mantener alineación */}
       <div 
         className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 ${
           selected ? 'bg-dark-blue-custom' : 'bg-white'
         }`}
+        style={{ minWidth: "20px" }} // Asegura ancho mínimo
         onClick={() => onSelect(section.id)}
       >
         {selected && (
@@ -94,7 +95,7 @@ const SectionDropdown = ({
   isOpen, 
   onOpenChange, 
   onAddSections,
-  onCancel, // Añadido del segundo código
+  onCancel, 
   existingSections = [],
   anchorRef
 }) => {
@@ -112,11 +113,14 @@ const SectionDropdown = ({
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   
-  // Estado para el hover en los botones (del segundo código)
+  // Estado para el hover en los botones
   const [hoverState, setHoverState] = useState({
     delete: false,
     accept: false
   });
+  
+  // Determinar si el botón "Aceptar" debería estar habilitado
+  const isAcceptButtonEnabled = newSectionName.trim() !== '' || selectedSections.length > 0;
   
   // Sincronizar con existingSections si cambian
   useEffect(() => {
@@ -135,7 +139,7 @@ const SectionDropdown = ({
     }
   }, [existingSections]);
   
-  // Importante: Añadido del segundo código para escuchar cambios en localStorage
+  // Importante: Añadido para escuchar cambios en localStorage
   useEffect(() => {
     // Función para actualizar las secciones cuando cambia localStorage
     const handleSectionChange = () => {
@@ -252,7 +256,7 @@ const SectionDropdown = ({
     addSection(newSection);
     updateSections(updatedSections);
     
-    // También actualizar las secciones en el componente padre (del segundo código)
+    // También actualizar las secciones en el componente padre
     onAddSections(updatedSections);
   };
   
@@ -289,15 +293,18 @@ const SectionDropdown = ({
 
   // Confirmar la acción
   const handleAccept = () => {
+    // Solo proceder si el botón está habilitado
+    if (!isAcceptButtonEnabled) return;
+    
     // Sincronizar con localStorage antes de cerrar
     updateSections(sections);
     
     onAddSections(sections);
     onOpenChange(false);
-    setSelectedSections([]); // Del segundo código
+    setSelectedSections([]);
   };
 
-  // Cancelar - del segundo código
+  // Cancelar
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
@@ -316,7 +323,7 @@ const SectionDropdown = ({
       selectedSections.forEach(id => removeSection(id));
       updateSections(updatedSections);
       
-      // También actualizar las secciones en el componente padre (del segundo código)
+      // También actualizar las secciones en el componente padre
       onAddSections(updatedSections);
       
       setSelectedSections([]);
@@ -404,6 +411,7 @@ const SectionDropdown = ({
           className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer ${
             selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
           }`}
+          style={{ minWidth: "20px" }} // Asegura ancho mínimo
           onClick={handleSelectAll}
         >
           {selectAll && filteredSections.length > 0 && (
@@ -416,7 +424,7 @@ const SectionDropdown = ({
       
       {/* Lista de secciones con DnD */}
       <DndProvider backend={HTML5Backend}>
-        <div className="max-h-48 overflow-y-auto mb-4">
+        <div className="max-h-48 overflow-y-auto mb-4 overflow-x-hidden">
           {filteredSections.length === 0 ? (
             <p className="text-sm text-gray-500 italic">No hay secciones creadas</p>
           ) : (
@@ -439,10 +447,15 @@ const SectionDropdown = ({
       <div className="flex justify-between mt-4">
         <button 
           onClick={handleAccept}
-          onMouseEnter={() => setHoverState({...hoverState, accept: true})}
-          onMouseLeave={() => setHoverState({...hoverState, accept: false})}
-          className={`bg-green-custom text-white py-1.5 px-8 rounded-full flex items-center text-sm hover:bg-green-700 transition-colors ${
-            hoverState.accept ? 'bg-green-700' : ''
+          disabled={!isAcceptButtonEnabled}
+          onMouseEnter={() => isAcceptButtonEnabled && setHoverState({...hoverState, accept: true})}
+          onMouseLeave={() => isAcceptButtonEnabled && setHoverState({...hoverState, accept: false})}
+          className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${
+            !isAcceptButtonEnabled
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : hoverState.accept
+                ? 'bg-green-700 text-white'
+                : 'bg-green-custom text-white'
           }`}
         >
           <span className="mr-1">✓</span> Aceptar

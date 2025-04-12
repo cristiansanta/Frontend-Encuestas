@@ -1,8 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getSections, updateSections, addSection, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
+import { 
+  getSections, 
+  updateSections, 
+  addSection, 
+  getSelectedSection, 
+  saveSelectedSection 
+} from '../services/SectionsStorage';
+import refresh from '../assets/img/refresh.svg';
 import AddCategory from '../assets/img/Add_1.svg';
 import Ok from '../assets/img/Ok.svg';
-import refresh from '../assets/img/refresh.svg';
+
+// Constante para la longitud máxima del nombre de sección
+const MAX_SECTION_NAME_LENGTH = 50;
 
 const SectionSelector = ({ 
   onSectionSelect, 
@@ -14,9 +23,13 @@ const SectionSelector = ({
   const [sections, setSections] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [newSectionName, setNewSectionName] = useState('');
+  const [inputError, setInputError] = useState('');
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Determinar si el botón "Aceptar" debería estar habilitado
+  const isAcceptButtonEnabled = selectedSection !== null;
   
   // Cargar secciones y la sección seleccionada al inicio
   useEffect(() => {
@@ -51,6 +64,36 @@ const SectionSelector = ({
     }
   }, []);
 
+  // Escuchar cambios en localStorage para mantener sincronizado
+  useEffect(() => {
+    // Función para actualizar las secciones cuando cambia localStorage
+    const handleSectionChange = () => {
+      const storedSections = getSections();
+      setSections(storedSections);
+    };
+    
+    // Función para manejar el evento personalizado de eliminación
+    const handleSectionRemoved = (event) => {
+      setSections(event.detail.updatedSections);
+    };
+    
+    // Escuchar cambios en localStorage
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'survey_sections') {
+        handleSectionChange();
+      }
+    });
+    
+    // Escuchar el evento personalizado
+    window.addEventListener('sectionRemoved', handleSectionRemoved);
+    
+    // Limpiar event listeners al desmontar
+    return () => {
+      window.removeEventListener('storage', handleSectionChange);
+      window.removeEventListener('sectionRemoved', handleSectionRemoved);
+    };
+  }, []);
+
   // Cerrar dropdown cuando se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -75,12 +118,18 @@ const SectionSelector = ({
     }
   }, [isDropdownOpen]);
 
+  // Validar y formatear el nombre de sección
+  const validateSectionName = (name) => {
+    return name.trim().replace(/\s+/g, ' ').substring(0, MAX_SECTION_NAME_LENGTH);
+  };
+
   // Alternar el dropdown
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
     if (!isDropdownOpen) {
       setSearchText('');
       setNewSectionName('');
+      setInputError('');
     }
   };
 
@@ -89,32 +138,66 @@ const SectionSelector = ({
     const value = e.target.value;
     setSearchText(value);
     setNewSectionName(value);
+    
+    // Validar longitud en tiempo real
+    if (value.length > MAX_SECTION_NAME_LENGTH) {
+      setInputError(`El nombre no debe exceder ${MAX_SECTION_NAME_LENGTH} caracteres`);
+    } else if (value.trim() === '') {
+      setInputError('');
+    } else {
+      // Verificar si ya existe una sección con este nombre
+      const normalizedName = value.trim().toLowerCase();
+      if (sections.some(s => s.name.toLowerCase() === normalizedName)) {
+        setInputError('Ya existe una sección con este nombre');
+      } else {
+        setInputError('');
+      }
+    }
+  };
+
+  // Añadir nueva sección
+  const handleAddSection = () => {
+    if (newSectionName.trim() === '') {
+      setInputError('El nombre no puede estar vacío');
+      return;
+    }
+    
+    if (newSectionName.length > MAX_SECTION_NAME_LENGTH) {
+      setInputError(`El nombre no debe exceder ${MAX_SECTION_NAME_LENGTH} caracteres`);
+      return;
+    }
+    
+    // Verificar si ya existe una sección con el mismo nombre
+    const normalizedName = newSectionName.trim().toLowerCase();
+    if (sections.some(s => s.name.toLowerCase() === normalizedName)) {
+      setInputError('Ya existe una sección con este nombre');
+      return;
+    }
+    
+    const formattedName = validateSectionName(newSectionName);
+    const newSection = {
+      id: Date.now(),
+      name: formattedName
+    };
+    
+    const updatedSections = [...sections, newSection];
+    setSections(updatedSections);
+    setNewSectionName('');
+    setSearchText('');
+    setInputError('');
+    
+    // Guardar en localStorage
+    addSection(newSection);
+    updateSections(updatedSections);
+    
+    // Seleccionar la nueva sección automaticamente
+    setSelectedSection(newSection);
   };
 
   // Manejar tecla Enter para agregar nueva sección
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && newSectionName.trim() !== '') {
-      addNewSection();
-    }
-  };
-
-  // Agregar nueva sección
-  const addNewSection = () => {
-    if (newSectionName.trim() !== '') {
-      const newSection = {
-        id: Date.now(),
-        name: newSectionName.trim()
-      };
-      
-      const updatedSections = [...sections, newSection];
-      setSections(updatedSections);
-      
-      // Guardar en localStorage
-      addSection(newSection);
-      updateSections(updatedSections);
-      
-      setNewSectionName('');
-      setSearchText('');
+    if (e.key === 'Enter' && newSectionName.trim() !== '' && !inputError) {
+      handleAddSection();
     }
   };
 
@@ -139,16 +222,18 @@ const SectionSelector = ({
   const handleCancel = () => {
     setSelectedSection(initialSelectedSection);
     setIsDropdownOpen(false);
+    setInputError('');
   };
+  
+  // Verificar si el texto de búsqueda podría ser una nueva sección
+  const isNewSection = newSectionName.trim() !== '' && 
+    !sections.some(section => section.name.toLowerCase() === newSectionName.toLowerCase().trim()) &&
+    !inputError;
 
   // Filtrar secciones basado en la búsqueda
   const filteredSections = sections.filter(section => 
     section.name.toLowerCase().includes(searchText.toLowerCase())
   );
-
-  // Verificar si el texto de búsqueda podría ser una nueva sección
-  const isNewSection = newSectionName.trim() !== '' && 
-    !sections.some(section => section.name.toLowerCase() === newSectionName.toLowerCase().trim());
 
   return (
     <div className="relative">
@@ -156,13 +241,18 @@ const SectionSelector = ({
         {/* Mostrar la sección seleccionada (al lado del botón) */}
         {selectedSection && (
           <div className="flex items-center bg-green-100 rounded-full overflow-hidden">
-          <span className="bg-green-custom px-3 py-2 flex items-center justify-center">
-            <img src={Ok} alt="Check" className="w-6 h-6" />
-          </span>
-          <span className="px-4 py-2 font-work-sans text-base font-semibold text-dark-blue-custom">
-            {selectedSection.name}
-          </span>
-        </div>
+            <span className="bg-green-custom px-3 py-2 flex items-center justify-center">
+              <img src={Ok} alt="Check" className="w-6 h-6" />
+            </span>
+            <span className="px-4 py-2 font-work-sans text-base font-semibold text-dark-blue-custom max-w-[200px]">
+              <span 
+                className="truncate block"
+                title={selectedSection.name.length > 20 ? selectedSection.name : ''}
+              >
+                {selectedSection.name}
+              </span>
+            </span>
+          </div>
         )}
       
         {/* Botón principal */}
@@ -209,12 +299,16 @@ const SectionSelector = ({
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Buscar sección o agregar una nueva"
-              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 outline-none text-sm"
+              className={`w-full border ${inputError ? 'border-red-500' : 'border-gray-300'} rounded-full px-4 py-2 pr-10 outline-none text-sm`}
+              maxLength={MAX_SECTION_NAME_LENGTH}
             />
+            {inputError && (
+              <p className="text-red-500 text-xs mt-1 ml-2">{inputError}</p>
+            )}
             {isNewSection && (
               <button 
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full p-1"
-                onClick={addNewSection}
+                onClick={handleAddSection}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="10" stroke="#0A3761" strokeWidth="2"/>
@@ -231,7 +325,7 @@ const SectionSelector = ({
           </div>
           
           {/* Lista de secciones con radio buttons */}
-          <div className="max-h-60 overflow-y-auto mb-4">
+          <div className="max-h-60 overflow-y-auto mb-4 overflow-x-hidden">
             {filteredSections.length === 0 ? (
               <p className="text-sm text-gray-500 italic">No hay secciones que coincidan con la búsqueda</p>
             ) : (
@@ -241,16 +335,18 @@ const SectionSelector = ({
                   className="flex items-center justify-between py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-50"
                   onClick={() => handleSectionSelect(section)}
                 >
-                  <span className="text-dark-blue-custom">
+                  <span className="text-dark-blue-custom truncate" style={{ maxWidth: "calc(100% - 30px)" }}
+                        title={section.name.length > 20 ? section.name : ''}>
                     {section.name}
                   </span>
                   
-                  {/* Radio button */}
+                  {/* Radio button - con ancho fijo para mantener alineación */}
                   <div 
-                    className={`w-5 h-5 border-2 border-dark-blue-custom rounded-full 
+                    className={`w-5 h-5 border-2 border-dark-blue-custom rounded-full flex-shrink-0
                       ${selectedSection && selectedSection.id === section.id 
                         ? 'flex items-center justify-center' 
                         : ''}`}
+                    style={{ minWidth: "20px" }}
                   >
                     {selectedSection && selectedSection.id === section.id && (
                       <div className="w-3 h-3 bg-dark-blue-custom rounded-full"></div>
@@ -272,9 +368,9 @@ const SectionSelector = ({
             
             <button 
               onClick={handleAccept}
-              disabled={!selectedSection}
+              disabled={!isAcceptButtonEnabled}
               className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${
-                !selectedSection 
+                !isAcceptButtonEnabled 
                   ? 'bg-gray-400 text-white cursor-not-allowed' 
                   : 'bg-green-custom text-white hover:bg-green-700'
               }`}
