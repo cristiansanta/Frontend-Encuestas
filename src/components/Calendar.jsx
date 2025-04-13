@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import cancel from '../assets/img/cancel.svg';
 import ok from '../assets/img/Ok.svg';
-const Calendar = ({ 
+const Calendar = ({
   initialDate = new Date(),
   onDateSelect,
   buttonLabel,
@@ -10,19 +10,22 @@ const Calendar = ({
   minDate = null,
   isEndDate = false,
   isOpen = false,
-  onOpenChange = () => {} // Función para controlar apertura/cierre desde componente padre
+  onOpenChange = () => { } // Función para controlar apertura/cierre desde componente padre
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [localSelectedDate, setLocalSelectedDate] = useState(selectedDate || initialDate);
   const calendarRef = useRef(null);
-  
-  // Establecer fecha mínima (por defecto, la fecha actual para fechas de finalización)
+
+  // Establecer fecha mínima
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Normalizar la hora actual a las 00:00:00
-  
-  const effectiveMinDate = isEndDate ? 
-    (minDate || today) : // Si es fecha de finalización, mínimo es hoy
-    minDate; // Si no, usar la minDate proporcionada si existe
+
+  // Modificación principal: para fecha de finalización, usar el máximo entre la fecha actual y la fecha de inicio
+  // Esto asegura que no se pueda seleccionar una fecha de finalización anterior a la fecha de inicio
+  // ni anterior a la fecha actual
+  const effectiveMinDate = isEndDate ?
+    (minDate && new Date(minDate) > today ? minDate : today) : // Si es fecha de finalización, usar el máximo entre minDate y today
+    minDate; // Si es fecha de inicio, usar la minDate proporcionada si existe
 
   // Formatear fecha a DD/MM/YY para mostrar en el botón
   const formatDate = (date) => {
@@ -46,29 +49,29 @@ const Calendar = ({
   const isToday = (date) => {
     const today = new Date();
     return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
   };
 
   // Comprobar si dos fechas son el mismo día
   const isSameDay = (date1, date2) => {
     if (!date1 || !date2) return false;
     return date1.getDate() === date2.getDate() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear();
   };
-  
+
   // Comprobar si una fecha es anterior a otra fecha
   const isBeforeDate = (date, minDate) => {
     if (!date || !minDate) return false;
-    
+
     // Normalizar ambas fechas a las 00:00:00 para comparar solo día/mes/año
     const dateToCompare = new Date(date);
     dateToCompare.setHours(0, 0, 0, 0);
-    
+
     const minDateTime = new Date(minDate);
     minDateTime.setHours(0, 0, 0, 0);
-    
+
     return dateToCompare < minDateTime;
   };
 
@@ -76,22 +79,22 @@ const Calendar = ({
   const generateCalendar = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
-    
+
     const daysInMonth = getDaysInMonth(year, month);
     const firstDayOfMonth = getFirstDayOfMonth(year, month);
-    
+
     const days = [];
-    
+
     // Días del mes anterior
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ day: null, currentMonth: false });
     }
-    
+
     // Días del mes actual
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({ day: i, currentMonth: true, date: new Date(year, month, i) });
     }
-    
+
     return days;
   };
 
@@ -172,10 +175,33 @@ const Calendar = ({
   // Nombres de los días de la semana
   const weekDays = ["DOM", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB"];
 
+  // Al abrir el calendario de finalización, asegúrate de que el mes mostrado sea adecuado
+  useEffect(() => {
+    if (isOpen && isEndDate) {
+      // Determinar la fecha mínima efectiva para finalización
+      const minEffectiveDate = minDate && new Date(minDate) > today ? new Date(minDate) : new Date(today);
+
+      // Si el mes actual del calendario es anterior al mes mínimo efectivo, actualízalo
+      if (
+        currentMonth.getFullYear() < minEffectiveDate.getFullYear() ||
+        (currentMonth.getFullYear() === minEffectiveDate.getFullYear() &&
+          currentMonth.getMonth() < minEffectiveDate.getMonth())
+      ) {
+        // Establecer al mes mínimo efectivo
+        setCurrentMonth(new Date(minEffectiveDate.getFullYear(), minEffectiveDate.getMonth(), 1));
+      }
+
+      // Si la fecha seleccionada localmente es anterior a la fecha mínima, actualizarla
+      if (isBeforeDate(localSelectedDate, minEffectiveDate)) {
+        setLocalSelectedDate(new Date(minEffectiveDate));
+      }
+    }
+  }, [isOpen, isEndDate, minDate]);
+
   return (
     <div className="relative">
       {/* Botón que muestra la fecha y activa el calendario */}
-      <button 
+      <button
         className="hidden md:flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
         onClick={() => onOpenChange(!isOpen)}
       >
@@ -186,18 +212,18 @@ const Calendar = ({
           <span className="font-work-sans text-lg font-semibold text-dark-blue-custom mr-2">
             {selectedDate ? formatDate(new Date(selectedDate)) : formatDate(new Date())}
           </span>
-          <img 
-            src={calendarIcon} 
-            alt="Calendario" 
-            className="w-5 h-5" 
+          <img
+            src={calendarIcon}
+            alt="Calendario"
+            className="w-5 h-5"
           />
         </span>
       </button>
-      
+
       {/* Calendario desplegable con nuevo diseño */}
       {isOpen && (
-        <div 
-          ref={calendarRef} 
+        <div
+          ref={calendarRef}
           className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-96"
         >
           {/* Cabecera con título */}
@@ -205,20 +231,32 @@ const Calendar = ({
             <h2 className="text-xl font-bold text-dark-blue-custom">{getCalendarTitle()}</h2>
             <p className="text-sm text-gray-600">{getCalendarSubtitle()}</p>
           </div>
-          
+
           {/* Navegación del mes */}
           <div className="flex items-center justify-between mb-2 relative">
-            <button 
-              onClick={prevMonth} 
+            <button
+              onClick={prevMonth}
               className="p-1 text-blue-900 hover:text-blue-700"
+              // Deshabilitar el botón de mes anterior si estamos en fecha de finalización
+              // y el mes anterior es antes del mes mínimo efectivo
+              disabled={isEndDate && (
+                new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1) <
+                new Date(
+                  (minDate && new Date(minDate) > today) ?
+                    new Date(minDate).getFullYear() : today.getFullYear(),
+                  (minDate && new Date(minDate) > today) ?
+                    new Date(minDate).getMonth() : today.getMonth(),
+                  1
+                )
+              )}
             >
               &lt;
             </button>
             <div className="text-lg font-bold text-blue-900">
               {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </div>
-            <button 
-              onClick={nextMonth} 
+            <button
+              onClick={nextMonth}
               className="p-1 text-blue-900 hover:text-blue-700"
             >
               &gt;
@@ -226,7 +264,7 @@ const Calendar = ({
             {/* Línea horizontal debajo del mes */}
             <div className="absolute w-full border-b border-gray-200 -bottom-1 left-0"></div>
           </div>
-          
+
           {/* Días de la semana */}
           <div className="grid grid-cols-7 gap-1 mb-1">
             {weekDays.map((day, index) => (
@@ -235,29 +273,27 @@ const Calendar = ({
               </div>
             ))}
           </div>
-          
+
           {/* Días del mes */}
           <div className="grid grid-cols-7 gap-1 mb-3">
             {generateCalendar(currentMonth).map((day, index) => (
-              <div 
-                key={index} 
-                className={`text-center p-1 relative ${
-                  !day.currentMonth ? "invisible" : ""
-                }`}
+              <div
+                key={index}
+                className={`text-center p-1 relative ${!day.currentMonth ? "invisible" : ""
+                  }`}
               >
                 {day.currentMonth && (
                   <button
                     onClick={() => handleLocalDateSelect(day.date)}
                     disabled={effectiveMinDate && isBeforeDate(day.date, effectiveMinDate)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                      isSameDay(day.date, localSelectedDate)
-                        ? "bg-green-custom text-white"
-                        : isToday(day.date)
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSameDay(day.date, localSelectedDate)
+                      ? "bg-green-custom text-white"
+                      : isToday(day.date)
                         ? "bg-green-custom text-white" // Día actual en verde con texto blanco
                         : effectiveMinDate && isBeforeDate(day.date, effectiveMinDate)
-                        ? "text-gray-300 cursor-not-allowed" // Fechas deshabilitadas en gris claro
-                        : "hover:bg-gray-100"
-                    }`}
+                          ? "text-gray-300 cursor-not-allowed" // Fechas deshabilitadas en gris claro
+                          : "hover:bg-gray-100"
+                      }`}
                   >
                     {day.day}
                   </button>
@@ -265,20 +301,20 @@ const Calendar = ({
               </div>
             ))}
           </div>
-          
+
           {/* Botones de acción */}
           <div className="flex justify-center gap-16 mt-1">
-            <button 
+            <button
               onClick={cancelSelection}
               className="bg-purple-custom text-white px-3 py-1.5 rounded-full flex items-center text-sm"
             >
-              <img src={cancel} alt="cancelar" width="18" height="18" className="mr-2"/> Cancelar
+              <img src={cancel} alt="cancelar" width="18" height="18" className="mr-2" /> Cancelar
             </button>
-            <button 
+            <button
               onClick={confirmSelection}
               className="bg-green-custom text-white px-3 py-1.5 rounded-full flex items-center text-sm"
             >
-              <img src={ok} alt="Aceptar" width="18" height="18" className="mr-2"/>Aceptar
+              <img src={ok} alt="Aceptar" width="18" height="18" className="mr-2" />Aceptar
             </button>
           </div>
         </div>
