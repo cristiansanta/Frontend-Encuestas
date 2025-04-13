@@ -394,7 +394,7 @@ const SectionDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[450px]"
+      className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[515px]"
       style={{
         top: anchorRef.current ? anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 5 : '0px',
         left: anchorRef.current ? anchorRef.current.offsetLeft : '0px',
@@ -418,7 +418,7 @@ const SectionDropdown = ({
           value={newSectionName}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className={`w-full border ${inputError ? 'border-red-500' : 'border-gray-300'} rounded-full px-4 py-2 pr-10 outline-none`}
+          className={`w-full border ${inputError ? 'border-red-500' : 'border-gray-300'} rounded-full px-4 py-2 pr-10 outline-none focus:border-dark-blue-custom transition-colors`}
           placeholder="Escriba el nombre de la nueva sección"
           maxLength={MAX_SECTION_NAME_LENGTH}
           style={{ fontFamily: "'Work Sans', sans-serif" }}
@@ -426,40 +426,39 @@ const SectionDropdown = ({
         {inputError && (
           <p className="text-red-500 text-xs mt-1 ml-2">{inputError}</p>
         )}
-        {isNewSection && (
-          <button
-            onClick={handleAddSection}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-dark-blue-custom"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-              <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-        )}
+        <button
+          onClick={isNewSection ? handleAddSection : undefined}
+          className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${isNewSection ? 'text-dark-blue-custom' : 'text-gray-400'}`}
+          disabled={!isNewSection}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+            <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
 
-      {/* Encabezado con título y checkbox "seleccionar todos" */}
-      <div className="flex items-center justify-between font-bold text-dark-blue-custom mb-2">
-        <span>Nombre de sección</span>
-        <div
-          className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer mr-3 ${selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
-            }`}
-          style={{ minWidth: "20px" }} // Asegura ancho mínimo
-          onClick={handleSelectAll}
-        >
-          {selectAll && filteredSections.length > 0 && (
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </div>
-      </div>
 
       {/* Lista de secciones con DnD */}
       <DndProvider backend={HTML5Backend}>
         <div className="max-h-48 overflow-y-auto mb-4 overflow-x-hidden">
+          {/* Encabezado con título y checkbox "seleccionar todos" */}
+          <div className="flex items-center justify-between font-bold text-dark-blue-custom sticky top-0 bg-white border-b border-gray-200 py-2 mb-1 z-10">
+            <span>Nombre de sección</span>
+            <div
+              className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer mr-3 ${selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
+                }`}
+              style={{ minWidth: "20px" }} // Asegura ancho mínimo
+              onClick={handleSelectAll}
+            >
+              {selectAll && filteredSections.length > 0 && (
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+          </div>
           {filteredSections.length === 0 ? (
             <p className="text-sm text-gray-500 italic">No hay secciones creadas</p>
           ) : (
