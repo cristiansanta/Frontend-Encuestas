@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-
+import cancel from '../assets/img/cancel.svg';
+import ok from '../assets/img/Ok.svg';
 const Calendar = ({ 
   initialDate = new Date(),
   onDateSelect,
@@ -266,18 +267,18 @@ const Calendar = ({
           </div>
           
           {/* Botones de acción */}
-          <div className="flex justify-between mt-1">
+          <div className="flex justify-center gap-16 mt-1">
             <button 
               onClick={cancelSelection}
               className="bg-purple-custom text-white px-3 py-1.5 rounded-full flex items-center text-sm"
             >
-              ✕ Cancelar
+              <img src={cancel} alt="cancelar" width="18" height="18" className="mr-2"/> Cancelar
             </button>
             <button 
               onClick={confirmSelection}
               className="bg-green-custom text-white px-3 py-1.5 rounded-full flex items-center text-sm"
             >
-              ✓ Aceptar
+              <img src={ok} alt="Aceptar" width="18" height="18" className="mr-2"/>Aceptar
             </button>
           </div>
         </div>

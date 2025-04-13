@@ -6,9 +6,10 @@ import {
   getSelectedSection, 
   saveSelectedSection 
 } from '../services/SectionsStorage';
+import cancel from '../assets/img/cancel.svg';
+import ok from '../assets/img/Ok.svg';
 import refresh from '../assets/img/refresh.svg';
 import AddCategory from '../assets/img/Add_1.svg';
-import Ok from '../assets/img/Ok.svg';
 
 // Constante para la longitud máxima del nombre de sección
 const MAX_SECTION_NAME_LENGTH = 50;
@@ -255,7 +256,7 @@ const SectionSelector = ({
         {selectedSection && (
           <div className="flex items-center bg-green-100 rounded-full overflow-hidden">
             <span className="bg-green-custom px-3 py-2 flex items-center justify-center">
-              <img src={Ok} alt="Check" className="w-6 h-6" />
+              <img src={ok} alt="Check" className="w-6 h-6" />
             </span>
             <span className="px-4 py-2 font-work-sans text-base font-semibold text-dark-blue-custom max-w-[200px]">
               <span 
@@ -371,23 +372,25 @@ const SectionSelector = ({
           </div>
           
           {/* Botones de acción */}
-          <div className="flex justify-between">
+          <div className="flex justify-center gap-16 mt-6">
             <button 
               onClick={handleCancel}
-              className="bg-purple-custom text-white py-1.5 px-8 rounded-full flex items-center text-sm hover:bg-purple-800 transition-colors"
+              className="bg-purple-custom text-white py-1.5 px-5 rounded-full flex items-center text-sm hover:bg-purple-800 transition-colors"
             >
+              <img src={cancel} alt="cancelar" width="18" height="18" className="mr-2"/>
               Cancelar
             </button>
             
             <button 
               onClick={handleAccept}
               disabled={!isAcceptButtonEnabled}
-              className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${
+              className={`py-1.5 px-5 rounded-full flex items-center text-sm transition-colors ${
                 !isAcceptButtonEnabled 
                   ? 'bg-gray-400 text-white cursor-not-allowed' 
                   : 'bg-green-custom text-white hover:bg-green-700'
               }`}
             >
+              <img src={ok} alt="Aceptar" width="18" height="18" className="mr-2"/>
               Aceptar
             </button>
           </div>

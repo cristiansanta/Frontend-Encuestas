@@ -5,6 +5,8 @@ import {
   addSection,
   removeSection
 } from '../services/SectionsStorage';
+import ok from '../assets/img/Ok.svg';
+import trashcan from '../assets/img/trashCan.svg';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -52,9 +54,9 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
       className={`flex items-center justify-between py-3 border-b border-gray-200 ${isDragging ? 'opacity-50' : 'opacity-100'
         }`}
     >
-      <div className="flex items-center" style={{ maxWidth: "calc(100% - 30px)" }}>
-        {/* Puntos para arrastrar */}
-        <span className="text-gray-400 mr-2 cursor-grab flex-shrink-0">
+      <div className="flex items-center" style={{ maxWidth: "calc(100% - 30px)", fontFamily: "'Work Sans', sans-serif" }}>
+        {/* Puntos para arrastrar - MODIFICADO para que coincida con la segunda imagen */}
+        <span className="text-dark-blue-custom mr-2 cursor-grab flex-shrink-0">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <circle cx="4" cy="5" r="1.5" />
             <circle cx="4" cy="10" r="1.5" />
@@ -395,7 +397,8 @@ const SectionDropdown = ({
       className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[450px]"
       style={{
         top: anchorRef.current ? anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 5 : '0px',
-        left: anchorRef.current ? anchorRef.current.offsetLeft : '0px'
+        left: anchorRef.current ? anchorRef.current.offsetLeft : '0px',
+        fontFamily: "'Work Sans', sans-serif"
       }}
     >
       {/* Encabezado */}
@@ -418,6 +421,7 @@ const SectionDropdown = ({
           className={`w-full border ${inputError ? 'border-red-500' : 'border-gray-300'} rounded-full px-4 py-2 pr-10 outline-none`}
           placeholder="Escriba el nombre de la nueva sección"
           maxLength={MAX_SECTION_NAME_LENGTH}
+          style={{ fontFamily: "'Work Sans', sans-serif" }}
         />
         {inputError && (
           <p className="text-red-500 text-xs mt-1 ml-2">{inputError}</p>
@@ -475,20 +479,22 @@ const SectionDropdown = ({
       </DndProvider>
 
       {/* Botones de acción */}
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-center mt-6 gap-16">
         <button
           onClick={handleAccept}
           disabled={!isAcceptButtonEnabled}
           onMouseEnter={() => isAcceptButtonEnabled && setHoverState({ ...hoverState, accept: true })}
           onMouseLeave={() => isAcceptButtonEnabled && setHoverState({ ...hoverState, accept: false })}
-          className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${!isAcceptButtonEnabled
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : hoverState.accept
-                ? 'bg-green-700 text-white'
-                : 'bg-green-custom text-white'
+          className={`py-1.5 px-5 rounded-full flex items-center text-sm transition-colors ${!isAcceptButtonEnabled
+            ? 'bg-gray-400 text-white cursor-not-allowed'
+            : hoverState.accept
+              ? 'bg-green-700 text-white'
+              : 'bg-green-custom text-white'
             }`}
         >
-          <span className="mr-1">✓</span> Aceptar
+          <span className="mr-2">
+            <img src={ok} alt="Aceptar" width="18" height="18" />
+          </span> Aceptar
         </button>
 
         <button
@@ -496,18 +502,14 @@ const SectionDropdown = ({
           disabled={selectedSections.length === 0}
           onMouseEnter={() => setHoverState({ ...hoverState, delete: true })}
           onMouseLeave={() => setHoverState({ ...hoverState, delete: false })}
-          className={`py-1.5 px-8 rounded-full flex items-center text-sm transition-colors ${selectedSections.length === 0
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : hoverState.delete
-                ? 'bg-orange-700 text-white'
-                : 'bg-orange-custom text-white'
+          className={`py-1.5 px-5 rounded-full flex items-center text-sm transition-colors ${selectedSections.length === 0
+            ? 'bg-gray-400 text-white cursor-not-allowed'
+            : hoverState.delete
+              ? 'bg-orange-700 text-white'
+              : 'bg-orange-custom text-white'
             }`}
         >
-          <svg className="mr-1" width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 4H14" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            <path d="M5 4V3C5 2.44772 5.44772 2 6 2H10C10.5523 2 11 2.44772 11 3V4" stroke="white" strokeWidth="2" />
-            <path d="M12 4V13C12 13.5523 11.5523 14 11 14H5C4.44772 14 4 13.5523 4 13V4" stroke="white" strokeWidth="2" />
-          </svg>
+          <img src={trashcan} alt="Eliminar" width="18" height="18" className="mr-2" />
           Eliminar
         </button>
       </div>
