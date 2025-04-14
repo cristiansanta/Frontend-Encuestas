@@ -442,7 +442,7 @@ const SectionDropdown = ({
 
       {/* Lista de secciones con DnD */}
       <DndProvider backend={HTML5Backend}>
-        <div className="max-h-48 overflow-y-auto mb-4 overflow-x-hidden">
+        <div className="max-h-48 overflow-y-auto mb-4 overflow-x-hidden scrollbar-image-match">
           {/* Encabezado con título y checkbox "seleccionar todos" */}
           <div className="flex items-center justify-between font-bold text-dark-blue-custom sticky top-0 bg-white border-b border-gray-200 py-2 mb-1 z-10">
             <span>Nombre de sección</span>
