@@ -254,32 +254,36 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full">
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? {minHeight: '70px'} : {}}>
         {/* Título de la pregunta - Convertido a input */}
-        <div className="flex items-center mb-4">
+        <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
           <div className="w-2/3">
             <input
               type="text"
               value={title}
               onChange={handleTitleChange}
               placeholder="Titulo de pregunta"
-              className="font-work-sans text-3xl font-bold text-dark-blue-custom w-full border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
+              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${
+                !isCollapsed ? 'border-b-2 border-gray-300 focus:border-blue-custom' : ''
+              }`}
             />
           </div>
           <div className="w-1/3 flex items-center justify-end gap-3">
-            <button
-              className="flex items-center bg-blue-custom rounded-full overflow-hidden"
-              onClick={() => console.log("Importar desde banco")}
-            >
-              <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
-                <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
-              </span>
-              <span className="bg-yellow-custom px-4 py-1">
-                <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                  Importar desde el Banco de Preguntas
+            {!isCollapsed && (
+              <button
+                className="flex items-center bg-blue-custom rounded-full overflow-hidden"
+                onClick={() => console.log("Importar desde banco")}
+              >
+                <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
+                  <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
                 </span>
-              </span>
-            </button>
+                <span className="bg-yellow-custom px-4 py-1">
+                  <span className="font-work-sans text-sm font-semibold text-blue-custom">
+                    Importar desde el Banco de Preguntas
+                  </span>
+                </span>
+              </button>
+            )}
 
             <div className="rounded-full flex items-center">
               <button
@@ -380,11 +384,11 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         />
       </div>
 
-      {/* Botón para agregar pregunta hija (condicional) */}
+      {/* Botón para agregar pregunta hija (condicional) - MODIFICADO para que tenga ancho reducido pero alineado a la izquierda */}
       {isParentQuestion && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-end">
           <button
-            className="w-full py-3 bg-yellow-custom rounded-xl flex items-center justify-start pl-6 gap-2 hover:bg-yellow-400 transition-colors relative"
+            className="w-5/6 py-3 bg-yellow-custom rounded-xl flex items-center justify-start pl-6 gap-2 hover:bg-yellow-400 transition-colors relative"
             onClick={handleAddChildQuestion}
           >
             <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta hija</span>
