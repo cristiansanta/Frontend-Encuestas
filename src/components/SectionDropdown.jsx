@@ -16,6 +16,7 @@ const MAX_SECTION_NAME_LENGTH = 50;
 // Componente para el elemento arrastrable
 const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => {
   const ref = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Configuración para arrastrar
   const [{ isDragging }, drag] = useDrag({
@@ -78,10 +79,15 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
 
       {/* Checkbox con posición fija */}
       <div
-        className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 mr-3 ${selected ? 'bg-dark-blue-custom' : 'bg-white'
-          }`}
+        className={`w-5 h-5 border-2 rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 mr-3 
+          ${selected && isHovered ? 'bg-cyan-custom border-cyan-custom' :
+            selected ? 'bg-green-custom border-green-custom' :
+              'bg-white border-dark-blue-custom'} 
+          transition-colors duration-200`}
         style={{ minWidth: "20px" }}
         onClick={() => onSelect(section.id)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {selected && (
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
