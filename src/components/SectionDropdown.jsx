@@ -51,11 +51,13 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
   return (
     <div
       ref={ref}
-      className={`flex items-center justify-between py-3 border-b border-gray-200 ${isDragging ? 'opacity-50' : 'opacity-100'
-        }`}
+      className={`relative flex items-center justify-between py-3 ${isDragging ? 'opacity-50' : 'opacity-100'}`}
     >
-      <div className="flex items-center" style={{ maxWidth: "calc(100% - 30px)", fontFamily: "'Work Sans', sans-serif" }}>
-        {/* Puntos para arrastrar - MODIFICADO para que coincida con la segunda imagen */}
+      {/* Línea divisoria con ancho controlado para que no llegue hasta el final */}
+      <div className="absolute bottom-0 left-0 right-3 border-b border-gray-300"></div>
+
+      <div className="flex items-center" style={{ maxWidth: "calc(100% - 40px)", fontFamily: "'Work Sans', sans-serif" }}>
+        {/* Puntos para arrastrar */}
         <span className="text-dark-blue-custom mr-2 cursor-grab flex-shrink-0">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <circle cx="4" cy="5" r="1.5" />
@@ -74,11 +76,11 @@ const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => 
         </span>
       </div>
 
-      {/* Checkbox - Con ancho fijo para mantener alineación */}
+      {/* Checkbox con posición fija */}
       <div
         className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer flex-shrink-0 mr-3 ${selected ? 'bg-dark-blue-custom' : 'bg-white'
           }`}
-        style={{ minWidth: "20px" }} // Asegura ancho mínimo
+        style={{ minWidth: "20px" }}
         onClick={() => onSelect(section.id)}
       >
         {selected && (
@@ -444,7 +446,9 @@ const SectionDropdown = ({
       <DndProvider backend={HTML5Backend}>
         <div className="max-h-48 overflow-y-auto mb-4 overflow-x-hidden scrollbar-image-match">
           {/* Encabezado con título y checkbox "seleccionar todos" */}
-          <div className="flex items-center justify-between font-bold text-dark-blue-custom sticky top-0 bg-white border-b border-gray-200 py-2 mb-1 z-10">
+          <div className="flex items-center justify-between font-bold text-dark-blue-custom sticky top-0 bg-white py-2 mb-1 z-10">
+            {/* Línea divisoria para el encabezado */}
+            <div className="absolute bottom-0 left-0 right-3 border-b border-gray-300"></div>
             <span>Nombre de sección</span>
             <div
               className={`w-5 h-5 border-2 border-dark-blue-custom rounded-md flex items-center justify-center cursor-pointer mr-3 ${selectAll && filteredSections.length > 0 ? 'bg-dark-blue-custom' : 'bg-white'
