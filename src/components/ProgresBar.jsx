@@ -80,7 +80,7 @@ const ProgressBar = ({ currentView }) => {
                 <div
                   className={`flex items-center relative ${
                     (step.completed === true && activeStep > step.id)
-                      ? 'font-work-sans font-bold bg-dark-blue-custom text-white'
+                      ? 'font-work-sans bg-dark-blue-custom text-white'
                       : activeStep === step.id
                       ? 'font-work-sans font-bold bg-yellow-custom text-dark-blue-custom'
                       : 'font-work-sans bg-gray-custom'

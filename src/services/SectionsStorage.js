@@ -49,6 +49,7 @@ export const addSection = (section) => {
     if (!exists) {
       currentSections.push(section);
       saveSections(currentSections);
+      notifySectionsChange(currentSections);
     }
     
     return true;
@@ -88,7 +89,11 @@ export const addMultipleSections = (newSections) => {
  * @returns {Boolean} - True si se actualizaron correctamente
  */
 export const updateSections = (sections) => {
-  return saveSections(sections);
+  const result = saveSections(sections);
+  if (result) {
+    notifySectionsChange(sections);
+  }
+  return result;
 };
 
 /**
@@ -100,7 +105,19 @@ export const removeSection = (sectionId) => {
   try {
     const currentSections = getSections();
     const updatedSections = currentSections.filter(s => s.id !== sectionId);
-    saveSections(updatedSections);
+    
+    // Guardar directamente para evitar problemas de sincronización
+    localStorage.setItem(SECTIONS_STORAGE_KEY, JSON.stringify(updatedSections));
+    
+    // Disparar evento de storage para que otros componentes se enteren
+    // Esto es útil para componentes en diferentes contextos
+    const event = new StorageEvent('storage', {
+      key: SECTIONS_STORAGE_KEY,
+      newValue: JSON.stringify(updatedSections),
+      url: window.location.href
+    });
+    window.dispatchEvent(event);
+    
     return true;
   } catch (error) {
     console.error('Error al eliminar sección:', error);
@@ -165,4 +182,10 @@ export const clearSectionsData = () => {
     console.error('Error al limpiar datos de secciones:', error);
     return false;
   }
+};
+
+export const notifySectionsChange = (sections) => {
+  // Crear y disparar un evento personalizado con las secciones actualizadas
+  const event = new CustomEvent('sectionsUpdated', { detail: sections });
+  window.dispatchEvent(event);
 };

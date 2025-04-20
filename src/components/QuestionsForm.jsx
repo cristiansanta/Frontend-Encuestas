@@ -51,10 +51,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     const loadSections = () => {
       // Obtener secciones guardadas
       const storedSections = getSections();
-      
+
       if (storedSections.length > 0) {
         setAvailableSections(storedSections);
-        
+
         // Intentar cargar la sección seleccionada previamente
         const savedSection = getSelectedSection();
         if (savedSection) {
@@ -70,9 +70,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         setAvailableSections(mockSections);
       }
     };
-    
+
     loadSections();
-    
+
     // También configuramos un listener para detectar cambios en localStorage
     // realizados por otras ventanas/pestañas
     const handleStorageChange = (e) => {
@@ -80,7 +80,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         loadSections();
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -127,7 +127,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setIsModalOpen(true);
       return;
     }
-    
+
     // Verificar que se haya ingresado título
     if (!title.trim()) {
       setErrorMessage('Debe ingresar un título para la pregunta antes de agregar una pregunta hija.');
@@ -135,7 +135,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setIsModalOpen(true);
       return;
     }
-    
+
     // Verificar que se haya seleccionado una sección
     if (!selectedSection) {
       setErrorMessage('Debe seleccionar una sección para la pregunta antes de agregar una pregunta hija.');
@@ -143,7 +143,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setIsModalOpen(true);
       return;
     }
-    
+
     // Si todo está bien, llamar a la función para añadir pregunta hija
     if (onAddChildQuestion) {
       onAddChildQuestion({
@@ -227,7 +227,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setIsParentQuestion(false);
       setSelectedQuestionType(null);
       // No reseteamos selectedSection para mantener la sección al agregar múltiples preguntas
-      
+
       // Mostrar mensaje de éxito
       setErrorMessage('Pregunta agregada correctamente.');
       setModalStatus('success');
@@ -254,32 +254,40 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-6 rounded-3xl bg-white shadow-2xl w-full">
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
         {/* Título de la pregunta - Convertido a input */}
-        <div className="flex items-center mb-4">
+        <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
           <div className="w-2/3">
             <input
               type="text"
               value={title}
               onChange={handleTitleChange}
-              placeholder="Titulo de pregunta"
-              className="font-work-sans text-3xl font-bold text-dark-blue-custom w-full border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
+              placeholder="Titulo de Pregunta"
+              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${
+                // Nueva lógica condicional para el borde:
+                // Mostrar borde cuando: 
+                // 1. NO está colapsado (estado expandido)
+                // 2. O cuando está colapsado PERO el título está vacío
+                (!isCollapsed || (isCollapsed && title.trim() === '')) ? 'border-b-2 border-gray-300 focus:border-blue-custom' : ''
+                }`}
             />
           </div>
           <div className="w-1/3 flex items-center justify-end gap-3">
-            <button
-              className="flex items-center bg-blue-custom rounded-full overflow-hidden"
-              onClick={() => console.log("Importar desde banco")}
-            >
-              <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
-                <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
-              </span>
-              <span className="bg-yellow-custom px-4 py-1">
-                <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                  Importar desde el Banco de Preguntas
+            {!isCollapsed && (
+              <button
+                className="flex items-center bg-blue-custom rounded-full overflow-hidden"
+                onClick={() => console.log("Importar desde banco")}
+              >
+                <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
+                  <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
                 </span>
-              </span>
-            </button>
+                <span className="bg-yellow-custom px-4 py-1">
+                  <span className="font-work-sans text-sm font-semibold text-blue-custom">
+                    Importar desde el Banco de Preguntas
+                  </span>
+                </span>
+              </button>
+            )}
 
             <div className="rounded-full flex items-center">
               <button
@@ -332,7 +340,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               <p className="text-gray-600 text-sm mb-3">
                 Selecciona la sección a la que pertene la pregunta
               </p>
-              <SectionSelector 
+              <SectionSelector
                 sections={availableSections}
                 onSectionSelect={handleSectionSelect}
                 initialSelectedSection={selectedSection}
@@ -380,25 +388,25 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         />
       </div>
 
-      {/* Botón para agregar pregunta hija (condicional) */}
+      {/* Botón para agregar pregunta hija (condicional) - MODIFICADO para que tenga ancho reducido pero alineado a la izquierda */}
       {isParentQuestion && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-end">
           <button
-            className="w-full py-3 bg-yellow-custom rounded-xl flex items-center justify-start pl-6 gap-2 hover:bg-yellow-400 transition-colors relative"
+            className="w-5/6 py-3 bg-yellow-custom rounded-xl flex items-center justify-start pl-6 gap-2 hover:bg-yellow-400 transition-colors relative"
             onClick={handleAddChildQuestion}
           >
             <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta hija</span>
             <div className="absolute right-4">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-custom">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
           </button>
         </div>
       )}
-      
+
       {/* Botón para agregar pregunta */}
       <div className="mt-4">
         <button
