@@ -79,7 +79,7 @@ const PreviewSurvey = () => {
   };
 
   const handlePreviewSurvey = () => {
-    navigate('/survey-details'); // Redirige a la ruta de SurveyDetails
+    navigate('/preview-details'); // Redirige a la ruta de SurveyDetails
   };
 
   const toggleSection = (section) => {
