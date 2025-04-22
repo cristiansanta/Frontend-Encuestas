@@ -3,7 +3,15 @@ import RichTextEditor from './TextBoxDetail.jsx';
 import InputSlide from './InputSlide.jsx';
 import Modal from './Modal';
 import SectionSelector from './SectionSelector';
-import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage.js';
+import { 
+  OpenAnswerPreview, 
+  NumericAnswerPreview, 
+  SingleChoicePreview, 
+  MultipleChoicePreview, 
+  TrueFalsePreview, 
+  DatePreview 
+} from './QuestionPreviewComponents';
+import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
 import DOMPurify from 'dompurify';
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -252,9 +260,31 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setIsModalOpen(false);
   };
 
-  return ( 
+  // Renderizar la vista previa correspondiente según el tipo de pregunta seleccionado
+  const renderQuestionPreview = () => {
+    if (!selectedQuestionType) return null;
+    
+    switch (selectedQuestionType) {
+      case 1: // Respuesta Abierta
+        return <OpenAnswerPreview />;
+      case 2: // Numérica
+        return <NumericAnswerPreview />;
+      case 3: // Opción Única
+        return <SingleChoicePreview />;
+      case 4: // Opción Multiple
+        return <MultipleChoicePreview />;
+      case 5: // Falso / Verdadero
+        return <TrueFalsePreview />;
+      case 6: // Fecha
+        return <DatePreview />;
+      default:
+        return null;
+    }
+  };
+
+  return (
     <>
-      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-3 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
         {/* Título de la pregunta - Convertido a input */}
         <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
           <div className="w-2/3">
@@ -262,7 +292,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               type="text"
               value={title}
               onChange={handleTitleChange}
-              placeholder="Título de Pregunta"
+              placeholder="Titulo de Pregunta"
               className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${
                 // Nueva lógica condicional para el borde:
                 // Mostrar borde cuando: 
@@ -276,14 +306,38 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             {!isCollapsed && (
               <button
                 className="flex items-center bg-blue-custom rounded-full overflow-hidden"
-                onClick={() => console.log("Importar desde banco")}
+                onClick={() => {
+                  // Si ya hay algo seleccionado o escrito, reiniciar todo
+                  if (selectedQuestionType || selectedSection || title.trim()) {
+                    setTitle('');
+                    setDescription('');
+                    setSelectedQuestionType(null);
+                    setSelectedSection(null);
+                    setMandatory(false);
+                    setAddToBank(false);
+                    setIsParentQuestion(false);
+                    localStorage.removeItem("selectedOptionId");
+                  } else {
+                    // Si no hay nada seleccionado, importar desde banco
+                    console.log("Importar desde banco");
+                  }
+                }}
               >
                 <span className="bg-blue-custom text-white px-4 py-1 flex items-center">
-                  <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
+                  {selectedQuestionType || selectedSection || title.trim() ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  ) : (
+                    <img src={Down} alt="Importar" className="w-5 h-5 mr-2" />
+                  )}
                 </span>
                 <span className="bg-yellow-custom px-4 py-1">
                   <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                    Importar desde el Banco de Preguntas
+                    {selectedQuestionType || selectedSection || title.trim() 
+                      ? "Volver a empezar"
+                      : "Importar desde el Banco de Preguntas"
+                    }
                   </span>
                 </span>
               </button>
@@ -373,6 +427,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 label="Añadir esta pregunta al banco de preguntas"
               />
             </div>
+            
+            {/* Componente de vista previa según el tipo de pregunta seleccionado */}
+            {renderQuestionPreview()}
           </>
         )}
 
@@ -396,8 +453,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             onClick={handleAddChildQuestion}
           >
             <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta hija</span>
-            <div className="absolute right-6">
-              <img src={AddCategory1} alt="Agregar" className="w-8 h-8" />
+            <div className="absolute right-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-custom">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
             </div>
           </button>
         </div>
@@ -410,7 +471,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
           onClick={handleSubmit}
         >
           <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta</span>
-          <div className="absolute right-6">
+          <div className="absolute right-4">
             <img src={AddCategory1} alt="Agregar" className="w-8 h-8" />
           </div>
         </button>
