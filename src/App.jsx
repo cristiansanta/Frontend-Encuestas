@@ -24,6 +24,7 @@ import SurveyReplied from './pages/SurveyReplied.jsx';
 import SurveyEdit from './pages/SurveyEdit.jsx';
 import DashboardTable from './components/DashboardTable.jsx';
 import PreviewSurvey from './pages/PreviewSurvey.jsx';
+import DetailsSurvey from './pages/DetailsSurvey.jsx';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function App() {
             <Route path="/survey-replied" element={<SurveyReplied />} />
             <Route path="/survey-edit" element={<SurveyEdit />} />
             <Route path="/preview-survey" element={<PreviewSurvey />} />
+            <Route path="/details-survey" element={<DetailsSurvey />} />
           </Routes>
         </div>
       </SurveyProvider>
