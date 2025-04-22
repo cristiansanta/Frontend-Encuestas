@@ -3,7 +3,7 @@ import RichTextEditor from './TextBoxDetail.jsx';
 import InputSlide from './InputSlide.jsx';
 import Modal from './Modal';
 import SectionSelector from './SectionSelector';
-import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
+import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage.js';
 import DOMPurify from 'dompurify';
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -252,9 +252,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setIsModalOpen(false);
   };
 
-  return (
+  return ( 
     <>
-      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-3 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
         {/* Título de la pregunta - Convertido a input */}
         <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
           <div className="w-2/3">
@@ -262,7 +262,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               type="text"
               value={title}
               onChange={handleTitleChange}
-              placeholder="Titulo de Pregunta"
+              placeholder="Título de Pregunta"
               className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${
                 // Nueva lógica condicional para el borde:
                 // Mostrar borde cuando: 
@@ -396,12 +396,8 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             onClick={handleAddChildQuestion}
           >
             <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta hija</span>
-            <div className="absolute right-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-custom">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+            <div className="absolute right-6">
+              <img src={AddCategory1} alt="Agregar" className="w-8 h-8" />
             </div>
           </button>
         </div>
@@ -414,7 +410,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
           onClick={handleSubmit}
         >
           <span className="font-work-sans text-xl font-bold text-blue-custom">Agregar pregunta</span>
-          <div className="absolute right-4">
+          <div className="absolute right-6">
             <img src={AddCategory1} alt="Agregar" className="w-8 h-8" />
           </div>
         </button>

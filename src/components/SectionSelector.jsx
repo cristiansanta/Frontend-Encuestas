@@ -341,7 +341,7 @@ const SectionSelector = ({
           </div>
 
           {/* Lista de secciones con radio buttons */}
-          <div className="max-h-60 overflow-y-auto mb-4 overflow-x-hidden">
+          <div className="max-h-60 overflow-y-auto mb-4 overflow-x-hidden scrollbar-image-match">
             {filteredSections.length === 0 ? (
               <p className="text-sm text-gray-500 italic">No hay secciones que coincidan con la búsqueda</p>
             ) : (
