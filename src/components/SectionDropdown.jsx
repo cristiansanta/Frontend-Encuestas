@@ -1,3 +1,4 @@
+// Modificación en SectionDropdown.jsx para mantener el dropdown pegado al botón al hacer scroll
 import React, { useState, useRef, useEffect } from 'react';
 import {
   getSections,
@@ -12,6 +13,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // Constante para la longitud máxima del nombre de sección
 const MAX_SECTION_NAME_LENGTH = 50;
+// Ancho del dropdown
+const DROPDOWN_WIDTH = 515;
 
 // Componente para el elemento arrastrable
 const DraggableItem = ({ id, index, section, selected, onSelect, moveItem }) => {
@@ -120,6 +123,9 @@ const SectionDropdown = ({
   const [inputError, setInputError] = useState('');
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Estado para almacenar la posición calculada del dropdown
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
   // Estado para el hover en los botones
   const [hoverState, setHoverState] = useState({
@@ -129,6 +135,79 @@ const SectionDropdown = ({
 
   // Determinar si el botón "Aceptar" debería estar habilitado
   const isAcceptButtonEnabled = newSectionName.trim() !== '' || selectedSections.length > 0;
+
+  // Función para actualizar la posición del dropdown
+  const updateDropdownPosition = () => {
+    if (isOpen && anchorRef.current && dropdownRef.current) {
+      const buttonRect = anchorRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      
+      // Encontrar el contenedor principal (el elemento blanco en la imagen)
+      // Buscamos hacia arriba en el DOM hasta encontrar un contenedor con suficiente ancho
+      let containerElement = anchorRef.current;
+      let containerRect = null;
+      
+      // Buscar el contenedor principal (normalmente tiene clase bg-white o similar)
+      while (containerElement && containerElement.parentElement) {
+        containerElement = containerElement.parentElement;
+        // Verificar si este elemento podría ser nuestro contenedor principal
+        // Buscamos un elemento con un ancho significativo y con background
+        const style = window.getComputedStyle(containerElement);
+        if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+            style.width && 
+            parseInt(style.width) > DROPDOWN_WIDTH) {
+          containerRect = containerElement.getBoundingClientRect();
+          break;
+        }
+      }
+      
+      // Si no encontramos un contenedor adecuado, usar la ventana
+      if (!containerRect) {
+        containerRect = {
+          left: 0,
+          right: windowWidth,
+          width: windowWidth
+        };
+      }
+      
+      // Posición vertical: debajo del botón, relativa a la ventana (viewport)
+      const top = buttonRect.bottom + 5;
+      
+      // Calcular posición inicialmente centrada con el botón
+      const buttonCenter = buttonRect.left + buttonRect.width / 2;
+      let leftPosition = buttonCenter - (DROPDOWN_WIDTH / 2);
+      
+      // Asegurar que no se salga por la izquierda del contenedor
+      leftPosition = Math.max(containerRect.left + 20, leftPosition);
+      
+      // Asegurar que no se salga por la derecha del contenedor
+      const rightEdge = leftPosition + DROPDOWN_WIDTH;
+      if (rightEdge > containerRect.right - 20) {
+        leftPosition = containerRect.right - DROPDOWN_WIDTH - 20;
+      }
+      
+      setDropdownPosition({ top, left: leftPosition });
+    }
+  };
+
+  // Calcular la posición del dropdown cuando se abre o cuando cambia el tamaño de la ventana
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      // Calcular posición inicial
+      updateDropdownPosition();
+      
+      // Recalcular si cambia el tamaño de la ventana
+      window.addEventListener('resize', updateDropdownPosition);
+      
+      // Añadir listener para el scroll para mantener el dropdown pegado al botón
+      window.addEventListener('scroll', updateDropdownPosition, true);
+      
+      return () => {
+        window.removeEventListener('resize', updateDropdownPosition);
+        window.removeEventListener('scroll', updateDropdownPosition, true);
+      };
+    }
+  }, [isOpen, anchorRef]);
 
   // Sincronizar con existingSections si cambian
   useEffect(() => {
@@ -402,10 +481,10 @@ const SectionDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[515px]"
+      className="fixed z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-[515px]"
       style={{
-        top: anchorRef.current ? anchorRef.current.offsetTop + anchorRef.current.offsetHeight + 5 : '0px',
-        left: anchorRef.current ? anchorRef.current.offsetLeft : '0px',
+        top: `${dropdownPosition.top}px`,
+        left: `${dropdownPosition.left}px`,
         fontFamily: "'Work Sans', sans-serif"
       }}
     >

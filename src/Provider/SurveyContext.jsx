@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 // Crear el contexto para la encuesta
 const SurveyContext = createContext();
@@ -6,11 +6,48 @@ const SurveyContext = createContext();
 // Crear el proveedor del contexto
 const SurveyProvider = ({ children }) => {
   const [survey, setSurvey] = useState({ id: null, title: '' });
-  const [selectedCategory, setSelectedCategory] = useState(null); // Añadir la categoría seleccionada
+  const [selectedCategory, setSelectedCategory] = useState(null);
   
-// console.log("dentro del usercontex", children)
+  // Estado para almacenar todas las categorías disponibles
+  // Formato: array de arrays donde cada elemento es [id, nombre]
+  const [categories, setCategories] = useState([
+    [1, 'Recursos Humanos'],
+    [2, 'Satisfacción del Cliente'],
+    [3, 'Evaluación de Productos'],
+    [4, 'Investigación de Mercado'],
+    [5, 'Educación y Capacitación'],
+    [6, 'Salud y Bienestar']
+  ]);
+
+  // Opcional: Puedes cargar categorías desde una API cuando el componente se monte
+  useEffect(() => {
+    // Función para cargar categorías desde la API
+    const fetchCategories = async () => {
+      try {
+        // Ejemplo de cómo podrías cargar categorías desde una API
+        // const response = await fetch('tu-api/categorias');
+        // const data = await response.json();
+        // setCategories(data);
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    };
+
+    // Descomentar si quieres cargar categorías desde una API
+    // fetchCategories();
+  }, []);
+
   return (
-    <SurveyContext.Provider value={{ survey, setSurvey, selectedCategory, setSelectedCategory}}>
+    <SurveyContext.Provider 
+      value={{ 
+        survey, 
+        setSurvey, 
+        selectedCategory, 
+        setSelectedCategory,
+        categories,
+        setCategories
+      }}
+    >
       {children}
     </SurveyContext.Provider>
   );

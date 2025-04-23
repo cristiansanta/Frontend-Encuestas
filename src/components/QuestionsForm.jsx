@@ -3,13 +3,13 @@ import RichTextEditor from './TextBoxDetail.jsx';
 import InputSlide from './InputSlide.jsx';
 import Modal from './Modal';
 import SectionSelector from './SectionSelector';
-import { 
-  OpenAnswerPreview, 
-  NumericAnswerPreview, 
-  SingleChoicePreview, 
-  MultipleChoicePreview, 
-  TrueFalsePreview, 
-  DatePreview 
+import {
+  OpenAnswerPreview,
+  NumericAnswerPreview,
+  SingleChoicePreview,
+  MultipleChoicePreview,
+  TrueFalsePreview,
+  DatePreview
 } from './QuestionPreviewComponents';
 import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
 import DOMPurify from 'dompurify';
@@ -123,7 +123,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
   // Manejar cambio en el input del título
   const handleTitleChange = (e) => {
-    setTitle(e.target.value);
+    // Limitar a 50 caracteres
+    if (e.target.value.length <= 50) {
+      setTitle(e.target.value);
+    }
   };
 
   // Función para manejar clic en "Agregar pregunta hija"
@@ -263,7 +266,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // Renderizar la vista previa correspondiente según el tipo de pregunta seleccionado
   const renderQuestionPreview = () => {
     if (!selectedQuestionType) return null;
-    
+
     switch (selectedQuestionType) {
       case 1: // Respuesta Abierta
         return <OpenAnswerPreview />;
@@ -286,21 +289,22 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     <>
       <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full`} style={isCollapsed ? { minHeight: '70px' } : {}}>
         {/* Título de la pregunta - Convertido a input */}
-        <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
-          <div className="w-2/3">
+        <div className="flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}">
+          <div className="w-2/3 relative">
             <input
               type="text"
               value={title}
               onChange={handleTitleChange}
               placeholder="Titulo de Pregunta"
-              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${
-                // Nueva lógica condicional para el borde:
-                // Mostrar borde cuando: 
-                // 1. NO está colapsado (estado expandido)
-                // 2. O cuando está colapsado PERO el título está vacío
-                (!isCollapsed || (isCollapsed && title.trim() === '')) ? 'border-b-2 border-gray-300 focus:border-blue-custom' : ''
+              maxLength={50}
+              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none ${isCollapsed ? 'py-1' : 'pb-1'} ${(!isCollapsed || (isCollapsed && title.trim() === '')) ? 'border-b-2 border-gray-300 focus:border-blue-custom' : ''
                 }`}
             />
+            {!isCollapsed && (
+              <div className="absolute right-0 bottom-1 text-xs text-gray-500">
+                {title.length}/50
+              </div>
+            )}
           </div>
           <div className="w-1/3 flex items-center justify-end gap-3">
             {!isCollapsed && (
@@ -334,7 +338,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 </span>
                 <span className="bg-yellow-custom px-4 py-1">
                   <span className="font-work-sans text-sm font-semibold text-blue-custom">
-                    {selectedQuestionType || selectedSection || title.trim() 
+                    {selectedQuestionType || selectedSection || title.trim()
                       ? "Volver a empezar"
                       : "Importar desde el Banco de Preguntas"
                     }
@@ -427,7 +431,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 label="Añadir esta pregunta al banco de preguntas"
               />
             </div>
-            
+
             {/* Componente de vista previa según el tipo de pregunta seleccionado */}
             {renderQuestionPreview()}
           </>
