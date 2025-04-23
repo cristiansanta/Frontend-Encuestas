@@ -571,7 +571,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
 
           {/* Lista de secciones con drag and drop */}
           <DndProvider backend={HTML5Backend}>
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto scrollbar-image-match">
               {sections.length === 0 ? (
                 <p className="text-sm text-gray-500 italic text-center py-4">No hay secciones creadas</p>
               ) : (
