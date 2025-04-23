@@ -65,7 +65,7 @@ const RichTextEditor = ({ value, onChange }) => {
         onChange={onChange}
         modules={modules}
         className="h-full w-full"
-        placeholder="Escribe algo aquí..."
+        placeholder="Escribe la descripción aquí..."
       />
     </div>
   );

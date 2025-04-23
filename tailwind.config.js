@@ -5,7 +5,10 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",   
   ],   
   theme: {     
-    extend: {       
+    extend: {
+      gridTemplateColumns: {
+        'custom': '1fr 0.6fr',
+      },
       colors: {         
         'blue-custom': '#00324D',
         'cyan-custom': '#00919F',
