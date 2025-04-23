@@ -1,5 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+// Importar el contexto de encuestas si lo estás utilizando
+// import { SurveyContext } from '../Provider/SurveyContext';
 
 // Importar imágenes
 import CaseActive from '../assets/img/banneractive.svg';
@@ -18,22 +21,40 @@ import RichTextEditor from '../components/TextBoxDetail';
 import ListRespondents from '../components/DynamicList/ListRespondents';
 import SectionDropdown from '../components/SectionDropdown';
 
-const DetailsSurvey = ({ surveyData = {} }) => {
+const DetailsSurvey = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Si estás usando el contexto, descomenta esto
+  // const { getSurveyById, updateSurvey } = useContext(SurveyContext);
+  
+  // Obtener datos de la encuesta pasados por el estado de navegación
+  const surveyData = location.state?.surveyData || {};
+  const fromView = location.state?.fromView || 'card';
+  
+  // Validar si hay datos de encuesta
+  useEffect(() => {
+    if (!location.state || !location.state.surveyData) {
+      // Redireccionar al dashboard si no hay datos de encuesta
+      navigate('/details-survey');
+    }
+  }, [location.state, navigate]);
+  
   // Estados del componente
   const [survey, setSurvey] = useState(surveyData);
   const [currentView, setCurrentView] = useState('details');
   const [showBackButton, setShowBackButton] = useState(true);
-  const [startDate, setStartDate] = useState(survey.fechaInicio || new Date());
-  const [endDate, setEndDate] = useState(survey.fechaFinal || new Date());
+  const [startDate, setStartDate] = useState(new Date(survey.fechaInicio || Date.now()));
+  const [endDate, setEndDate] = useState(new Date(survey.fechaFinal || Date.now()));
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
   const [description, setDescription] = useState(survey.description || '');
   const [sections, setSections] = useState(survey.sections || []);
   const [showSectionDropdown, setShowSectionDropdown] = useState(false);
-
+  
   // Referencias
   const newSectionButtonRef = useRef(null);
-
+  
   // Determinar qué banner mostrar según el estado
   const getBannerByState = () => {
     switch (survey.estado) {
@@ -49,33 +70,51 @@ const DetailsSurvey = ({ surveyData = {} }) => {
         return CaseNotPublic;
     }
   };
-
+  
   // Manejadores de eventos
   const handleStartDateChange = (date) => {
     setStartDate(date);
   };
-
+  
   const handleEndDateChange = (date) => {
     setEndDate(date);
   };
-
+  
   const handleSectionButtonClick = () => {
     setShowSectionDropdown(!showSectionDropdown);
     // Cerrar calendarios si estaban abiertos
     setShowStartCalendar(false);
     setShowEndCalendar(false);
   };
-
+  
   const handleUpdateSections = (newSections) => {
     setSections([...sections, ...newSections]);
     setShowSectionDropdown(false);
   };
-
+  
   const handleRemoveSection = (sectionId, e) => {
     e.stopPropagation();
     setSections(sections.filter(section => section.id !== sectionId));
   };
-
+  
+  // Función para guardar cambios (podría integrarse con SurveyContext)
+  const handleSaveChanges = () => {
+    const updatedSurvey = {
+      ...survey,
+      fechaInicio: startDate.toISOString(),
+      fechaFinal: endDate.toISOString(),
+      description: description,
+      sections: sections
+    };
+    // Navegar de vuelta al dashboard después de guardar
+    navigate('/dashboard');
+  };
+  
+  // Función para manejar el regreso al dashboard
+  const handleBackToHome = () => {
+    navigate('/dashboard');
+  };
+  
   // Renderizado condicional según el estado de la encuesta
   const renderSurveyContent = () => {
     switch (survey.estado) {
@@ -91,7 +130,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
         return renderNotPublishedState();
     }
   };
-
+  
   // Renderizado para estado "Activa"
   const renderActiveState = () => {
     return (
@@ -99,7 +138,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
         <div className="mb-4">
           <h1 className="font-work-sans text-3xl font-bold text-blue-900">{survey.title || 'Encuesta sin título'}</h1>
         </div>
-
+        
         {renderTimeRange()}
         {renderDescription()}
         {renderSections()}
@@ -107,7 +146,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       </>
     );
   };
-
+  
   // Renderizado para estado "Finalizada"
   const renderFinishedState = () => {
     return (
@@ -115,7 +154,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
         <div className="mb-4">
           <h1 className="font-work-sans text-3xl font-bold text-purple-900">{survey.title || 'Encuesta sin título'}</h1>
         </div>
-
+        
         {renderTimeRange()}
         {renderDescription()}
         {renderSections()}
@@ -131,7 +170,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       </>
     );
   };
-
+  
   // Renderizado para estado "Próxima a Finalizar"
   const renderComingToEndState = () => {
     return (
@@ -139,10 +178,10 @@ const DetailsSurvey = ({ surveyData = {} }) => {
         <div className="mb-4">
           <h1 className="font-work-sans text-3xl font-bold text-orange-600">{survey.title || 'Encuesta sin título'}</h1>
         </div>
-
+        
         {renderTimeRange()}
         {renderDescription()}
-
+        
         {/* Selector de secciones */}
         <div className="mb-4">
           <div className="mb-1">
@@ -157,20 +196,29 @@ const DetailsSurvey = ({ surveyData = {} }) => {
             </select>
           </div>
         </div>
-
+        
         {renderRespondentsTable()}
       </>
     );
   };
-
+  
   // Renderizado para estado "Sin publicar"
   const renderNotPublishedState = () => {
     return (
       <>
+        {/* Miga de pan (breadcrumb) */}
+        <div className="flex items-center mb-4 bg-gray-100 p-2 rounded-lg">
+          <div className="flex items-center text-blue-900">
+            <span className="mr-2">Configuración</span>
+            <span className="mx-2">&gt;</span>
+            <span className="font-semibold">Detalles de la encuesta</span>
+          </div>
+        </div>
+        
         <div className="mb-4">
           <h1 className="font-work-sans text-3xl font-bold text-blue-900">{survey.title || 'Nueva Encuesta'}</h1>
         </div>
-
+        
         {/* Sección con el título de la encuesta */}
         <div className="mb-4">
           <div className="mb-1">
@@ -180,18 +228,28 @@ const DetailsSurvey = ({ surveyData = {} }) => {
             type="text"
             className="w-full border border-gray-300 rounded-lg px-4 py-2"
             value={survey.title || ''}
-            onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
+            onChange={(e) => setSurvey({...survey, title: e.target.value})}
             placeholder="Ingrese el título de la encuesta"
           />
         </div>
-
+        
         {renderTimeRange()}
         {renderDescription()}
         {renderSections()}
+        
+        {/* Botón para "Guardar y continuar" */}
+        <div className="flex justify-end mt-6">
+          <button 
+            className="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+            onClick={handleSaveChanges}
+          >
+            Guardar y continuar
+          </button>
+        </div>
       </>
     );
   };
-
+  
   // Componentes comunes reutilizables
   const renderTimeRange = () => {
     return (
@@ -240,7 +298,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       </div>
     );
   };
-
+  
   const renderDescription = () => {
     return (
       <div className="mb-4">
@@ -256,7 +314,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       </div>
     );
   };
-
+  
   const renderSections = () => {
     return (
       <div className="mb-4">
@@ -318,7 +376,7 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       </div>
     );
   };
-
+  
   const renderRespondentsTable = () => {
     return (
       <div className="mb-4">
@@ -338,17 +396,20 @@ const DetailsSurvey = ({ surveyData = {} }) => {
       <div className="mb-4">
         <img src={getBannerByState()} alt={`Estado: ${survey.estado}`} className="w-full h-auto rounded-t-lg" />
       </div>
-
-      {/* Botón para regresar al home si es necesario */}
+      
+      {/* Botón para regresar al dashboard */}
       {showBackButton && (
         <div className="mb-4">
-          <NavigationBackButton currentView={currentView} className="flex items-center text-blue-900 hover:text-blue-700 transition-colors">
+          <button 
+            onClick={handleBackToHome}
+            className="flex items-center text-blue-900 hover:text-blue-700 transition-colors"
+          >
             <img src={homeIcon} alt="Home" className="w-5 h-5 mr-2" />
-            <span>Regresar al home</span>
-          </NavigationBackButton>
+            <span>Regresar al dashboard</span>
+          </button>
         </div>
       )}
-
+      
       {/* Contenido dinámico según el estado */}
       {renderSurveyContent()}
     </div>
