@@ -88,12 +88,26 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
           <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
 
           {showTooltip && (
-            <div className="absolute right-0 top-full mt-2 bg-dark-blue-custom text-white px-3 py-1 rounded text-sm whitespace-nowrap z-10"
-              style={{
-                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 85% 85%, 75% 100%, 65% 85%, 0% 85%)'
-              }}
-            >
-              Eliminar sección
+            <div className="tooltip-container absolute z-10 right-full top-1/2 transform -translate-y-1/2 mr-2">
+              {/* Contenedor principal de la tooltip */}
+              <div 
+                className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap"
+                style={{
+                  backgroundColor: '#00294B',
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                Eliminar sección
+              </div>
+              {/* Triángulo que apunta al botón */}
+              <div 
+                className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45"
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  backgroundColor: '#00294B'
+                }}
+              ></div>
             </div>
           )}
         </button>
