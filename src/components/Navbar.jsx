@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, act } from 'react';
 import Listsurveys from '../assets/ListSurveys';
 import PlusIcon from '../assets/PlusIcon';
 import HomeIcon from '../assets/HomeIcon';
@@ -66,7 +66,7 @@ export const Navbar = () => {
         {
             icon: PlusIcon,
             path: "/survey-create",
-            active: activePath === "/survey-create" || activePath === "/questions-create" || activePath === "/preview-survey",
+            active: activePath === "/survey-create" || activePath === "/questions-create" || activePath === "/preview-survey" || activePath === "/details-survey",
             label: "Crear Encuesta",
         },
         {

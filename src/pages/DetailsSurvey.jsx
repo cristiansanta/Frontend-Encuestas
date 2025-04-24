@@ -1,14 +1,11 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-// Importar el contexto de encuestas si lo estás utilizando
-// import { SurveyContext } from '../Provider/SurveyContext';
+
+// Importar componente de Layout
+import MainLayoutDetailsSurvey from '../components/MainLayoutDetailsSurvey';
 
 // Importar imágenes
-import CaseActive from '../assets/img/banneractive.svg';
-import CaseComingFinished from '../assets/img/bannercomingfinished.svg';
-import CaseNotPublic from '../assets/img/bannernotpublic.svg';
-import CaseFinished from '../assets/img/bannerfinished.svg';
 import calendar2 from '../assets/img/calendar.svg';
 import Addsurvey from '../assets/img/addsurvey.svg';
 import trashcan from '../assets/img/addsurvey.svg';
@@ -21,12 +18,13 @@ import RichTextEditor from '../components/TextBoxDetail';
 import ListRespondents from '../components/DynamicList/ListRespondents';
 import SectionDropdown from '../components/SectionDropdown';
 
+/**
+ * Componente DetailsSurvey - Muestra los detalles de una encuesta
+ * según su estado (Activa, Finalizada, Próxima a Finalizar, Sin publicar)
+ */
 const DetailsSurvey = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Si estás usando el contexto, descomenta esto
-  // const { getSurveyById, updateSurvey } = useContext(SurveyContext);
   
   // Obtener datos de la encuesta pasados por el estado de navegación
   const surveyData = location.state?.surveyData || {};
@@ -36,7 +34,7 @@ const DetailsSurvey = () => {
   useEffect(() => {
     if (!location.state || !location.state.surveyData) {
       // Redireccionar al dashboard si no hay datos de encuesta
-      navigate('/details-survey');
+      navigate('/dashboard');
     }
   }, [location.state, navigate]);
   
@@ -54,20 +52,22 @@ const DetailsSurvey = () => {
   
   // Referencias
   const newSectionButtonRef = useRef(null);
-  
-  // Determinar qué banner mostrar según el estado
-  const getBannerByState = () => {
+    
+  // Determinar el título para el header según el estado
+  const getHeaderTitle = () => {
+    if (!survey.title) return 'Detalles de encuesta';
+    
     switch (survey.estado) {
       case 'Activa':
-        return CaseActive;
-      case 'Próxima a Finalizar':
-        return CaseComingFinished;
-      case 'Sin publicar':
-        return CaseNotPublic;
+        return `Encuesta activa: ${survey.title}`;
       case 'Finalizada':
-        return CaseFinished;
+        return `Encuesta finalizada: ${survey.title}`;
+      case 'Próxima a Finalizar':
+        return `Encuesta por finalizar: ${survey.title}`;
+      case 'Sin publicar':
+        return `Configuración de encuesta: ${survey.title}`;
       default:
-        return CaseNotPublic;
+        return survey.title;
     }
   };
   
@@ -97,7 +97,7 @@ const DetailsSurvey = () => {
     setSections(sections.filter(section => section.id !== sectionId));
   };
   
-  // Función para guardar cambios (podría integrarse con SurveyContext)
+  // Función para guardar cambios y regresar al dashboard
   const handleSaveChanges = () => {
     const updatedSurvey = {
       ...survey,
@@ -106,6 +106,10 @@ const DetailsSurvey = () => {
       description: description,
       sections: sections
     };
+    
+    // Aquí podrías integrar con SurveyContext para guardar los cambios
+    console.log('Guardando cambios en la encuesta:', updatedSurvey);
+    
     // Navegar de vuelta al dashboard después de guardar
     navigate('/dashboard');
   };
@@ -390,29 +394,36 @@ const DetailsSurvey = () => {
     );
   };
 
+  // Calcular el título para el header
+  const headerTitle = getHeaderTitle();
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 pt-6 pb-12">
-      {/* Banner superior según estado */}
-      <div className="mb-4">
-        <img src={getBannerByState()} alt={`Estado: ${survey.estado}`} className="w-full h-auto rounded-t-lg" />
+    <MainLayoutDetailsSurvey 
+      headerTitle={headerTitle}
+      showTopBanner={true}
+      showHeaderBanner={true}
+      surveyState={survey.estado || 'Sin publicar'}
+    >
+      <div className="w-full mr-auto ml-0 md:ml-12">
+        {/* Botón para regresar al dashboard */}
+        {showBackButton && (
+          <div className="mb-4">
+            <NavigationBackButton 
+              currentView={currentView} 
+              onClick={handleBackToHome}
+            >
+              <div className="flex items-center">
+                <img src={homeIcon} alt="Home" className="w-5 h-5 mr-2" />
+                <span>Regresar al dashboard</span>
+              </div>
+            </NavigationBackButton>
+          </div>
+        )}
+        
+        {/* Contenido dinámico según el estado */}
+        {renderSurveyContent()}
       </div>
-      
-      {/* Botón para regresar al dashboard */}
-      {showBackButton && (
-        <div className="mb-4">
-          <button 
-            onClick={handleBackToHome}
-            className="flex items-center text-blue-900 hover:text-blue-700 transition-colors"
-          >
-            <img src={homeIcon} alt="Home" className="w-5 h-5 mr-2" />
-            <span>Regresar al dashboard</span>
-          </button>
-        </div>
-      )}
-      
-      {/* Contenido dinámico según el estado */}
-      {renderSurveyContent()}
-    </div>
+    </MainLayoutDetailsSurvey>
   );
 };
 
