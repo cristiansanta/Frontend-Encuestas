@@ -14,17 +14,106 @@ import DropdownIcon from '../assets/img/tabledeploy.svg';
 
 // Sample data (en una implementación real, esto vendría de tu API)
 const surveyData = [
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Sin publicar', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Próxima a Finalizar', creador: 'Usuario Administrador', categoria: 'Encuestas para Administrativos', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Solo Funciona', estado: 'Finalizada', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  { id: 136, title: 'Prueba', estado: 'Activa', creador: 'Usuario Administrador', categoria: 'Salud y Bienestar', fechaCreacion: '10/03/2025', asignaciones: 0 },
-  // ... otros datos
+  { 
+    id: 101, 
+    title: 'Perfil Personal y Profesional', 
+    estado: 'Finalizada', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 12,
+    description: "Esta encuesta está diseñada para recopilar información sobre tu perfil personal y profesional."
+  },
+  { 
+    id: 102, 
+    title: 'Satisfacción Laboral', 
+    estado: 'Activa', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 45,
+    description: "Encuesta para evaluar el nivel de satisfacción de los empleados en el entorno laboral."
+  },
+  { 
+    id: 103, 
+    title: 'Clima Organizacional', 
+    estado: 'Próxima a Finalizar', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Encuestas para Administrativos', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 78,
+    description: "Evaluación del ambiente laboral y la cultura organizacional de la empresa."
+  },
+  { 
+    id: 104, 
+    title: 'Evaluación de Liderazgo', 
+    estado: 'Sin publicar', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Encuestas para Administrativos', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 0,
+    description: "Borrador de encuesta para evaluar las habilidades de liderazgo en la organización."
+  },
+  { 
+    id: 105, 
+    title: 'Evaluación de Desempeño', 
+    estado: 'Finalizada', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 56,
+    description: "Encuesta para evaluar el rendimiento y logro de objetivos del personal."
+  },
+  { 
+    id: 106, 
+    title: 'Comunicación Interna', 
+    estado: 'Próxima a Finalizar', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Encuestas para Administrativos', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 32,
+    description: "Análisis de los canales y efectividad de la comunicación dentro de la organización."
+  },
+  { 
+    id: 107, 
+    title: 'Innovación y Creatividad', 
+    estado: 'Finalizada', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 28,
+    description: "Encuesta para medir la cultura de innovación y generación de ideas en la empresa."
+  },
+  { 
+    id: 108, 
+    title: 'Formación y Desarrollo', 
+    estado: 'Activa', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 67,
+    description: "Evaluación de las necesidades de capacitación y oportunidades de crecimiento profesional."
+  },
+  { 
+    id: 109, 
+    title: 'Bienestar Corporativo', 
+    estado: 'Finalizada', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 89,
+    description: "Encuesta para evaluar las iniciativas de bienestar y su impacto en los colaboradores."
+  },
+  { 
+    id: 110, 
+    title: 'Evaluación de Procesos', 
+    estado: 'Activa', 
+    creador: 'Usuario Administrador', 
+    categoria: 'Salud y Bienestar', 
+    fechaCreacion: '10/03/2025', 
+    asignaciones: 42,
+    description: "Análisis de la eficiencia y efectividad de los procesos organizacionales."
+  },
 ];
 
 // Mapear IDs de filtro a estados de encuesta
@@ -36,7 +125,7 @@ const mapFilterToEstado = {
   'all': '' // Filtro para mostrar todos
 };
 
-const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
+const DashboardTable = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetails }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -133,17 +222,40 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
         return 'bg-gray-500';
     }
   };
+  
+  // Preparar los datos de navegación de la encuesta
+  const prepareSurveyData = (survey) => {
+    return {
+      id: survey.id,
+      title: survey.title,
+      estado: survey.estado,
+      fechaInicio: survey.fechaInicio,
+      fechaFinal: survey.fechaFinal,
+      description: survey.description,
+      sections: [
+        { id: 1, name: "Información Personal" },
+        { id: 2, name: "Experiencia Laboral" },
+        { id: 3, name: "Valoración" }
+      ]
+    };
+  };
 
   // Función para renderizar los iconos de acción según el estado
-  const renderActionIcons = (estado) => {
-    switch (estado) {
+  const renderActionIcons = (survey) => {
+    switch (survey.estado) {
       case 'Finalizada':
         return (
           <div className="flex justify-center space-x-2">
             <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
               <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
             </button>
-            <button className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+            <button 
+              className="p-2 bg-purple-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300"
+              onClick={(e) => {
+                e.stopPropagation(); // Evitar que el clic se propague a la fila
+                onNavigateToDetails(prepareSurveyData(survey));
+              }}
+            >
               <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
             </button>
           </div>
@@ -154,7 +266,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
               <img src={ShareIcon} alt="Compartir" className="w-5 h-5" />
             </button>
-            <button className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+            <button 
+              className="p-2 bg-green-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateToDetails(prepareSurveyData(survey));
+              }}
+            >
               <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
             </button>
           </div>
@@ -165,7 +283,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
             <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
               <img src={CalendarIcon} alt="Ampliar plazo" className="w-5 h-5" />
             </button>
-            <button className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+            <button 
+              className="p-2 bg-orange-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateToDetails(prepareSurveyData(survey));
+              }}
+            >
               <img src={ViewIcon} alt="Ver" className="w-5 h-5" />
             </button>
           </div>
@@ -173,7 +297,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
       case 'Sin publicar':
         return (
           <div className="flex justify-center space-x-2">
-            <button className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
+            <button 
+              className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateToDetails(prepareSurveyData(survey));
+              }}
+            >
               <img src={EditIcon} alt="Editar" className="w-5 h-5" />
             </button>
             <button className="p-2 bg-celeste-custom rounded-full text-white hover:bg-opacity-80 transition-all duration-300">
@@ -190,6 +320,11 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
           </div>
         );
     }
+  };
+
+  // Manejar clic en la fila para navegar a detalles
+  const handleRowClick = (survey) => {
+    onNavigateToDetails(prepareSurveyData(survey));
   };
 
   // Configuración de animación para las filas de la tabla
@@ -284,12 +419,13 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                     return (
                       <motion.tr
                         key={index}
-                        className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-gray-100'}
+                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 cursor-pointer`}
                         custom={index}
                         variants={tableRowVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
+                        onClick={() => handleRowClick(survey)}
                       >
                         {/* Celda con checkbox e indicador de estado - sticky left */}
                         <td className="border-r py-3 px-2 relative sticky left-0 z-10" style={{ backgroundColor: rowBgColor }}>
@@ -300,7 +436,10 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                           <div className="flex items-center justify-center pl-6">
                             <div
                               className={`w-5 h-5 border border-gray-300 rounded cursor-pointer flex items-center justify-center transition-colors ${selectedRows.includes(index) ? 'bg-blue-500 border-blue-500' : 'bg-white'}`}
-                              onClick={() => handleRowSelect(index)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Evitar que el clic se propague a la fila
+                                handleRowSelect(index);
+                              }}
                             >
                               {selectedRows.includes(index) && (
                                 <svg
@@ -338,10 +477,14 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                         <td className="py-3 px-4 border-r text-center">{DOMPurify.sanitize(String(survey.asignaciones))}</td>
 
                         {/* Celda de acciones - sticky right (MODIFICADA con botón de despliegue) */}
-                        <td className="py-3 px-4 text-center sticky right-0 z-10 transition-all duration-300" style={{ backgroundColor: rowBgColor }}>
+                        <td 
+                          className="py-3 px-4 text-center sticky right-0 z-10 transition-all duration-300" 
+                          style={{ backgroundColor: rowBgColor }}
+                          onClick={(e) => e.stopPropagation()} // Evitar que el clic en esta celda navegue a detalles
+                        >
                           {/* Vista de escritorio: Mostrar botones directamente */}
                           <div className="hidden md:flex justify-center space-x-2">
-                            {renderActionIcons(survey.estado)}
+                            {renderActionIcons(survey)}
                           </div>
 
                           {/* Vista móvil: Mostrar botón de despliegue o iconos de acción */}
@@ -354,7 +497,7 @@ const DashboardTable = ({ searchTerm = '', stateFilter = 'all' }) => {
                                 exit={{ x: 50, opacity: 0 }}
                                 transition={{ duration: 0.3, ease: "easeOut" }}
                               >
-                                {renderActionIcons(survey.estado)}
+                                {renderActionIcons(survey)}
                               </motion.div>
                             ) : (
                               <button

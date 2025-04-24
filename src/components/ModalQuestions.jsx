@@ -14,7 +14,7 @@ const ModalQuestions = ({ isOpen, toggleModal, selectedItem, titlefather, refres
 
   // useQuery para cargar detalles de preguntas
   const { data, isLoading, error } = useQuery({
-    queryKey: ['surveyDetails'],
+    queryKey: ['previewDetails'],
     enabled: isOpen, // Activamos solo cuando el modal está abierto
   });
 

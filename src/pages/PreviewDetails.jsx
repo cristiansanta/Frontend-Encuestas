@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import BackgroundImg from '../assets/img/backgroundsurvey.svg';
 
-const SurveyDetails = () => {
+const PreviewDetails = () => {
     // Estados básicos del componente
     const [userResponses, setUserResponses] = useState({});
     const [visibleQuestions, setVisibleQuestions] = useState({});
@@ -536,4 +536,4 @@ const SurveyDetails = () => {
     );
 };
 
-export default SurveyDetails;
+export default PreviewDetails;

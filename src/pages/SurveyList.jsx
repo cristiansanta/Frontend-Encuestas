@@ -25,7 +25,7 @@ const SurveyList = () => {
 
   // useQuery para obtener los datos
   const { data, isLoading, error } = useQuery({
-    queryKey: ['surveyDetailslist'],
+    queryKey: ['PreviewDetailslist'],
     queryFn: fetchsurveys,
   });
 
