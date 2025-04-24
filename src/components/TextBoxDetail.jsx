@@ -55,16 +55,31 @@ const RichTextEditor = ({ value, onChange }) => {
   `;
 
   return (
-    <div className="w-full h-80 overflow-hidden bg-gray-back-custom rounded-lg">
+    <div className="w-full h-[350px] overflow-hidden bg-gray-back-custom rounded-lg flex flex-col">
       {/* Incluimos los estilos personalizados */}
-      <style>{customStyles}</style>
+      <style>
+        {customStyles + `
+          /* Estilos para mantener la toolbar fija */
+          .ql-toolbar.ql-snow {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+          }
+          
+          /* Ajustar el contenedor para permitir scroll mientras mantiene la estructura */
+          .ql-container.ql-snow {
+            flex: 1;
+            overflow-y: auto;
+          }
+        `}
+      </style>
       
       <ReactQuill
         theme="snow"
         value={value}
         onChange={onChange}
         modules={modules}
-        className="h-full w-full"
+        className="flex flex-col h-full"
         placeholder="Escribe la descripción aquí..."
       />
     </div>

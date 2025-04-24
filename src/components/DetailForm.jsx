@@ -20,6 +20,7 @@ const MAX_SECTION_NAME_LENGTH = 50;
 
 // Componente para el elemento arrastrable de sección
 const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
   const ref = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -79,10 +80,22 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
           <span className="font-work-sans text-lg font-medium text-dark-blue-custom">{name}</span>
         </div>
         <button
-          className="bg-orange-custom text-white p-3 hover:bg-orange-600 transition-colors"
+          className="bg-orange-custom text-white p-3 hover:bg-orange-600 transition-colors relative"
           onClick={() => onRemove(id)}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
         >
           <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
+
+          {showTooltip && (
+            <div className="absolute right-0 top-full mt-2 bg-dark-blue-custom text-white px-3 py-1 rounded text-sm whitespace-nowrap z-10"
+              style={{
+                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 85% 85%, 75% 100%, 65% 85%, 0% 85%)'
+              }}
+            >
+              Eliminar sección
+            </div>
+          )}
         </button>
       </div>
     </div>
@@ -385,9 +398,9 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             onChange={handleTitleChange}
             placeholder="Titulo de Encuesta"
             maxLength={50}
-            className="font-work-sans text-3xl font-bold text-dark-blue-custom w-full border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
+            className="font-work-sans text-3xl font-bold text-dark-blue-custom w-[89%] border-b-2 border-gray-300 focus:border-blue-custom focus:outline-none pb-1"
           />
-          <div className="absolute right-0 bottom-1 text-xs text-gray-500">
+          <div className="absolute right-[11%] bottom-1 text-xs text-gray-500">
             {title.length}/50
           </div>
         </div>
@@ -461,9 +474,9 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       </div>
 
       {/* Contenedor principal de dos columnas */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row -mt-6">
         {/* Columna izquierda */}
-        <div className="flex-1 flex flex-col gap-4 p-6">
+        <div className="flex-1 flex flex-col gap-3 p-6">
           {/* Rango de tiempo */}
           <div className="mb-4">
             <div className="mb-1 border border-white p-0">
@@ -554,8 +567,8 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
               <button
                 onClick={newSectionName.trim() !== '' && !inputError ? handleAddSection : undefined}
                 className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${newSectionName.trim() !== '' && !inputError
-                    ? 'bg-green-500 text-white hover:bg-green-600'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   } transition-colors`}
                 disabled={newSectionName.trim() === '' || !!inputError}
               >
@@ -571,7 +584,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
 
           {/* Lista de secciones con drag and drop */}
           <DndProvider backend={HTML5Backend}>
-            <div className="max-h-96 overflow-y-auto scrollbar-image-match">
+            <div className="max-h-96 overflow-y-auto scrollbar-image-match pr-4">
               {sections.length === 0 ? (
                 <p className="text-sm text-gray-500 italic text-center py-4">No hay secciones creadas</p>
               ) : (
