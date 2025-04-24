@@ -340,7 +340,12 @@ const Calendar = ({
       {isOpen && (
         <div
           ref={calendarRef}
-          className="absolute z-10 mt-2 bg-white shadow-lg rounded-3xl p-4 w-96"
+          className="absolute z-50 mt-2 bg-white shadow-lg rounded-3xl p-4 w-96"
+          style={{
+            zIndex: 9999, // Asegura que el calendario esté por encima de todo
+            position: 'absolute',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+          }}
         >
           {/* Cabecera con título */}
           <div className="text-center mb-3">

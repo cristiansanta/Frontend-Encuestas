@@ -15,7 +15,6 @@ const RichTextEditor = ({ value, onChange }) => {
   };
 
   // Estilos personalizados para aplicar al ReactQuill
-  // Estos se añadirán al archivo CSS existente o se incluirán inline
   const customStyles = `
     /* Estilos para la barra de herramientas */
     .ql-toolbar.ql-snow {
@@ -23,6 +22,7 @@ const RichTextEditor = ({ value, onChange }) => {
       border-color: #003366 !important;
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
+      z-index: 10 !important; /* Asegura que la barra esté por encima del contenido */
     }
     
     /* Estilos para los botones e iconos de la barra */
@@ -51,6 +51,24 @@ const RichTextEditor = ({ value, onChange }) => {
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
       border-color: #d1d5db !important;
+      z-index: 9 !important; /* Asegura que el contenedor esté por debajo de la barra de herramientas */
+    }
+    
+    /* Importante: Asegurar que el editor tenga un z-index menor que el calendario */
+    .ql-editor {
+      z-index: 9 !important;
+    }
+    
+    /* Asegurar que la toolbar sea fija pero no afecte a otros elementos */
+    .ql-toolbar.ql-snow {
+      position: relative; /* Cambiamos a relative para que no afecte a otros elementos */
+      z-index: 10 !important;
+    }
+    
+    /* Ajustar el contenedor para permitir scroll mientras mantiene la estructura */
+    .ql-container.ql-snow {
+      flex: 1;
+      overflow-y: auto;
     }
   `;
 
@@ -58,20 +76,7 @@ const RichTextEditor = ({ value, onChange }) => {
     <div className="w-full h-[350px] overflow-hidden bg-gray-back-custom rounded-lg flex flex-col">
       {/* Incluimos los estilos personalizados */}
       <style>
-        {customStyles + `
-          /* Estilos para mantener la toolbar fija */
-          .ql-toolbar.ql-snow {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-          }
-          
-          /* Ajustar el contenedor para permitir scroll mientras mantiene la estructura */
-          .ql-container.ql-snow {
-            flex: 1;
-            overflow-y: auto;
-          }
-        `}
+        {customStyles}
       </style>
       
       <ReactQuill
@@ -79,7 +84,7 @@ const RichTextEditor = ({ value, onChange }) => {
         value={value}
         onChange={onChange}
         modules={modules}
-        className="flex flex-col h-full"
+        className="flex flex-col h-full scrollbar-image-match"
         placeholder="Escribe la descripción aquí..."
       />
     </div>

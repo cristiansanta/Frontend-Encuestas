@@ -93,7 +93,7 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
               <div 
                 className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap"
                 style={{
-                  backgroundColor: '#00294B',
+                  backgroundColor: '#002C4D',
                   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)'
                 }}
               >
@@ -105,7 +105,7 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
                 style={{
                   width: '10px',
                   height: '10px',
-                  backgroundColor: '#00294B'
+                  backgroundColor: '#002C4D'
                 }}
               ></div>
             </div>
