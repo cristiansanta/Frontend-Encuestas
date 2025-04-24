@@ -12,14 +12,15 @@ import HeaderBar from './HeaderBar';
 
 /**
  * HeaderBannerDetailsSurvey - Component that manages banner display based on survey state
- * Adapted to match the structure and functionality of HeaderBanner
+ * Includes survey title and status display
  * 
  * @param {Object} props - Component properties
  * @param {string} props.surveyState - The current state of the survey ('Activa', 'Próxima a Finalizar', 'Sin publicar', 'Finalizada')
  * @param {string} props.username - The username to display (received from localStorage)
+ * @param {string} props.surveyTitle - The title of the survey
  * @returns {JSX.Element} - The rendered component
  */
-const HeaderBannerDetailsSurvey = ({ surveyState, username }) => {
+const HeaderBannerDetailsSurvey = ({ surveyState, username, surveyTitle }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect if the device is mobile
@@ -63,6 +64,29 @@ const HeaderBannerDetailsSurvey = ({ surveyState, username }) => {
           alt={`Estado: ${surveyState}`} 
           className="banner-image w-full h-auto rounded-t-lg"
         />
+        
+        {/* Contenido sobre el banner - ajustado más a la derecha */}
+        <div className="absolute inset-0 flex flex-col justify-center pl-8 md:pl-32 lg:pl-48 xl:pl-64 pr-8 md:pr-12 lg:pr-16">
+          {/* Título de la encuesta */}
+          <h1 className="text-white text-2xl md:text-4xl lg:text-7xl font-work-sans font-bold mb-3">
+            {surveyTitle || 'Encuesta sin título'}
+          </h1>
+          
+          {/* Separador blanco */}
+          <div className="w-full max-w-2xl h-0.5 bg-white mb-3"></div>
+          
+          {/* Estado de la encuesta */}
+          <div className="flex items-center">
+            <span className="text-white text-lg md:text-xl font-work-sans mr-3">
+              Estado de la Encuesta:
+            </span>
+            <span className="text-white text-lg md:text-xl font-work-sans font-semibold px-4 py-1 border border-white rounded-full">
+              {surveyState}
+            </span>
+          </div>
+        </div>
+        
+        {/* HeaderBar para mostrar el nombre de usuario */}
         <HeaderBar username={username} />
       </div>
     </div>
@@ -72,13 +96,15 @@ const HeaderBannerDetailsSurvey = ({ surveyState, username }) => {
 // Define prop types
 HeaderBannerDetailsSurvey.propTypes = {
   surveyState: PropTypes.oneOf(['Activa', 'Próxima a Finalizar', 'Sin publicar', 'Finalizada']),
-  username: PropTypes.string
+  username: PropTypes.string,
+  surveyTitle: PropTypes.string
 };
 
 // Define default props
 HeaderBannerDetailsSurvey.defaultProps = {
   surveyState: 'Sin publicar',
-  username: ''
+  username: '',
+  surveyTitle: ''
 };
 
 export default HeaderBannerDetailsSurvey;

@@ -14,6 +14,7 @@ import TopBanner from './TopBanner';
  * @param {boolean} props.showTopBanner - Indica si se debe mostrar el banner superior
  * @param {boolean} props.showHeaderBanner - Indica si se debe mostrar el banner principal
  * @param {string} props.surveyState - Estado de la encuesta para el banner
+ * @param {string} props.surveyTitle - Título de la encuesta a mostrar en el banner
  * @returns {JSX.Element} Estructura principal de la página
  */
 const MainLayoutDetailsSurvey = ({ 
@@ -21,7 +22,8 @@ const MainLayoutDetailsSurvey = ({
   headerTitle = "",
   showTopBanner = true,
   showHeaderBanner = true,
-  surveyState = "Sin publicar"
+  surveyState = "Sin publicar",
+  surveyTitle = ""
 }) => {
   // Obtener el nombre de usuario directamente de localStorage
   const username = localStorage.getItem('userName') || "";
@@ -35,6 +37,7 @@ const MainLayoutDetailsSurvey = ({
           <HeaderBannerDetailsSurvey 
             surveyState={surveyState}
             username={username}
+            surveyTitle={surveyTitle}
           />
         )}
         <div className="mt-6 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 2xl:w-10/12 mx-auto">
@@ -51,7 +54,8 @@ MainLayoutDetailsSurvey.propTypes = {
   headerTitle: PropTypes.string,
   showTopBanner: PropTypes.bool,
   showHeaderBanner: PropTypes.bool,
-  surveyState: PropTypes.oneOf(['Activa', 'Próxima a Finalizar', 'Sin publicar', 'Finalizada'])
+  surveyState: PropTypes.oneOf(['Activa', 'Próxima a Finalizar', 'Sin publicar', 'Finalizada']),
+  surveyTitle: PropTypes.string
 };
 
 export default MainLayoutDetailsSurvey;

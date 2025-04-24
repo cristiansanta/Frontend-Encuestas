@@ -6,10 +6,11 @@ import DOMPurify from 'dompurify';
 import MainLayoutDetailsSurvey from '../components/MainLayoutDetailsSurvey';
 
 // Importar imágenes
-import calendar2 from '../assets/img/calendar.svg';
+import calendar2 from '../assets/img/calendar2.svg';
 import Addsurvey from '../assets/img/addsurvey.svg';
-import trashcan from '../assets/img/addsurvey.svg';
-import homeIcon from '../assets/img/addsurvey.svg';
+import trashcan from '../assets/img/trash.svg';
+import homeIcon from '../assets/img/homeicon.svg';
+import verIcon from '../assets/img/EyeIconWhite.svg'; // Icono para botón Ver Más
 
 // Importar componentes
 import NavigationBackButton from '../components/NavigationBackButton';
@@ -49,10 +50,17 @@ const DetailsSurvey = () => {
   const [description, setDescription] = useState(survey.description || '');
   const [sections, setSections] = useState(survey.sections || []);
   const [showSectionDropdown, setShowSectionDropdown] = useState(false);
+  const [showAllSections, setShowAllSections] = useState(false);
   
   // Referencias
   const newSectionButtonRef = useRef(null);
-    
+  
+  // Depuración para verificar estado de la encuesta
+  useEffect(() => {
+    console.log('DetailsSurvey - Estado de la encuesta:', survey.estado);
+    console.log('DetailsSurvey - Nombre de usuario guardado:', localStorage.getItem('userName'));
+  }, [survey]);
+  
   // Determinar el título para el header según el estado
   const getHeaderTitle = () => {
     if (!survey.title) return 'Detalles de encuesta';
@@ -97,6 +105,10 @@ const DetailsSurvey = () => {
     setSections(sections.filter(section => section.id !== sectionId));
   };
   
+  const handleToggleShowAllSections = () => {
+    setShowAllSections(!showAllSections);
+  };
+  
   // Función para guardar cambios y regresar al dashboard
   const handleSaveChanges = () => {
     const updatedSurvey = {
@@ -139,14 +151,14 @@ const DetailsSurvey = () => {
   const renderActiveState = () => {
     return (
       <>
-        <div className="mb-4">
-          <h1 className="font-work-sans text-3xl font-bold text-blue-900">{survey.title || 'Encuesta sin título'}</h1>
+        {/* Contenedor unificado para Rango de tiempo, Descripción y Secciones */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          {renderTimeRange()}
+          {renderDescription()}
+          {renderSections()}
         </div>
         
-        {renderTimeRange()}
-        {renderDescription()}
-        {renderSections()}
-        {renderRespondentsTable()}
+        {renderRespondentsTable(survey.estado)}
       </>
     );
   };
@@ -155,22 +167,15 @@ const DetailsSurvey = () => {
   const renderFinishedState = () => {
     return (
       <>
-        <div className="mb-4">
-          <h1 className="font-work-sans text-3xl font-bold text-purple-900">{survey.title || 'Encuesta sin título'}</h1>
+        {/* Contenedor unificado para Rango de tiempo, Descripción y Secciones */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          {renderTimeRange()}
+          {renderDescription()}
+          {renderSections()}
         </div>
         
-        {renderTimeRange()}
-        {renderDescription()}
-        {renderSections()}
-        {/* Lista de encuestados en formato lista, no tabla */}
-        <div className="mb-4">
-          <div className="mb-1">
-            <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Lista de encuestados</h2>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm">
-            <ListRespondents listView={true} />
-          </div>
-        </div>
+        {/* Lista de encuestados filtrada por estado 'Finalizada' */}
+        {renderRespondentsTable(survey.estado)}
       </>
     );
   };
@@ -179,29 +184,29 @@ const DetailsSurvey = () => {
   const renderComingToEndState = () => {
     return (
       <>
-        <div className="mb-4">
-          <h1 className="font-work-sans text-3xl font-bold text-orange-600">{survey.title || 'Encuesta sin título'}</h1>
+        {/* Contenedor unificado para Rango de tiempo y Descripción */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          {renderTimeRange()}
+          {renderDescription()}
+          
+          {/* Selector de secciones */}
+          <div className="mb-4">
+            <div className="mb-1">
+              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Secciones</h2>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-1">
+              <select className="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full">
+                <option value="">Seleccionar sección...</option>
+                {sections.map(section => (
+                  <option key={section.id} value={section.id}>{section.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
         
-        {renderTimeRange()}
-        {renderDescription()}
-        
-        {/* Selector de secciones */}
-        <div className="mb-4">
-          <div className="mb-1">
-            <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Secciones</h2>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-1">
-            <select className="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full">
-              <option value="">Seleccionar sección...</option>
-              {sections.map(section => (
-                <option key={section.id} value={section.id}>{section.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        {renderRespondentsTable()}
+        {/* Lista de encuestados filtrada por estado 'Próxima a Finalizar' */}
+        {renderRespondentsTable(survey.estado)}
       </>
     );
   };
@@ -219,10 +224,6 @@ const DetailsSurvey = () => {
           </div>
         </div>
         
-        <div className="mb-4">
-          <h1 className="font-work-sans text-3xl font-bold text-blue-900">{survey.title || 'Nueva Encuesta'}</h1>
-        </div>
-        
         {/* Sección con el título de la encuesta */}
         <div className="mb-4">
           <div className="mb-1">
@@ -237,9 +238,15 @@ const DetailsSurvey = () => {
           />
         </div>
         
-        {renderTimeRange()}
-        {renderDescription()}
-        {renderSections()}
+        {/* Contenedor unificado para Rango de tiempo, Descripción y Secciones */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          {renderTimeRange()}
+          {renderDescription()}
+          {renderSections()}
+        </div>
+        
+        {/* Lista de encuestados filtrada por estado 'Sin publicar' */}
+        {survey.title && renderRespondentsTable(survey.estado)}
         
         {/* Botón para "Guardar y continuar" */}
         <div className="flex justify-end mt-6">
@@ -257,7 +264,7 @@ const DetailsSurvey = () => {
   // Componentes comunes reutilizables
   const renderTimeRange = () => {
     return (
-      <div className="mb-4">
+      <div className="mb-6">
         <div className="mb-1">
           <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
         </div>
@@ -305,11 +312,11 @@ const DetailsSurvey = () => {
   
   const renderDescription = () => {
     return (
-      <div className="mb-4">
+      <div className="mb-6">
         <div className="mb-1">
           <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
         </div>
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white">
           <RichTextEditor
             value={description}
             onChange={(value) => setDescription(DOMPurify.sanitize(value))}
@@ -320,6 +327,10 @@ const DetailsSurvey = () => {
   };
   
   const renderSections = () => {
+    // Determinar si mostrar todas las secciones o solo las primeras 4
+    const visibleSections = showAllSections ? sections : sections.slice(0, 4);
+    const hasMoreSections = sections.length > 4;
+    
     return (
       <div className="mb-4">
         <div className="mb-1">
@@ -329,7 +340,7 @@ const DetailsSurvey = () => {
           Agrega las secciones en las que clasificarás las preguntas.
         </p>
         <div className="flex flex-wrap gap-2 mt-1">
-          {sections.map(section => (
+          {visibleSections.map(section => (
             <div
               key={section.id}
               className="relative"
@@ -349,6 +360,22 @@ const DetailsSurvey = () => {
               </div>
             </div>
           ))}
+
+          {/* Botón "Ver Más" si hay más de 4 secciones */}
+          {hasMoreSections && (
+            <div className="relative">
+              <button
+                className="flex items-center justify-center bg-green-600 text-white rounded-full px-6 py-2 hover:bg-green-700 transition-colors"
+                onClick={handleToggleShowAllSections}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                </svg>
+                <span>{showAllSections ? "Ver Menos" : "Ver Más"}</span>
+              </button>
+            </div>
+          )}
 
           <div className="relative">
             <button
@@ -381,14 +408,13 @@ const DetailsSurvey = () => {
     );
   };
   
-  const renderRespondentsTable = () => {
+  // Renderizar la tabla de encuestados con filtrado según el estado de la encuesta
+  const renderRespondentsTable = (surveyState) => {
     return (
-      <div className="mb-4">
-        <div className="mb-1">
-          <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Lista de encuestados</h2>
-        </div>
+      <div className="mb-4">          
         <div className="bg-white rounded-lg shadow-sm">
-          <ListRespondents />
+          {/* Pasamos el estado de la encuesta como prop para filtrar los encuestados */}
+          <ListRespondents filterByState={surveyState} />
         </div>
       </div>
     );
@@ -403,6 +429,7 @@ const DetailsSurvey = () => {
       showTopBanner={true}
       showHeaderBanner={true}
       surveyState={survey.estado || 'Sin publicar'}
+      surveyTitle={survey.title || 'Encuesta sin título'}
     >
       <div className="w-full mr-auto ml-0 md:ml-12">
         {/* Botón para regresar al dashboard */}
