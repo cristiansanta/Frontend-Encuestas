@@ -295,7 +295,8 @@ const SectionSelector = ({
       {isDropdownOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 left-0 top-full mt-2 bg-white shadow-lg rounded-2xl p-4 w-[515px]"
+          className="absolute z-50 left-0 top-full mt-2 bg-white shadow-lg rounded-2xl p-4 w-[515px]"
+          style={{ zIndex: 50 }}
         >
           <h2 className="text-xl font-bold text-center text-dark-blue-custom mb-2">
             Elegir Sección de la Pregunta
