@@ -17,8 +17,8 @@ const ListRespondents = ({ filterByState, listView = false }) => {
   // Estados
   const [searchTerm, setSearchTerm] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [expandedRow, setExpandedRow] = useState(null);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,6 +94,13 @@ const ListRespondents = ({ filterByState, listView = false }) => {
       correo: 'faperez.suarez@mail.com',
       fechaRespuesta: '10/03/2025',
       estado: 'Sin publicar'
+    },
+    {
+      id: 11,
+      nombre: 'Saurio Darwin',
+      correo: 'faperez.suarez@mail.com',
+      fechaRespuesta: '10/03/2025',
+      estado: 'Finalizada'
     }
   ]);
 
@@ -268,7 +275,7 @@ const ListRespondents = ({ filterByState, listView = false }) => {
             duration: 1,
             ease: "linear"
           }}
-          className="w-16 h-16 border-4 border-blue-custom border-t-transparent rounded-full"
+          className="w-16 h-16 border-4 border- border-t-transparent rounded-full"
         />
       </div>
     );
@@ -483,7 +490,7 @@ const ListRespondents = ({ filterByState, listView = false }) => {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <td colSpan="6" className="py-6 text-center text-gray-500 text-lg">
+                    <td colSpan={6} className="py-6 text-center text-gray-500 text-lg">
                       {renderNoResultsMessage()}
                     </td>
                   </motion.tr>

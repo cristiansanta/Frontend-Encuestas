@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import bannerImage from '../assets/img/bannner_encuestas.png';
-import dashboardImage from '../assets/img/BANNER_ENCUESTAS_2025_Step_1.svg';
-import dashboardresponsive from '../assets/img/newbanneresponsive.svg';
+
+// Importaciones SVG Creacion de Encuestas 
+import CaseSurveyCreate from '../assets/img/create_survey.svg';
+import CaseSurveyCreateResponsive from '../assets/img/responsive_crate_survey.svg';
+
+// Importaciones SVG DashBoard
+import CaseDashBoard from '../assets/img/dashboard.svg';
+import CaseDashBoardResponsive from '../assets/img/responsive_dashboard.svg';
+
+
+
 import '../style/HeaderBanner.css';
+
 import TopBanner from '../components/TopBanner';
 import HeaderBar from '../components/HeaderBar';
 
@@ -27,9 +36,9 @@ const HeaderBanner = ({ showDashboardBanner, username }) => {
   // Seleccionar la imagen basada en el estado booleano y si es móvil
   const imageSrc = showDashboardBanner
     ? isMobile
-      ? dashboardresponsive
-      : dashboardImage
-    : dashboardImage;
+      ? CaseDashBoardResponsive
+      : CaseSurveyCreate
+    : CaseSurveyCreate;
 
   return (
     <div className={`banner-container ${showDashboardBanner ? 'svg-container' : ''} relative`}>
