@@ -35,15 +35,6 @@
   object-fit: contain;
 }
 
-/* Estilos específicos por ruta - podemos eliminar este media query ya que ahora controlamos la imagen desde el componente */
-/*
-@media (max-width: 767px) {
-  .dashboard-svg {
-    content: url('../assets/img/newbanneresponsive.svg');
-  }
-}
-*/
-
 @media (min-width: 768px) and (max-width: 1023px) {
   .banner-container {
     height: 250px;
