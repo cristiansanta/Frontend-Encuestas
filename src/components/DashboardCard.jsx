@@ -83,7 +83,7 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetai
       estado: card.estado,
       fechaInicio: card.fechaInicio,
       fechaFinal: card.fechaFinal,
-      description: "Descripción de la encuesta. Este texto se cargará desde la base de datos.",
+      description: "Descripción detallada de la encuesta, incluyendo su propósito, estructura y los temas que aborda, con el fin de brindar una comprensión clara antes de su realización.",
       sections: [
         { id: 1, name: "Información Personal" },
         { id: 2, name: "Experiencia Laboral" },

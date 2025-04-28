@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Importación estándar de estilos Quill Snow
 import '../style/quill.css'; // Tu archivo CSS personalizado (asegúrate que la ruta sea correcta)
 
-const RichTextEditor = ({ value, onChange, placeholder = "Escribe la descripción aquí..." }) => {
+const RichTextEditor = ({ value, onChange, placeholder = "Descripción detallada de la encuesta, incluyendo su propósito, estructura y los temas que aborda, con el fin de brindar una comprensión clara antes de su realización." }) => {
   // Configuración de módulos de la barra de herramientas (como en tu original)
   const modules = {
     toolbar: [
