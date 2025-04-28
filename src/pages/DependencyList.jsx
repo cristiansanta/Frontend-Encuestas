@@ -27,7 +27,7 @@ const DependencyList = () => {
     const [editItem, setEditItem] = useState(null);
 
     // Función para obtener datos de la encuesta
-    const fetchSurveyDetails = async () => {
+    const fetchPreviewDetails = async () => {
         try {
             const url = `surveys/${localStorage.getItem('id_survey')}/details`;
             const method = 'GET';
@@ -40,8 +40,8 @@ const DependencyList = () => {
 
     // useQuery para manejar la consulta de datos
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['surveyDetails'],
-        queryFn: fetchSurveyDetails,
+        queryKey: ['PreviewDetails'],
+        queryFn: fetchSPreviewDetails,
     });
 
     // Manejo de estados iniciales de datos
@@ -114,7 +114,7 @@ const DependencyList = () => {
     };
 
     const handleFinish = () => {
-        navigate('/surveyDetails');
+        navigate('/PreviewDetails');
     };
 
     const handleEditSubmit = async (updatedItem) => {

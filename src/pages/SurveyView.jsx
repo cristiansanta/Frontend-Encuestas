@@ -87,7 +87,7 @@ const SurveyView = () => {
     };
 
     const { data: survey, isLoading, error } = useQuery({
-        queryKey: ["surveyDetails", surveyId],
+        queryKey: ["PreviewDetails", surveyId],
         queryFn: fetchSections,
         enabled: !errorMessage,
     });

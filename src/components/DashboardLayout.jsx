@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import MainLayout from './MainLayout';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 // Importar imágenes SVG
 import zoomIcon from '../assets/img/zoom.svg';
@@ -13,6 +14,7 @@ import Filter from '../assets/img/filtersurvey.svg';
 /**
  * Componente de Layout específico para el Dashboard
  * Extiende el MainLayout agregando barra de filtros, búsqueda y controles específicos del dashboard
+ * Incluye funcionalidad de reconocimiento de voz para la búsqueda
  * 
  * @param {Object} props - Propiedades del componente
  * @param {React.ReactNode} props.children - Contenido específico de la página
@@ -26,8 +28,8 @@ import Filter from '../assets/img/filtersurvey.svg';
  * @param {function} props.onCreateSurvey - Función para manejar la creación de una nueva encuesta
  * @returns {JSX.Element} Layout específico para el dashboard
  */
-const DashboardLayout = ({ 
-  children, 
+const DashboardLayout = ({
+  children,
   headerTitle = "",
   onSearchChange,
   searchTerm = '',
@@ -38,10 +40,44 @@ const DashboardLayout = ({
   onCreateSurvey
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
+  const [isListening, setIsListening] = useState(false);
+
   // Referencias separadas para las versiones desktop y móvil
   const desktopDropdownRef = useRef(null);
   const mobileDropdownRef = useRef(null);
+
+  // Configuración de reconocimiento de voz
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+
+  // Efecto para actualizar el término de búsqueda cuando cambia el transcript
+  useEffect(() => {
+    if (transcript && onSearchChange && listening) {
+      onSearchChange(transcript);
+    }
+  }, [transcript, onSearchChange, listening]);
+
+  // Efecto para actualizar el estado de escucha
+  useEffect(() => {
+    setIsListening(listening);
+  }, [listening]);
+
+  // Función para manejar el inicio/fin del reconocimiento de voz
+  const handleVoiceSearch = () => {
+    if (listening) {
+      SpeechRecognition.stopListening();
+      resetTranscript();
+    } else {
+      resetTranscript();
+      SpeechRecognition.startListening({ continuous: false, language: 'es-ES' });
+      // No borrar el texto actual al iniciar la escucha
+      // Esto permite que el usuario pueda continuar dictando a partir del texto actual
+    }
+  };
 
   // Definimos los filtros con clases de Tailwind personalizadas
   const filters = [
@@ -102,7 +138,13 @@ const DashboardLayout = ({
 
   // Obtener el filtro actual
   const currentFilter = getCurrentFilter();
-  
+
+  // Verificar si el navegador soporta reconocimiento de voz
+  if (!browserSupportsSpeechRecognition) {
+    // Si no hay soporte, no mostramos error pero deshabilitamos el botón de voz
+    console.warn("El navegador no soporta el reconocimiento de voz.");
+  }
+
   return (
     <MainLayout headerTitle={headerTitle} showHeaderBanner={true}>
       <div className="flex flex-col w-full">
@@ -111,8 +153,8 @@ const DashboardLayout = ({
           {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
           <div className="flex space-x-4">
             {/* Botón Nueva Encuesta */}
-            <button 
-              onClick={onCreateSurvey} 
+            <button
+              onClick={onCreateSurvey}
               className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
             >
               <span className="bg-blue-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
@@ -124,8 +166,8 @@ const DashboardLayout = ({
             </button>
 
             {/* Versión móvil - Solo icono */}
-            <button 
-              onClick={onCreateSurvey} 
+            <button
+              onClick={onCreateSurvey}
               className="md:hidden bg-blue-custom text-white p-2 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105"
             >
               <img src={Addsurvey} alt="Nueva encuesta" className="w-5 h-5" />
@@ -299,22 +341,45 @@ const DashboardLayout = ({
               <img src={Tablesurvey} alt="Vista de lista" className="w-5 h-5" />
             </button>
 
-            {/* Barra de Búsqueda */}
-            <div className="relative flex items-center w-48 md:w-64 lg:w-50 rounded-lg overflow-hidden">
-              <span className="absolute left-3 flex items-center">
-                <img src={zoomIcon} alt="Zoom" className="h-5 sm:h-6" />
+            {/* Barra de Búsqueda con reconocimiento de voz */}
+            <div className="relative flex items-center w-48 md:w-64 lg:w-50">
+              {/* Ícono de búsqueda */}
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <img src={zoomIcon} alt="Zoom" className="h-4 sm:h-5" />
               </span>
+
+              {/* Input */}
               <input
                 type="text"
                 placeholder="Buscar encuesta"
-                className="border border-gray-300 rounded-full p-2 pl-10 pr-10 w-full"
+                className="border border-gray-300 rounded-full py-2 pl-10 pr-10 w-full"
                 value={searchTerm}
-                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                onChange={(e) => {
+                  if (onSearchChange) {
+                    onSearchChange(e.target.value);
+                  }
+                }}
               />
-              <span className="absolute right-3 flex items-center">
-                <img src={voiceIcon} alt="Voice" className="h-5 sm:h-6" />
-              </span>
+
+              {/* Ícono de voz con estado de escucha */}
+              <button
+                onClick={handleVoiceSearch}
+                disabled={!browserSupportsSpeechRecognition}
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isListening ? 'animate-pulse' : ''}`}
+              >
+                <span className={`flex items-center justify-center ${isListening ? 'text-red-500' : ''}`}>
+                  <img 
+                    src={voiceIcon} 
+                    alt="Voice" 
+                    className={`h-6 sm:h-8 ${isListening ? 'filter hue-rotate-90' : ''}`} 
+                  />
+                  {isListening && (
+                    <span className="absolute h-2 w-2 rounded-full bg-red-500 top-0 right-0"></span>
+                  )}
+                </span>
+              </button>
             </div>
+
 
           </div>
         </div>
@@ -336,6 +401,17 @@ const DashboardLayout = ({
             >
               ✕
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Indicador visual de reconocimiento de voz activo */}
+      {isListening && (
+        <div className="w-full mt-2 mb-2 px-12">
+          <div className="flex items-center justify-center">
+            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+              Escuchando... "{transcript}"
+            </span>
           </div>
         </div>
       )}

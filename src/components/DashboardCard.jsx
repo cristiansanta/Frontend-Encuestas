@@ -8,20 +8,20 @@ import Calendar from '../assets/img/calendar.svg';
 import Done from '../assets/img/done.svg';
 
 const cardsData = [
-  { name: "asd", estado: "Finalizada", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Encuestas contestadas" },
-  { name: "asd", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "asd", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "asd", estado: "Sin publicar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "asd", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "asd", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "asd", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "asd", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "Solo por probar", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "asd", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "asd", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "asd", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
-  { name: "asd", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
-  { name: "ve que si fun", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 1, name: "Perfil Personal", estado: "Finalizada", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Encuestas contestadas" },
+  { id: 2, name: "Satisfacción Laboral", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 3, name: "Clima Organizacional", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 4, name: "Evaluación de Desempeño", estado: "Sin publicar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 5, name: "Bienestar Corporativo", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 6, name: "Formación y Desarrollo", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 7, name: "Comunicación Interna", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 8, name: "Liderazgo", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 9, name: "Salud Ocupacional", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 10, name: "Calidad de Vida", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 11, name: "Compensación", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 12, name: "Innovación", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
+  { id: 13, name: "Tecnología", estado: "Activa", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Total respuestas" },
+  { id: 14, name: "Cultura Corporativa", estado: "Próxima a Finalizar", fechaInicio: "02/10/25", fechaFinal: "04/12/25", total: "33'333.333", tipo: "Respuestas actuales" },
 ];
 
 // Mapear IDs de filtro a estados de tarjeta
@@ -33,7 +33,7 @@ const mapFilterToEstado = {
   'all': '' // Filtro para mostrar todos
 };
 
-const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
+const DashboardCard = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetails }) => {
   // Obtener el estado de filtro correspondiente
   const estadoFilter = mapFilterToEstado[stateFilter] || '';
 
@@ -74,6 +74,34 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
       }
     }
   };
+  
+  // Función para preparar los datos de la encuesta para la navegación
+  const prepareNavigationData = (card) => {
+    return {
+      id: card.id,
+      title: `Encuesta ${card.name}`,
+      estado: card.estado,
+      fechaInicio: card.fechaInicio,
+      fechaFinal: card.fechaFinal,
+      description: "Descripción de la encuesta. Este texto se cargará desde la base de datos.",
+      sections: [
+        { id: 1, name: "Información Personal" },
+        { id: 2, name: "Experiencia Laboral" },
+        { id: 3, name: "Valoración" }
+      ]
+    };
+  };
+
+  // Verificar que onNavigateToDetails es una función para evitar errores
+  const handleNavigation = (card) => {
+    if (typeof onNavigateToDetails === 'function') {
+      const data = prepareNavigationData(card);
+      console.log('Navegando a detalles con los datos:', data);
+      onNavigateToDetails(data);
+    } else {
+      console.error('onNavigateToDetails no es una función válida');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 p-12 w-full -mt-8">
@@ -108,7 +136,7 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
                       className="h-6 w-6"
                     />
                   </div>
-                  <h2 className="text-lg font-semibold ml-4">Encuesta {card.name.toString()}</h2>
+                  <h2 className="text-lg font-semibold ml-4">Encuesta {card.name}</h2>
                 </div>
                 <div className="space-y-2 flex-grow">
                   <p className="flex justify-between items-center">
@@ -137,7 +165,10 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
                 <div className="flex justify-center space-x-2 mt-4">
                   {card.estado === "Finalizada" && (
                     <>
-                      <button className="flex items-center px-4 py-2 bg-purple-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button 
+                        className="flex items-center px-4 py-2 bg-purple-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        onClick={() => handleNavigation(card)}
+                      >
                         <img src={Eyel} alt="Ver" className="h-5 w-5 mr-2" />
                         Ver
                       </button>
@@ -148,14 +179,20 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
                     </>
                   )}
                   {card.estado === "Activa" && (
-                    <button className="flex items-center px-4 py-2 bg-green-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                    <button 
+                      className="flex items-center px-4 py-2 bg-green-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                      onClick={() => handleNavigation(card)}
+                    >
                       <img src={Eyel} alt="Ver Respuestas" className="h-5 w-5 mr-2" />
                       Ver Respuestas
                     </button>
                   )}
                   {card.estado === "Próxima a Finalizar" && (
                     <>
-                      <button className="flex items-center px-4 py-2 bg-orange-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button 
+                        className="flex items-center px-4 py-2 bg-orange-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        onClick={() => handleNavigation(card)}
+                      >
                         <img src={Eyel} alt="Ver" className="h-5 w-5 mr-2" />
                         Ver
                       </button>
@@ -167,7 +204,10 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all' }) => {
                   )}
                   {card.estado === "Sin publicar" && (
                     <>
-                      <button className="flex items-center px-4 py-2 bg-celeste-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button 
+                        className="flex items-center px-4 py-2 bg-celeste-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        onClick={() => handleNavigation(card)}
+                      >
                         <img src={Edit} alt="Editar" className="h-5 w-5 mr-2" />
                         Editar
                       </button>

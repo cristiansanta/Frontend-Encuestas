@@ -13,7 +13,7 @@ import SurveyList from './pages/SurveyList.jsx';
 import Register from './pages/Register.jsx';
 import { SurveyProvider } from './Provider/SurveyContext.jsx'; 
 import ProtectedRoute from './components/ProtectedRoute'; 
-import SurveyDetails from './pages/SurveyDetails.jsx';
+import PreviewDetails from './pages/PreviewDetails.jsx';
 import ManageUsers from './pages/ManageUsers.jsx';
 import RolesAsignation from './pages/RolesAsignation.jsx';
 import AsignationMigrate from './pages/AsignationMigrate.jsx';
@@ -24,6 +24,8 @@ import SurveyReplied from './pages/SurveyReplied.jsx';
 import SurveyEdit from './pages/SurveyEdit.jsx';
 import DashboardTable from './components/DashboardTable.jsx';
 import PreviewSurvey from './pages/PreviewSurvey.jsx';
+import DetailsSurvey from './pages/DetailsSurvey.jsx';
+import Page404 from './components/Page404.jsx';
 
 const queryClient = new QueryClient();
 
@@ -44,7 +46,7 @@ function App() {
             <Route path="/questions-list" element={<ProtectedRoute element={<QuestionsList />} />} />
             <Route path="/questions-create" element={<ProtectedRoute element={<QuestionsCreate />} />} />
             <Route path="/dependency-list" element={<ProtectedRoute element={<DependencyList />} />} />
-            <Route path="/survey-details" element={<ProtectedRoute element={<SurveyDetails />} />} />
+            <Route path="/preview-details" element={<ProtectedRoute element={<PreviewDetails />} />} />
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/roles-asignation" element={<RolesAsignation />} />
             <Route path="/asignation-migrate" element={<AsignationMigrate />} />
@@ -55,6 +57,8 @@ function App() {
             <Route path="/survey-replied" element={<SurveyReplied />} />
             <Route path="/survey-edit" element={<SurveyEdit />} />
             <Route path="/preview-survey" element={<PreviewSurvey />} />
+            <Route path="/details-survey" element={<DetailsSurvey />} />
+            <Route path="*" element={<Page404 />} />
           </Routes>
         </div>
       </SurveyProvider>

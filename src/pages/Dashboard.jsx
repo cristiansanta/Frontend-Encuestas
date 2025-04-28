@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import apiRequest from '../Provider/apiHelper';
 
@@ -10,34 +10,28 @@ import DashboardTable from '../components/DashboardTable';
 
 /**
  * Componente principal del Dashboard
- * Utiliza DashboardLayout para la estructura y muestra DashboardCard o DashboardTable según el modo de vista
- * 
- * @returns {JSX.Element} Componente Dashboard completo
+ * Combina funcionalidad de permisos, navegación, búsqueda y filtros, usando un layout estructurado
  */
 const Dashboard = () => {
-  // Estados para el dashboard
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all'); // Por defecto muestra todas
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' o 'table'
-  
-  // Hooks de navegación
+
   const navigate = useNavigate();
   const user_id = localStorage.getItem('id_user');
 
-  // Función para obtener los permisos del usuario
+  // Fetch de permisos del usuario
   const fetchUserPermissions = async () => {
     const response = await apiRequest('GET', `getUserRoles?user_id=${user_id}`);
     console.log('Permisos del usuario desde dashboard:', response.roles);
     return response;
   };
 
-  // useQuery para obtener permisos
   const { data: userPermissions = {}, isLoading, error } = useQuery({
     queryKey: ['UserPermissions'],
     queryFn: fetchUserPermissions,
   });
 
-  // Handlers para los diferentes cambios de estado
   const handleSearchChange = (value) => {
     setSearchTerm(value);
   };
@@ -54,7 +48,16 @@ const Dashboard = () => {
     navigate('/survey-create');
   };
 
-  // Manejo de estados de carga o error
+  const handleNavigateToDetails = (survey) => {
+    navigate('/details-survey', {
+      state: {
+        surveyData: survey,
+        fromView: viewMode
+      }
+    });
+  };
+
+  // Estados de carga o error
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-lg font-medium text-gray-700">
@@ -71,12 +74,10 @@ const Dashboard = () => {
     );
   }
 
-  // Verificar si no hay roles asignados (actualmente forzado a false)
-  const hasNoRoles = false; // Forzado a false para desactivar la validación
+  const hasNoRoles = false; // Validación deshabilitada por ahora
 
   return (
     <>
-      {/* Mensaje si no tiene roles */}
       {hasNoRoles ? (
         <div className="mt-34 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 mx-auto bg-gray-200 text-white rounded-lg text-center p-4">
           <h2 className="text-lg sm:text-xl font-semibold text-blue-custom">No hay roles registrados</h2>
@@ -93,12 +94,19 @@ const Dashboard = () => {
           onViewModeChange={handleViewModeChange}
           onCreateSurvey={handleCreateSurvey}
         >
-          {/* Contenido principal: Cards o Tabla según el modo de vista */}
           <div className="-mt-4">
             {viewMode === 'cards' ? (
-              <DashboardCard searchTerm={searchTerm} stateFilter={selectedFilter} />
+              <DashboardCard
+                searchTerm={searchTerm}
+                stateFilter={selectedFilter}
+                onNavigateToDetails={handleNavigateToDetails}
+              />
             ) : (
-              <DashboardTable searchTerm={searchTerm} stateFilter={selectedFilter} />
+              <DashboardTable
+                searchTerm={searchTerm}
+                stateFilter={selectedFilter}
+                onNavigateToDetails={handleNavigateToDetails}
+              />
             )}
           </div>
         </DashboardLayout>

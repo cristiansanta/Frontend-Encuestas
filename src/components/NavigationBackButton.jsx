@@ -18,7 +18,7 @@ const NavigationBackButton = ({ currentView, className = '' }) => {
   // Configuración de navegación según la vista actual (actualizada para usar rutas normales)
   const navigationConfig = {
     'SurveyCreate': {
-      label: 'Regresar al Dashboard',
+      label: 'Regresar al Home',
       target: '/dashboard'
     },
     'QuestionsCreate': {
