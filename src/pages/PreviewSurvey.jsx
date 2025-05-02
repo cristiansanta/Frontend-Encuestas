@@ -450,7 +450,7 @@ const PreviewSurvey = () => {
         </div>
 
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Preguntas de la Encuesta</h2>
+          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones de la Encuesta</h2>
 
           <CollapsibleSection
             title="Información Personal"
