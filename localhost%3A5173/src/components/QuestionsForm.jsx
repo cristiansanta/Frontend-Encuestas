@@ -458,79 +458,79 @@ const SavedQuestionForm = ({
           {childFormsFromProps.length > 0 && (
             <div className="space-y-2 mt-2">
               {childFormsFromProps.map((childForm) => (
-                <div key={childForm.id} className="transition-all duration-300 ease-in-out">
-                  {childForm.completed ? (
-                    // For completed forms, render a collapsible version with the red background
-                    <div className="w-5/6 ml-auto">
-                      <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-pink-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
-                        {/* Cabecera con título */}
-                        <div className="flex items-center">
-                          <div className="w-2/3 relative pr-4">
-                            <input
-                              type="text"
-                              value={childForm.data?.title || ''}
-                              onChange={(e) => {
-                                if (childForm.isCollapsed) return;
-                                const updatedChild = {
-                                  ...childForm,
-                                  data: {
-                                    ...childForm.data,
-                                    title: e.target.value
-                                  }
-                                };
-                                onUpdateChildInSavedForm(form.id, childForm.id, updatedChild.data);
-                              }}
-                              placeholder="Titulo de Pregunta Hija"
-                              maxLength={50}
-                              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none bg-transparent ${childForm.isCollapsed ? 'py-1' : 'pb-1'} ${!childForm.isCollapsed ? 'border-b-2 border-gray-300 focus:border-blue-custom' : 'border-b-2 border-transparent'}`}
-                              readOnly={childForm.isCollapsed}
-                            />
-                            {!childForm.isCollapsed && (
-                              <div className="absolute right-4 bottom-1 text-xs text-gray-500">
-                                {(childForm.data?.title || '').length}/50
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Botones de acción */}
-                          <div className="w-1/3 flex items-center justify-end gap-3">
-                            {/* Botón para eliminar */}
-                            <button
-                              className="focus:outline-none hover:opacity-80"
-                              onClick={() => onRemoveChildFromSavedForm(form.id, childForm.id)}
-                              aria-label="Eliminar pregunta hija"
-                            >
-                              <img src={trashcan_1} alt="trashCan" className="w-7 h-7" />
-                            </button>
-
-                            {/* Botón Colapsar/Expandir */}
-                            <div className="rounded-full flex items-center">
-                              <button
-                                onClick={() => {
-                                  // Toggle collapse state for this specific child
-                                  const updatedChild = {
-                                    ...childForm,
-                                    isCollapsed: !childForm.isCollapsed
-                                  };
-                                  // Update this specific child
-                                  const updatedChildForms = form.childForms.map(cf =>
-                                    cf.id === childForm.id ? updatedChild : cf
-                                  );
-                                  // Update the parent with the new children array
-                                  onUpdate(form.id, { ...form, childForms: updatedChildForms });
-                                }}
-                                className="focus:outline-none transform transition-transform duration-300 hover:opacity-80"
-                                style={{ transform: childForm.isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                                aria-label={childForm.isCollapsed ? "Expandir formulario hijo" : "Colapsar formulario hijo"}
-                              >
-                                <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-7 h-7" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Contenido expandido editable */}
+                <div key={childForm.id} className="transition-all duration-300 ease-in-out w-5/6 ml-auto">
+                  {/* Contenedor del formulario hijo guardado */}
+                  <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
+                    {/* Cabecera con título */}
+                    <div className="flex items-center">
+                      <div className="w-2/3 relative pr-4">
+                        <input
+                          type="text"
+                          value={childForm.data?.title || ''}
+                          onChange={(e) => {
+                            if (childForm.isCollapsed) return;
+                            const updatedChild = {
+                              ...childForm,
+                              data: {
+                                ...childForm.data,
+                                title: e.target.value
+                              }
+                            };
+                            onUpdateChildInSavedForm(form.id, childForm.id, updatedChild.data);
+                          }}
+                          placeholder="Titulo de Pregunta Hija"
+                          maxLength={50}
+                          className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none bg-transparent ${childForm.isCollapsed ? 'py-1' : 'pb-1'} ${!childForm.isCollapsed ? 'border-b-2 border-gray-300 focus:border-blue-custom' : 'border-b-2 border-transparent'}`}
+                          readOnly={childForm.isCollapsed}
+                        />
                         {!childForm.isCollapsed && (
+                          <div className="absolute right-4 bottom-1 text-xs text-gray-500">
+                            {(childForm.data?.title || '').length}/50
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botones de acción */}
+                      <div className="w-1/3 flex items-center justify-end gap-3">
+                        {/* Botón para eliminar */}
+                        <button
+                          className="focus:outline-none hover:opacity-80"
+                          onClick={() => onRemoveChildFromSavedForm(form.id, childForm.id)}
+                          aria-label="Eliminar pregunta hija"
+                        >
+                          <img src={trashcan_1} alt="trashCan" className="w-7 h-7" />
+                        </button>
+
+                        {/* Botón Colapsar/Expandir */}
+                        <div className="rounded-full flex items-center">
+                          <button
+                            onClick={() => {
+                              // Toggle collapse state for this specific child
+                              const updatedChild = {
+                                ...childForm,
+                                isCollapsed: !childForm.isCollapsed
+                              };
+                              // Update this specific child
+                              const updatedChildForms = form.childForms.map(cf =>
+                                cf.id === childForm.id ? updatedChild : cf
+                              );
+                              // Update the parent with the new children array
+                              onUpdate(form.id, { ...form, childForms: updatedChildForms });
+                            }}
+                            className="focus:outline-none transform transition-transform duration-300 hover:opacity-80"
+                            style={{ transform: childForm.isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                            aria-label={childForm.isCollapsed ? "Expandir formulario hijo" : "Colapsar formulario hijo"}
+                          >
+                            <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-7 h-7" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contenido expandido editable */}
+                    {!childForm.isCollapsed && (
+                      <>
+                        {childForm.completed ? (
                           <>
                             {/* Tipo de pregunta */}
                             <div className="mb-4">
@@ -619,20 +619,20 @@ const SavedQuestionForm = ({
                               />
                             </div>
                           </>
+                        ) : (
+                          // Formulario de edición hijo
+                          <ChildQuestionForm
+                            ref={(el) => { childFormRefs.current[childForm.id] = el; }}
+                            formId={childForm.id}
+                            parentQuestionData={childForm.parentData}
+                            onSave={(childData) => handleSaveChildData(childForm.id, childData)}
+                            onCancel={() => handleCancelChildCreation(childForm.id)}
+                            onValidityChange={(isValid) => handleChildFormValidityChange(childForm.id, isValid)}
+                          />
                         )}
-                      </div>
-                    </div>
-                  ) : (
-                    // For incomplete forms, render ChildQuestionForm DIRECTLY without additional container
-                    <ChildQuestionForm
-                      ref={(el) => { childFormRefs.current[childForm.id] = el; }}
-                      formId={childForm.id}
-                      parentQuestionData={childForm.parentData}
-                      onSave={(childData) => handleSaveChildData(childForm.id, childData)}
-                      onCancel={() => handleCancelChildCreation(childForm.id)}
-                      onValidityChange={(isValid) => handleChildFormValidityChange(childForm.id, isValid)}
-                    />
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1493,149 +1493,147 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             {newChildForms.length > 0 && (
               <div className="space-y-2 mt-2">
                 {newChildForms.map((childFormData) => (
-                  <div key={childFormData.id} className="transition-all duration-300 ease-in-out">
+                  <div key={childFormData.id} className="transition-all duration-300 ease-in-out w-5/6 ml-auto">
                     {childFormData.completed ? (
                       // For completed forms, render an editable/collapsible version
-                      <div className="w-5/6 ml-auto">
-                        <div className={`flex flex-col gap-4 ${childFormData.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childFormData.isCollapsed ? { minHeight: '50px' } : {}}>
-                          {/* Cabecera con título */}
-                          <div className="flex items-center">
-                            <div className="w-2/3 relative pr-4">
-                              <input
-                                type="text"
-                                value={childFormData.data?.title || ''}
-                                onChange={(e) => {
-                                  if (childFormData.isCollapsed) return;
+                      <div className={`flex flex-col gap-4 ${childFormData.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childFormData.isCollapsed ? { minHeight: '50px' } : {}}>
+                        {/* Cabecera con título */}
+                        <div className="flex items-center">
+                          <div className="w-2/3 relative pr-4">
+                            <input
+                              type="text"
+                              value={childFormData.data?.title || ''}
+                              onChange={(e) => {
+                                if (childFormData.isCollapsed) return;
+                                setNewChildForms(prev => prev.map(child =>
+                                  child.id === childFormData.id
+                                    ? { ...child, data: { ...child.data, title: e.target.value } }
+                                    : child
+                                ));
+                              }}
+                              placeholder="Titulo de Pregunta Hija"
+                              maxLength={50}
+                              className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none bg-transparent ${childFormData.isCollapsed ? 'py-1' : 'pb-1'} ${!childFormData.isCollapsed ? 'border-b-2 border-gray-300 focus:border-blue-custom' : 'border-b-2 border-transparent'}`}
+                              readOnly={childFormData.isCollapsed}
+                            />
+                            {!childFormData.isCollapsed && (
+                              <div className="absolute right-4 bottom-1 text-xs text-gray-500">
+                                {(childFormData.data?.title || '').length}/50
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Botones de acción */}
+                          <div className="w-1/3 flex items-center justify-end gap-3">
+                            {/* Botón para eliminar */}
+                            <button
+                              className="focus:outline-none hover:opacity-80"
+                              onClick={() => handleCancelNewChildQuestion(childFormData.id)}
+                              aria-label="Eliminar pregunta hija"
+                            >
+                              <img src={trashcan_1} alt="trashCan" className="w-7 h-7" />
+                            </button>
+
+                            {/* Botón Colapsar/Expandir */}
+                            <div className="rounded-full flex items-center">
+                              <button
+                                onClick={() => {
+                                  // Toggle collapse state for this specific child
                                   setNewChildForms(prev => prev.map(child =>
                                     child.id === childFormData.id
-                                      ? { ...child, data: { ...child.data, title: e.target.value } }
+                                      ? { ...child, isCollapsed: !child.isCollapsed }
                                       : child
                                   ));
                                 }}
-                                placeholder="Titulo de Pregunta Hija"
-                                maxLength={50}
-                                className={`font-work-sans text-3xl font-bold text-dark-blue-custom w-full focus:outline-none bg-transparent ${childFormData.isCollapsed ? 'py-1' : 'pb-1'} ${!childFormData.isCollapsed ? 'border-b-2 border-gray-300 focus:border-blue-custom' : 'border-b-2 border-transparent'}`}
-                                readOnly={childFormData.isCollapsed}
-                              />
-                              {!childFormData.isCollapsed && (
-                                <div className="absolute right-4 bottom-1 text-xs text-gray-500">
-                                  {(childFormData.data?.title || '').length}/50
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Botones de acción */}
-                            <div className="w-1/3 flex items-center justify-end gap-3">
-                              {/* Botón para eliminar */}
-                              <button
-                                className="focus:outline-none hover:opacity-80"
-                                onClick={() => handleCancelNewChildQuestion(childFormData.id)}
-                                aria-label="Eliminar pregunta hija"
+                                className="focus:outline-none transform transition-transform duration-300 hover:opacity-80"
+                                style={{ transform: childFormData.isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                aria-label={childFormData.isCollapsed ? "Expandir formulario hijo" : "Colapsar formulario hijo"}
                               >
-                                <img src={trashcan_1} alt="trashCan" className="w-7 h-7" />
+                                <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-7 h-7" />
                               </button>
-
-                              {/* Botón Colapsar/Expandir */}
-                              <div className="rounded-full flex items-center">
-                                <button
-                                  onClick={() => {
-                                    // Toggle collapse state for this specific child
-                                    setNewChildForms(prev => prev.map(child =>
-                                      child.id === childFormData.id
-                                        ? { ...child, isCollapsed: !child.isCollapsed }
-                                        : child
-                                    ));
-                                  }}
-                                  className="focus:outline-none transform transition-transform duration-300 hover:opacity-80"
-                                  style={{ transform: childFormData.isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                                  aria-label={childFormData.isCollapsed ? "Expandir formulario hijo" : "Colapsar formulario hijo"}
-                                >
-                                  <img src={collapseExpandButton} alt="Colapsar/Expandir" className="w-7 h-7" />
-                                </button>
-                              </div>
                             </div>
                           </div>
-
-                          {/* Contenido expandido editable */}
-                          {!childFormData.isCollapsed && (
-                            <>
-                              {/* Tipo de pregunta */}
-                              <div className="mb-4">
-                                <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom mb-1">Tipo de pregunta</h2>
-                                <p className="font-work-sans text-gray-600 text-sm mb-3">
-                                  Selecciona el tipo de pregunta que estás creando, ten en cuenta la información que esperas recolectar del encuestado.
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {questionTypes.map(type => (
-                                    <button
-                                      key={type.id}
-                                      onClick={() => {
-                                        setNewChildForms(prev => prev.map(child =>
-                                          child.id === childFormData.id
-                                            ? { ...child, data: { ...child.data, questionType: type.id } }
-                                            : child
-                                        ));
-                                      }}
-                                      className={`flex items-center space-x-2 px-4 py-1 rounded-full border transition-colors duration-200
-                          ${childFormData.data?.questionType === type.id
-                                          ? 'bg-green-custom text-white border-green-500 shadow-sm'
-                                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400'}`}
-                                    >
-                                      <img
-                                        src={type.icon}
-                                        alt={type.name}
-                                        className="w-5 h-5"
-                                        style={childFormData.data?.questionType === type.id ? { filter: 'brightness(0) invert(1)' } : {}}
-                                      />
-                                      <span className="font-semibold">{type.name}</span>
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Descripción */}
-                              <div className="mb-4">
-                                <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom mb-2">Descripción de la Pregunta</h2>
-                                <RichTextEditor
-                                  value={childFormData.data?.description || ''}
-                                  onChange={(value) => {
-                                    setNewChildForms(prev => prev.map(child =>
-                                      child.id === childFormData.id
-                                        ? { ...child, data: { ...child.data, description: value } }
-                                        : child
-                                    ));
-                                  }}
-                                />
-                              </div>
-
-                              {/* Opciones adicionales (Switches) */}
-                              <div className="text-base md:text-lg flex flex-row justify-between gap-4 py-2 font-work-sans">
-                                <SwitchOption
-                                  value={childFormData.data?.mandatory || false}
-                                  onChange={() => {
-                                    setNewChildForms(prev => prev.map(child =>
-                                      child.id === childFormData.id
-                                        ? { ...child, data: { ...child.data, mandatory: !(child.data?.mandatory || false) } }
-                                        : child
-                                    ));
-                                  }}
-                                  label="¿Esta pregunta es obligatoria?"
-                                />
-                                <SwitchOption
-                                  value={childFormData.data?.addToBank || false}
-                                  onChange={() => {
-                                    setNewChildForms(prev => prev.map(child =>
-                                      child.id === childFormData.id
-                                        ? { ...child, data: { ...child.data, addToBank: !(child.data?.addToBank || false) } }
-                                        : child
-                                    ));
-                                  }}
-                                  label="Añadir esta pregunta al banco de preguntas"
-                                />
-                              </div>
-                            </>
-                          )}
                         </div>
+
+                        {/* Contenido expandido editable */}
+                        {!childFormData.isCollapsed && (
+                          <>
+                            {/* Tipo de pregunta */}
+                            <div className="mb-4">
+                              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom mb-1">Tipo de pregunta</h2>
+                              <p className="font-work-sans text-gray-600 text-sm mb-3">
+                                Selecciona el tipo de pregunta que estás creando, ten en cuenta la información que esperas recolectar del encuestado.
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {questionTypes.map(type => (
+                                  <button
+                                    key={type.id}
+                                    onClick={() => {
+                                      setNewChildForms(prev => prev.map(child =>
+                                        child.id === childFormData.id
+                                          ? { ...child, data: { ...child.data, questionType: type.id } }
+                                          : child
+                                      ));
+                                    }}
+                                    className={`flex items-center space-x-2 px-4 py-1 rounded-full border transition-colors duration-200
+                          ${childFormData.data?.questionType === type.id
+                                        ? 'bg-green-custom text-white border-green-500 shadow-sm'
+                                        : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400'}`}
+                                  >
+                                    <img
+                                      src={type.icon}
+                                      alt={type.name}
+                                      className="w-5 h-5"
+                                      style={childFormData.data?.questionType === type.id ? { filter: 'brightness(0) invert(1)' } : {}}
+                                    />
+                                    <span className="font-semibold">{type.name}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Descripción */}
+                            <div className="mb-4">
+                              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom mb-2">Descripción de la Pregunta</h2>
+                              <RichTextEditor
+                                value={childFormData.data?.description || ''}
+                                onChange={(value) => {
+                                  setNewChildForms(prev => prev.map(child =>
+                                    child.id === childFormData.id
+                                      ? { ...child, data: { ...child.data, description: value } }
+                                      : child
+                                  ));
+                                }}
+                              />
+                            </div>
+
+                            {/* Opciones adicionales (Switches) */}
+                            <div className="text-base md:text-lg flex flex-row justify-between gap-4 py-2 font-work-sans">
+                              <SwitchOption
+                                value={childFormData.data?.mandatory || false}
+                                onChange={() => {
+                                  setNewChildForms(prev => prev.map(child =>
+                                    child.id === childFormData.id
+                                      ? { ...child, data: { ...child.data, mandatory: !(child.data?.mandatory || false) } }
+                                      : child
+                                  ));
+                                }}
+                                label="¿Esta pregunta es obligatoria?"
+                              />
+                              <SwitchOption
+                                value={childFormData.data?.addToBank || false}
+                                onChange={() => {
+                                  setNewChildForms(prev => prev.map(child =>
+                                    child.id === childFormData.id
+                                      ? { ...child, data: { ...child.data, addToBank: !(child.data?.addToBank || false) } }
+                                      : child
+                                  ));
+                                }}
+                                label="Añadir esta pregunta al banco de preguntas"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
                     ) : (
                       // Formulario de edición hijo temporal (sin cambios)
@@ -1662,7 +1660,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
                 return (
                   <button
-                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
+                    className={`w-2/3 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
                       (!isNewFormCollapsed && newChildFormCompleted) ||
                       isNewFormCollapsed ||
                       hasValidChildToSave
