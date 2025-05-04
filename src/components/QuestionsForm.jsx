@@ -64,11 +64,11 @@ const isDescriptionNotEmpty = (htmlString) => {
 };
 
 // Componente para mostrar y editar preguntas guardadas
-const SavedQuestionForm = ({ 
-  form, 
-  onToggleCollapse, 
-  onUpdate, 
-  onAddChildQuestion, 
+const SavedQuestionForm = ({
+  form,
+  onToggleCollapse,
+  onUpdate,
+  onAddChildQuestion,
   onDeleteForm,
   onUpdateChildInSavedForm,
   onRemoveChildFromSavedForm
@@ -87,6 +87,9 @@ const SavedQuestionForm = ({
   const childFormRefs = useRef({});
   const bankButtonRef = useRef(null);
   const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+
+  // Nuevo estado para monitorear la validez de los formularios hijos
+  const [childFormValidities, setChildFormValidities] = useState({});
 
   // Efecto para sincronizar el estado cuando cambia form
   useEffect(() => {
@@ -123,7 +126,7 @@ const SavedQuestionForm = ({
       isParentQuestion: isParentQuestionState,
       addToBank,
     };
-    
+
     onUpdate(form.id, updatedParentData);
     console.log("SavedQuestionForm: Notificando actualización de datos del padre:", updatedParentData);
   };
@@ -131,27 +134,35 @@ const SavedQuestionForm = ({
   // Maneja la activación/desactivación del switch para el banco
   const handleBankSwitchChange = () => {
     if (!canActivateSwitches || !isEditing) return;
-    
+
     const newAddToBank = !addToBank;
     setAddToBank(newAddToBank);
-    
-    const questionDataForBank = { 
-      title: title.trim(), 
-      questionType: selectedQuestionType 
+
+    const questionDataForBank = {
+      title: title.trim(),
+      questionType: selectedQuestionType
     };
-    
+
     if (newAddToBank) {
       if (isSimilarQuestionInBank(questionDataForBank)) {
         setErrorMessage('Ya existe una pregunta similar en el banco de preguntas.');
-        setModalStatus('info'); 
-        setIsModalOpen(true); 
-        setAddToBank(false); 
+        setModalStatus('info');
+        setIsModalOpen(true);
+        setAddToBank(false);
         return;
       }
       saveCurrentQuestionToBank();
     } else {
       removeSimilarQuestionFromBank(questionDataForBank);
     }
+  };
+
+  const handleChildFormValidityChange = (childId, isValid) => {
+    console.log(`SavedQuestionForm: Validez del hijo ${childId} cambió a ${isValid}`);
+    setChildFormValidities(prev => ({
+      ...prev,
+      [childId]: isValid
+    }));
   };
 
   // Guardar la pregunta actual en el banco
@@ -219,7 +230,7 @@ const SavedQuestionForm = ({
     if (!form.isCollapsed && isEditing) {
       saveParentChanges();
     }
-    
+
     console.log("SavedQuestionForm: Solicitando añadir hijo al padre con ID:", form.id);
     onAddChildQuestion(form.id);
   };
@@ -249,7 +260,7 @@ const SavedQuestionForm = ({
   const handleParentQuestionChange = () => {
     if (!isEditing || !canActivateSwitches) return;
     setIsParentQuestionState(!isParentQuestionState);
-    
+
     // Si acaba de activar la pregunta como madre, guardamos los cambios
     if (!isParentQuestionState) {
       const updatedForm = {
@@ -265,7 +276,7 @@ const SavedQuestionForm = ({
   return (
     <div className="mb-6">
       {/* Contenedor principal del formulario guardado */}
-      <div className={`flex flex-col gap-4 ${form.isCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={form.isCollapsed ? { minHeight: '70px' } : {}}>
+      <div className={`bg-red-800 flex flex-col gap-4 ${form.isCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={form.isCollapsed ? { minHeight: '70px' } : {}}>
         {/* Cabecera con título */}
         <div className="flex items-center">
           <div className="w-2/3 relative pr-4">
@@ -443,7 +454,7 @@ const SavedQuestionForm = ({
 
       {/* Sección para preguntas hijas y botón agregar */}
       {isParentQuestionState && (
-        <div className="mt-1 pl-6 pr-4 md:pl-12 md:pr-6 transition-all duration-300 ease-in-out">
+        <div className="mt-1 transition-all duration-300 ease-in-out">
           {/* Renderizado de los hijos existentes */}
           {childFormsFromProps.length > 0 && (
             <div className="space-y-2 mt-2">
@@ -509,6 +520,7 @@ const SavedQuestionForm = ({
                           parentQuestionData={childForm.parentData}
                           onSave={(childData) => handleSaveChildData(childForm.id, childData)}
                           onCancel={() => handleCancelChildCreation(childForm.id)}
+                          onValidityChange={(isValid) => handleChildFormValidityChange(childForm.id, isValid)}
                         />
                       )}
                     </>
@@ -518,30 +530,71 @@ const SavedQuestionForm = ({
             </div>
           )}
 
-          {/* Botón: Agregar pregunta hija */}
-          <div className="mt-3">
-            <button
-              className={`w-full py-2.5 md:py-3 rounded-xl flex items-center justify-center gap-2 transition-colors relative shadow-sm hover:shadow-md ${
-                ((!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) || form.isCollapsed)
-                  ? "bg-yellow-custom hover:bg-yellow-400"
-                  : "bg-gray-200 cursor-not-allowed"
-              }`}
-              onClick={handleAddChildQuestionClick}
-              disabled={!((!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) || form.isCollapsed)}
-              aria-disabled={!((!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) || form.isCollapsed)}
-            >
-              <span className={`font-work-sans text-xl font-bold ${((!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) || form.isCollapsed) ? "text-blue-custom" : "text-gray-500"}`}>
-                Agregar pregunta hija
-              </span>
-              <div className="absolute right-4">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                  className={`${((!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) || form.isCollapsed) ? "text-blue-custom" : "text-gray-400"}`}>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                  <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
-            </button>
+          {/* Botón: Agregar pregunta hija PREGUNTA PREVIAMENTE GUARDADA */}
+          <div className="mt-3 flex justify-end">
+            {(() => {
+              const hasValidChildToSave = childFormsFromProps.some(cf =>
+                !cf.completed && childFormValidities[cf.id]
+              );
+
+              return (
+                <button
+                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
+                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
+                    form.isCollapsed ||
+                    hasValidChildToSave
+                  ) ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"
+                    }`}
+                  onClick={() => {
+                    // Verificar si hay una pregunta hija incompleta
+                    const incompleteChildForm = childFormsFromProps.find(cf => !cf.completed);
+
+                    if (incompleteChildForm) {
+                      // Si hay una pregunta hija incompleta, intentar guardarla
+                      const childFormRef = childFormRefs.current[incompleteChildForm.id];
+                      if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
+                        childFormRef.submitChildQuestion();
+                      }
+                    } else {
+                      // Si no hay preguntas hijas incompletas, crear una nueva
+                      handleAddChildQuestionClick();
+                    }
+                  }}
+                  disabled={!(
+                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
+                    form.isCollapsed ||
+                    hasValidChildToSave
+                  )}
+                  aria-disabled={!(
+                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
+                    form.isCollapsed ||
+                    hasValidChildToSave
+                  )}
+                >
+                  <span className={`font-work-sans text-xl font-bold ${(
+                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
+                    form.isCollapsed ||
+                    hasValidChildToSave
+                  ) ? "text-blue-custom" : "text-gray-500"}`}>
+                    {childFormsFromProps.some(cf => !cf.completed && childFormValidities[cf.id])
+                      ? "Guardar pregunta hija"
+                      : "Agregar pregunta hija"}
+                  </span>
+                  <div className="absolute right-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                      className={`${(
+                        (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
+                        form.isCollapsed ||
+                        hasValidChildToSave
+                      ) ? "text-blue-custom" : "text-gray-400"}`}>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                      <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                </button>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -586,6 +639,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // Estado para preguntas hijas del nuevo formulario
   const [newChildForms, setNewChildForms] = useState([]);
   const [newChildFormCompleted, setNewChildFormCompleted] = useState(true);
+
+  // Nuevo estado para monitorear la validez de los formularios hijos
+  const [childFormValidities, setChildFormValidities] = useState({});
 
   // Nuevo estado para formularios guardados
   const [savedForms, setSavedForms] = useState([]);
@@ -676,7 +732,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     }
   }, [isParentQuestion]);
 
-  // --- Funciones Auxiliares ---
 
   // Verificar cambios
   const hasNewFormChanges =
@@ -720,7 +775,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setModalStatus('success');
     setIsModalOpen(true);
   };
-  
+
   // NUEVAS FUNCIONES para manejar preguntas hijas en formularios guardados
   const handleAddNewChildToSavedForm = (parentId) => {
     console.log("QuestionsForm: Añadiendo estructura de hijo para padre ID:", parentId);
@@ -730,19 +785,19 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
           const childFormId = `child_${Date.now()}`;
           let effectiveParentId = form.serverId && !isNaN(Number(form.serverId)) ? Number(form.serverId) : form.id;
           const parentQuestionData = {
-            id: effectiveParentId, 
-            serverId: form.serverId, 
-            title: form.title, 
+            id: effectiveParentId,
+            serverId: form.serverId,
+            title: form.title,
             description: form.description,
-            questionType: form.questionType, 
-            section: form.section, 
+            questionType: form.questionType,
+            section: form.section,
             mandatory: form.mandatory
           };
           const newChildForm = {
-            id: childFormId, 
-            parentData: parentQuestionData, 
+            id: childFormId,
+            parentData: parentQuestionData,
             completed: false,
-            isCollapsed: false, 
+            isCollapsed: false,
             data: null
           };
           console.log("QuestionsForm: Nueva estructura de hijo creada:", newChildForm);
@@ -757,7 +812,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       })
     );
   };
-  
+
   const handleUpdateChildInSavedForm = (parentId, childId, childData) => {
     console.log("QuestionsForm: Actualizando hijo ID:", childId, "en padre ID:", parentId);
     setSavedForms(prevForms =>
@@ -778,10 +833,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       })
     );
     setErrorMessage('Pregunta hija agregada/actualizada.');
-    setModalStatus('success'); 
+    setModalStatus('success');
     setIsModalOpen(true);
   };
-  
+
   const handleRemoveChildFromSavedForm = (parentId, childId) => {
     console.log("QuestionsForm: Eliminando hijo ID:", childId, "de padre ID:", parentId);
     setSavedForms(prevForms =>
@@ -795,7 +850,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       })
     );
     setErrorMessage('Pregunta hija eliminada.');
-    setModalStatus('info'); 
+    setModalStatus('info');
     setIsModalOpen(true);
   };
 
@@ -922,7 +977,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const handleDescriptionChange = (value) => {
     setDescription(value);
   };
-  
+
   // Función para alternar colapso del nuevo formulario
   const toggleNewFormCollapse = () => setIsNewFormCollapsed(!isNewFormCollapsed);
 
@@ -970,7 +1025,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       section: selectedSection,
       mandatory
     };
-    
+
     const childFormId = `new_child_${Date.now()}`;
     const newChild = {
       id: childFormId,
@@ -1010,36 +1065,36 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     // Validación de datos
     if (!title.trim() || !isDescriptionNotEmpty(description) || !selectedQuestionType || !selectedSection) {
       setErrorMessage('Título, Descripción, Tipo de Pregunta y Sección son requeridos.');
-      setModalStatus('error'); 
-      setIsModalOpen(true); 
+      setModalStatus('error');
+      setIsModalOpen(true);
       return;
     }
 
     const sanitizedTitle = DOMPurify.sanitize(title.trim());
     const cleanDescription = DOMPurify.sanitize(description);
     const parentFormData = {
-      title: sanitizedTitle, 
-      descrip: cleanDescription, 
+      title: sanitizedTitle,
+      descrip: cleanDescription,
       validate: mandatory ? 'Requerido' : 'Opcional',
-      cod_padre: 0, 
-      bank: addToBank, 
-      type_questions_id: selectedQuestionType, 
+      cod_padre: 0,
+      bank: addToBank,
+      type_questions_id: selectedQuestionType,
       section_id: selectedSection.id,
-      questions_conditions: isParentQuestion, 
+      questions_conditions: isParentQuestion,
       creator_id: 1, // O obtener del usuario logueado
     };
 
     try {
       const accessToken = localStorage.getItem('accessToken');
       const response = await fetch(endpoint, {
-        method: 'POST', 
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Bearer ${accessToken}` 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify(parentFormData),
       });
-      
+
       if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
 
       const responseData = await response.json();
@@ -1048,35 +1103,35 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
 
       const savedFormEntry = {
-        id: formKey, 
-        serverId: Number(serverId), 
-        title: sanitizedTitle, 
+        id: formKey,
+        serverId: Number(serverId),
+        title: sanitizedTitle,
         description: cleanDescription,
-        questionType: selectedQuestionType, 
-        section: selectedSection, 
+        questionType: selectedQuestionType,
+        section: selectedSection,
         mandatory: mandatory,
-        isParentQuestion: isParentQuestion, 
-        addToBank: addToBank, 
+        isParentQuestion: isParentQuestion,
+        addToBank: addToBank,
         isCollapsed: true, // Colapsar al guardar
         childForms: newChildForms
           .filter(child => child.completed && child.data)
           .map(child => ({
             id: child.id,
-            parentData: { 
-              ...child.parentData, 
-              id: Number(serverId), 
-              serverId: Number(serverId) 
+            parentData: {
+              ...child.parentData,
+              id: Number(serverId),
+              serverId: Number(serverId)
             },
-            completed: true, 
-            isCollapsed: true, 
+            completed: true,
+            isCollapsed: true,
             data: child.data
           }))
       };
 
       if (addToBank) {
         const bankData = { ...savedFormEntry, id: Number(serverId) };
-        delete bankData.childForms; 
-        delete bankData.serverId; 
+        delete bankData.childForms;
+        delete bankData.serverId;
         delete bankData.isCollapsed;
         addQuestionToBank(bankData);
       }
@@ -1084,13 +1139,13 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setSavedForms(prevForms => [...prevForms, savedFormEntry]);
       resetNewForm(true); // Resetear form nuevo
       setErrorMessage('Pregunta agregada correctamente.');
-      setModalStatus('success'); 
+      setModalStatus('success');
       setIsModalOpen(true);
 
     } catch (error) {
       console.error('Error al guardar la pregunta:', error);
       setErrorMessage(`Error al guardar: ${error.message}.`);
-      setModalStatus('error'); 
+      setModalStatus('error');
       setIsModalOpen(true);
     }
   };
@@ -1118,6 +1173,17 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     }
   };
 
+  // Añadir esta función para manejar el cambio de validez
+  const handleChildFormValidityChange = (childId, isValid) => {
+    setChildFormValidities(prev => ({
+      ...prev,
+      [childId]: isValid
+    }));
+  };
+  const hasValidChildToSave = newChildForms.some(child =>
+    !child.completed && childFormValidities[child.id]
+  );
+
   // --- Renderizado JSX ---
   return (
     <>
@@ -1137,7 +1203,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
       {/* Contenedor Principal del Formulario NUEVO */}
       <div key={formKey} className="mb-6">
-        <div className={`flex flex-col gap-4 ${isNewFormCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isNewFormCollapsed ? { minHeight: '70px' } : {}}>
+        <div className={`bg-green-800 flex flex-col gap-4 ${isNewFormCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isNewFormCollapsed ? { minHeight: '70px' } : {}}>
 
           {/* Cabecera: Título, Botón Importar/Reset, Botón Colapsar */}
           <div className={`flex items-center ${isNewFormCollapsed ? 'mb-0' : 'mb-4'}`}>
@@ -1301,7 +1367,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
         {/* Sección para hijos del NUEVO formulario y botón agregar */}
         {isParentQuestion && (
-          <div className="mt-1 pl-6 pr-4 md:pl-12 md:pr-6 transition-all duration-300 ease-in-out">
+          <div className="mt-1 pr-0 transition-all duration-300 ease-in-out">
             {/* Renderizado de hijos temporales */}
             {newChildForms.length > 0 && (
               <div className="space-y-2 mt-2">
@@ -1357,6 +1423,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                             parentQuestionData={childFormData.parentData}
                             onSave={(childData) => handleSaveNewChildQuestion(childFormData.id, childData)}
                             onCancel={() => handleCancelNewChildQuestion(childFormData.id)}
+                            onValidityChange={(isValid) => handleChildFormValidityChange(childFormData.id, isValid)}
                           />
                         )}
                       </>
@@ -1366,30 +1433,72 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               </div>
             )}
 
-            {/* Botón Agregar pregunta hija (NUEVO Form) */}
-            <div className="mt-3">
-              <button
-                className={`w-full py-2.5 md:py-3 rounded-xl flex items-center justify-center gap-2 transition-colors relative shadow-sm hover:shadow-md ${
-                  ((!isNewFormCollapsed && newChildFormCompleted) || isNewFormCollapsed)
-                    ? "bg-yellow-custom hover:bg-yellow-400"
-                    : "bg-gray-200 cursor-not-allowed"
-                }`}
-                onClick={handleAddNewChildQuestion}
-                disabled={!((!isNewFormCollapsed && newChildFormCompleted) || isNewFormCollapsed)}
-                aria-disabled={!((!isNewFormCollapsed && newChildFormCompleted) || isNewFormCollapsed)}
-              >
-                <span className={`font-work-sans text-xl font-bold ${((!isNewFormCollapsed && newChildFormCompleted) || isNewFormCollapsed) ? "text-blue-custom" : "text-gray-500"}`}>
-                  Agregar pregunta hija
-                </span>
-                <div className="absolute right-4">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    className={`${((!isNewFormCollapsed && newChildFormCompleted) || isNewFormCollapsed) ? "text-blue-custom" : "text-gray-400"}`}>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </div>
-              </button>
+            {/* Botón Agregar pregunta hija PREGUNTAS HIJAS GUARDADAS PRIMERO COMO TEMPORALES */}
+            <div className="mt-3 flex justify-end">
+              {/* Condición para verificar si hay un hijo incompleto pero válido para guardar */}
+              {(() => {
+                const hasValidChildToSave = newChildForms.some(child =>
+                  !child.completed && childFormValidities[child.id]
+                );
+
+                return (
+                  <button
+                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
+                      (!isNewFormCollapsed && newChildFormCompleted) ||
+                      isNewFormCollapsed ||
+                      hasValidChildToSave
+                    ) ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"
+                      }`}
+                    onClick={() => {
+                      // Verificar si hay una pregunta hija incompleta
+                      const incompleteChild = newChildForms.find(child => !child.completed);
+
+                      if (incompleteChild) {
+                        // Si hay una pregunta hija incompleta, intentar guardarla
+                        const childFormRef = childFormRefs.current[incompleteChild.id];
+                        if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
+                          childFormRef.submitChildQuestion();
+                        }
+                      } else {
+                        // Si no hay preguntas hijas incompletas, crear una nueva
+                        handleAddNewChildQuestion();
+                      }
+                    }}
+                    disabled={!(
+                      (!isNewFormCollapsed && newChildFormCompleted) ||
+                      isNewFormCollapsed ||
+                      hasValidChildToSave
+                    )}
+                    aria-disabled={!(
+                      (!isNewFormCollapsed && newChildFormCompleted) ||
+                      isNewFormCollapsed ||
+                      hasValidChildToSave
+                    )}
+                  >
+                    <span className={`font-work-sans text-xl font-bold ${(
+                      (!isNewFormCollapsed && newChildFormCompleted) ||
+                      isNewFormCollapsed ||
+                      hasValidChildToSave
+                    ) ? "text-blue-custom" : "text-gray-500"}`}>
+                      {newChildForms.some(child => !child.completed && childFormValidities[child.id])
+                        ? "Guardar pregunta hija"
+                        : "Agregar pregunta hija"}
+                    </span>
+                    <div className="absolute right-4">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        className={`${(
+                          (!isNewFormCollapsed && newChildFormCompleted) ||
+                          isNewFormCollapsed ||
+                          hasValidChildToSave
+                        ) ? "text-blue-custom" : "text-gray-400"}`}>
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                        <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                  </button>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1398,11 +1507,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       {/* Botón: Agregar pregunta (NUEVO Form) */}
       <div className="mt-4">
         <button
-          className={`w-full py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${
-            canActivateNewFormSwitches
-              ? "bg-yellow-custom hover:bg-yellow-400"
-              : "bg-gray-200 cursor-not-allowed"
-          }`}
+          className={`w-full py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canActivateNewFormSwitches
+            ? "bg-yellow-custom hover:bg-yellow-400"
+            : "bg-gray-200 cursor-not-allowed"
+            }`}
           onClick={handleSubmitNewQuestion}
           disabled={!canActivateNewFormSwitches}
         >
