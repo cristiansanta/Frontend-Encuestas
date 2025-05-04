@@ -641,17 +641,28 @@ const SavedQuestionForm = ({
           {/* Botón: Agregar pregunta hija PREGUNTA PREVIAMENTE GUARDADA */}
           <div className="mt-3 flex justify-end">
             {(() => {
+              // Variable para verificar si hay hijos válidos para guardar
               const hasValidChildToSave = childFormsFromProps.some(cf =>
                 !cf.completed && childFormValidities[cf.id]
               );
 
+              // Comprobación más segura: verificar que la pregunta principal tenga datos válidos
+              // incluso cuando está contraída
+              const parentFormIsValid =
+                form.title?.trim() !== '' &&
+                form.questionType !== null &&
+                form.section !== null &&
+                isDescriptionNotEmpty(form.description);
+
+              // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
+              const canEnableButton = (
+                (parentFormIsValid && childFormsFromProps.every(cf => cf.completed)) ||
+                hasValidChildToSave
+              );
+
               return (
                 <button
-                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
-                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
-                    form.isCollapsed ||
-                    hasValidChildToSave
-                  ) ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"
+                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"
                     }`}
                   onClick={() => {
                     // Verificar si hay una pregunta hija incompleta
@@ -663,47 +674,31 @@ const SavedQuestionForm = ({
                       if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
                         childFormRef.submitChildQuestion();
                       }
+                    } else if (parentFormIsValid) {
+                      // Sólo permitir crear una nueva si la principal es válida
+                      handleAddChildQuestionClick();
                     } else {
-                      // Si no hay preguntas hijas incompletas, crear una nueva SIN EXPANDIR la madre
-                      if (form.isCollapsed) {
-                        // Si la madre está colapsada, mantenemos la madre colapsada
-                        handleAddChildQuestionClick();
-                      } else {
-                        // Comportamiento normal
-                        handleAddChildQuestionClick();
-                      }
+                      // Si la principal no es válida, mostrar un error
+                      setErrorMessage('Debe completar todos los campos de la pregunta principal antes de agregar una hija.');
+                      setModalStatus('error');
+                      setIsModalOpen(true);
                     }
                   }}
-                  disabled={!(
-                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
-                    form.isCollapsed ||
-                    hasValidChildToSave
-                  )}
-                  aria-disabled={!(
-                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
-                    form.isCollapsed ||
-                    hasValidChildToSave
-                  )}
+                  disabled={!canEnableButton}
+                  aria-disabled={!canEnableButton}
                 >
-                  <span className={`font-work-sans text-2xl font-bold ${(
-                    (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
-                    form.isCollapsed ||
-                    hasValidChildToSave
-                  ) ? "text-blue-custom" : "text-gray-500"}`}>
+                  <span className={`font-work-sans text-2xl font-bold ${canEnableButton ? "text-blue-custom" : "text-gray-500"
+                    }`}>
                     {childFormsFromProps.some(cf => !cf.completed && childFormValidities[cf.id])
                       ? "Guardar pregunta hija"
                       : "Agregar pregunta hija"}
                   </span>
                   <div className="absolute right-4">
-                    {/* Cambiamos por el icono AddCategory1 */}
+                    {/* Icono AddCategory1 */}
                     <img
                       src={AddCategory1}
                       alt="Agregar"
-                      className={`w-8 h-8 ${!(
-                        (!form.isCollapsed && childFormsFromProps.every(cf => cf.completed)) ||
-                        form.isCollapsed ||
-                        hasValidChildToSave
-                      ) ? "opacity-50" : ""}`}
+                      className={`w-8 h-8 ${!canEnableButton ? "opacity-50" : ""}`}
                     />
                   </div>
                 </button>
@@ -1656,17 +1651,29 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             {/* Botón Agregar pregunta hija PREGUNTAS HIJAS GUARDADAS PRIMERO COMO TEMPORALES */}
             <div className="mt-3 flex justify-end">
               {(() => {
+
+                // Variable para verificar si hay hijos válidos para guardar
                 const hasValidChildToSave = newChildForms.some(child =>
                   !child.completed && childFormValidities[child.id]
                 );
 
+                // Comprobación más segura: verificar que la pregunta principal tenga datos válidos
+                // incluso cuando está contraída
+                const parentFormIsValid =
+                  title.trim() !== '' &&
+                  selectedQuestionType !== null &&
+                  selectedSection !== null &&
+                  isDescriptionNotEmpty(description);
+
+                // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
+                const canEnableButton = (
+                  (parentFormIsValid && newChildFormCompleted) ||
+                  hasValidChildToSave
+                );
+
                 return (
                   <button
-                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${(
-                      (!isNewFormCollapsed && newChildFormCompleted) ||
-                      isNewFormCollapsed ||
-                      hasValidChildToSave
-                    ) ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"
+                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"
                       }`}
                     onClick={() => {
                       // Verificar si hay una pregunta hija incompleta
@@ -1678,41 +1685,30 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                         if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
                           childFormRef.submitChildQuestion();
                         }
-                      } else {
-                        // Si no hay preguntas hijas incompletas, crear una nueva
+                      } else if (parentFormIsValid) {
+                        // Sólo permitir crear una nueva si la principal es válida
                         handleAddNewChildQuestion();
+                      } else {
+                        // Si la principal no es válida, mostrar un error
+                        setErrorMessage('Debe completar todos los campos de la pregunta principal antes de agregar una hija.');
+                        setModalStatus('error');
+                        setIsModalOpen(true);
                       }
                     }}
-                    disabled={!(
-                      (!isNewFormCollapsed && newChildFormCompleted) ||
-                      isNewFormCollapsed ||
-                      hasValidChildToSave
-                    )}
-                    aria-disabled={!(
-                      (!isNewFormCollapsed && newChildFormCompleted) ||
-                      isNewFormCollapsed ||
-                      hasValidChildToSave
-                    )}
+                    disabled={!canEnableButton}
+                    aria-disabled={!canEnableButton}
                   >
-                    <span className={`font-work-sans text-2xl font-bold ${(
-                      (!isNewFormCollapsed && newChildFormCompleted) ||
-                      isNewFormCollapsed ||
-                      hasValidChildToSave
-                    ) ? "text-blue-custom" : "text-gray-500"}`}>
+                    <span className={`font-work-sans text-2xl font-bold ${canEnableButton ? "text-blue-custom" : "text-gray-500"
+                      }`}>
                       {newChildForms.some(child => !child.completed && childFormValidities[child.id])
                         ? "Guardar pregunta hija"
                         : "Agregar pregunta hija"}
                     </span>
                     <div className="absolute right-4">
-                      {/* Cambiamos por el icono AddCategory1 */}
                       <img
                         src={AddCategory1}
                         alt="Agregar"
-                        className={`w-8 h-8 ${!(
-                          (!isNewFormCollapsed && newChildFormCompleted) ||
-                          isNewFormCollapsed ||
-                          hasValidChildToSave
-                        ) ? "opacity-50" : ""}`}
+                        className={`w-8 h-8 ${!canEnableButton ? "opacity-50" : ""}`}
                       />
                     </div>
                   </button>
