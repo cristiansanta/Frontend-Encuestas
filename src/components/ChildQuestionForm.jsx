@@ -65,23 +65,6 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
   const endpoint = import.meta.env.VITE_API_ENDPOINT + 'questions/store';
 
-  // --- Efectos ---
-
-  // Cargar datos iniciales si vienen del padre
-  useEffect(() => {
-    if (parentQuestionData?.section) {
-      setSelectedSection(parentQuestionData.section);
-    }
-  }, [parentQuestionData]);
-  useEffect(() => {
-    console.log('ChildQuestionForm recibió parentQuestionData:', parentQuestionData);
-  }, [parentQuestionData]);
-
-  // Efecto para verificar si el formulario está completo
-  useEffect(() => {
-    setIsFormCompleted(canActivateSwitches);
-  }, [title, description, selectedQuestionType]);
-
   // --- Funciones Auxiliares ---
 
   // Verifica si la descripción tiene contenido visible real
@@ -96,12 +79,53 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     return textContent.length > 0;
   };
 
-  // Determina si se pueden activar los switches
+  // Determina si se pueden activar los switches - MOVIDO ANTES DE LOS EFECTOS
   const canActivateSwitches =
     title.trim() !== '' &&
     selectedQuestionType !== null &&
     selectedSection !== null &&
     isDescriptionNotEmpty(description);
+
+  // --- Efectos ---
+
+  // Cargar datos iniciales si vienen del padre
+  useEffect(() => {
+    if (parentQuestionData?.section) {
+      setSelectedSection(parentQuestionData.section);
+    }
+  }, [parentQuestionData]);
+
+  useEffect(() => {
+    console.log('ChildQuestionForm recibió parentQuestionData:', parentQuestionData);
+  }, [parentQuestionData]);
+
+  // Efecto para verificar si el formulario está completo - AHORA canActivateSwitches YA EXISTE
+  useEffect(() => {
+    setIsFormCompleted(canActivateSwitches);
+  }, [title, description, selectedQuestionType, canActivateSwitches]);
+
+  // Efecto para notificar al padre cuando cambia la validez del formulario
+  useEffect(() => {
+    if (props.onValidityChange) {
+      props.onValidityChange(canActivateSwitches);
+    }
+  }, [canActivateSwitches, props]);
+
+  // Actualizar pregunta en el banco cuando cambian los datos pero sigue activado el switch
+  useEffect(() => {
+    if (addToBank && canActivateSwitches && !isSaved) {
+      // Importante: No actualizar al cambiar addToBank para evitar ciclos
+      const questionData = {
+        title: title.trim(),
+        questionType: selectedQuestionType
+      };
+
+      // Solo actualizar si no es un duplicado
+      if (!isSimilarQuestionInBank(questionData)) {
+        saveCurrentQuestionToBank();
+      }
+    }
+  }, [title, selectedQuestionType, description, addToBank, canActivateSwitches, isSaved]);
 
   // Maneja la activación/desactivación del switch para el banco
   const handleBankSwitchChange = () => {
@@ -165,22 +189,6 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
       setAddToBank(false); // Desactivar el switch automáticamente
     }
   };
-
-  // Actualizar pregunta en el banco cuando cambian los datos pero sigue activado el switch
-  useEffect(() => {
-    if (addToBank && canActivateSwitches && !isSaved) {
-      // Importante: No actualizar al cambiar addToBank para evitar ciclos
-      const questionData = {
-        title: title.trim(),
-        questionType: selectedQuestionType
-      };
-
-      // Solo actualizar si no es un duplicado
-      if (!isSimilarQuestionInBank(questionData)) {
-        saveCurrentQuestionToBank();
-      }
-    }
-  }, [title, selectedQuestionType, description]);
 
   // Limpiar el formulario
   const resetForm = () => {
@@ -256,21 +264,48 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     }
 
     // Preparar datos para enviar - sin intentar convertir el ID a número
-    let parentId;
-    if (typeof parentQuestionData.id === 'string' && !isNaN(Number(parentQuestionData.id))) {
-      parentId = Number(parentQuestionData.id);
-    } else if (typeof parentQuestionData.id === 'number') {
-      parentId = parentQuestionData.id;
-    } else {
-      // Último intento: usar un ID del localStorage o 0 como fallback
+    // Determinar el ID del padre de forma más robusta
+    let parentId = 0; // Valor predeterminado si todo falla
+
+    // 1. Intentar usar serverId primero si existe (más confiable)
+    if (parentQuestionData?.serverId && !isNaN(Number(parentQuestionData.serverId))) {
+      parentId = Number(parentQuestionData.serverId);
+      console.log('Usando serverId:', parentId);
+    }
+    // 2. Intentar usar el ID regular
+    else if (parentQuestionData?.id) {
+      if (typeof parentQuestionData.id === 'number') {
+        parentId = parentQuestionData.id;
+        console.log('Usando id numérico:', parentId);
+      }
+      else if (typeof parentQuestionData.id === 'string' && !isNaN(Number(parentQuestionData.id))) {
+        parentId = Number(parentQuestionData.id);
+        console.log('Usando id string convertido a número:', parentId);
+      }
+    }
+
+    // 3. Último recurso: verificar si hay un ID guardado en localStorage
+    if (parentId === 0) {
       const storedId = localStorage.getItem('questions_id');
-      parentId = storedId ? Number(storedId) : 0;
+      if (storedId && !isNaN(Number(storedId))) {
+        parentId = Number(storedId);
+        console.log('Usando ID de localStorage:', parentId);
+      }
+    }
+
+    // Verificación final - asegurarse que parentId no sea 0 ni undefined ni null
+    if (!parentId) {
+      console.error('No se pudo determinar un ID válido para la pregunta padre');
+      setErrorMessage('No se pudo determinar un ID válido para la pregunta padre. Intente guardar la pregunta padre primero.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return; // Detener la ejecución
     }
 
     // Para debugging
-    console.log('Tipo de parentQuestionData.id:', typeof parentQuestionData.id);
-    console.log('Valor de parentQuestionData.id:', parentQuestionData.id);
-    console.log('Valor convertido de parentId:', parentId);
+    console.log('Tipo de parentQuestionData:', typeof parentQuestionData);
+    console.log('parentQuestionData completo:', parentQuestionData);
+    console.log('Valor final de parentId:', parentId);
 
     const formData = {
       title: sanitizedTitle,
@@ -348,6 +383,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   useImperativeHandle(ref, () => ({
     submitChildQuestion: handleSubmit,
     resetChildForm: resetForm,
+    isFormValid: () => canActivateSwitches,
     isFormCompleted: () => isFormCompleted,
     isSaved: () => saved || isSaved
   }));
@@ -382,7 +418,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   return (
     <div className="w-5/6 ml-auto"> {/* Contenedor que define el ancho */}
       {/* Contenedor Principal del Formulario */}
-      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isCollapsed ? { minHeight: '70px' } : {}}>
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-blue-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isCollapsed ? { minHeight: '50px' } : {}}>
 
         {/* Cabecera: Título y Botones */}
         <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
@@ -512,26 +548,6 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
           confirmText="Cerrar"
         />
       </div>
-
-      {/* Botón: Agregar pregunta hija - Solo visible si no está guardado */}
-      {!isCollapsed && !isFormDisabled && (
-        <div className="mt-4">
-          <button
-            className={`w-full py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canActivateSwitches
-              ? "bg-yellow-custom hover:bg-yellow-400"
-              : "bg-gray-200 cursor-not-allowed"
-              }`}
-            onClick={handleSubmit}
-            disabled={!canActivateSwitches}
-          >
-            <span className={`font-work-sans text-xl font-bold ${canActivateSwitches ? "text-blue-custom" : "text-gray-500"
-              }`}>Agregar pregunta hija</span>
-            <div className="absolute right-4">
-              <img src={AddCategory1} alt="Agregar" className={`w-8 h-8 ${!canActivateSwitches ? "opacity-50" : ""}`} />
-            </div>
-          </button>
-        </div>
-      )}
     </div>
   );
 });
