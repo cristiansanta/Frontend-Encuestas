@@ -462,7 +462,7 @@ const SavedQuestionForm = ({
                   {childForm.completed ? (
                     // For completed forms, render a collapsible version with the red background
                     <div className="w-5/6 ml-auto">
-                      <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-pink-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
+                      <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
                         {/* Cabecera con título */}
                         <div className="flex items-center">
                           <div className="w-2/3 relative pr-4">
@@ -662,7 +662,7 @@ const SavedQuestionForm = ({
 
               return (
                 <button
-                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"
+                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-gray-400" : "bg-gray-200 cursor-not-allowed"
                     }`}
                   onClick={() => {
                     // Verificar si hay una pregunta hija incompleta
@@ -1673,7 +1673,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
                 return (
                   <button
-                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"
+                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-gray-400" : "bg-gray-200 cursor-not-allowed"
                       }`}
                     onClick={() => {
                       // Verificar si hay una pregunta hija incompleta

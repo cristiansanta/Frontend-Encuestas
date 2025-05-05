@@ -149,18 +149,18 @@ const DashboardLayout = ({
     <MainLayout headerTitle={headerTitle} showHeaderBanner={true}>
       <div className="flex flex-col w-full">
         {/* Botones de acciones */}
-        <div className="w-full flex justify-between items-center space-x-2 px-12 -pt-4">
+        <div className="w-full flex flex-wrap justify-between items-center px-4 sm:px-8 md:px-12 py-4 gap-2">
           {/* Lado izquierdo: Nueva Encuesta y Filtrar por Estado */}
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* Botón Nueva Encuesta */}
             <button
               onClick={onCreateSurvey}
               className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
             >
-              <span className="bg-blue-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
+              <span className="bg-blue-custom text-white px-3 py-2 flex items-center h-full hover:bg-opacity-80">
                 <img src={Addsurvey} alt="Nueva encuesta" className="w-5 h-5" />
               </span>
-              <span className="bg-yellow-custom text-blue-custom px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
+              <span className="bg-yellow-custom text-blue-custom px-4 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
                 Nueva Encuesta
               </span>
             </button>
@@ -182,22 +182,22 @@ const DashboardLayout = ({
                   className="flex items-center cursor-pointer transition-all duration-300 hover:scale-105"
                   onClick={toggleFilterDropdown}
                 >
-                  <span className="bg-blue-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
+                  <span className="bg-blue-custom text-white px-3 py-2 flex items-center h-full hover:bg-opacity-80">
                     <img src={Filtersurvey} alt="Filtrar" className="w-5 h-5" />
                   </span>
-                  <span className="bg-yellow-custom text-blue-custom px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
+                  <span className="bg-yellow-custom text-blue-custom px-4 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
                     Filtro por estado
                     {selectedFilter === 'all' ? (
                       <img
                         src={Selectsurvey}
                         alt="Seleccionar"
-                        className="w-5 h-5 ml-3"
+                        className="w-5 h-5 ml-2"
                       />
                     ) : (
                       <img
                         src={Selectsurvey}
                         alt="Seleccionar"
-                        className="w-5 h-5 ml-3 transform -rotate-90"
+                        className="w-5 h-5 ml-2 transform -rotate-90"
                       />
                     )}
                   </span>
@@ -206,7 +206,7 @@ const DashboardLayout = ({
                 {/* Mostrar el filtro seleccionado si no es "all" */}
                 {selectedFilter !== 'all' && (
                   <span
-                    className={`py-2 px-5 font-semibold text-white text-sm flex items-center ${currentFilter.bgClass}`}
+                    className={`py-2 px-4 font-semibold text-white text-sm flex items-center ${currentFilter.bgClass}`}
                   >
                     {currentFilter.label}
                   </span>
@@ -261,75 +261,24 @@ const DashboardLayout = ({
             >
               <img src={Filter} alt="Filtrar" className="w-5 h-5" />
             </button>
-
-            {/* Dropdown móvil (aparece cuando se hace clic en el icono) */}
-            {isFilterOpen && (
-              <div className="md:hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div
-                  className="bg-white rounded-3xl shadow-lg border border-gray-200 w-72 overflow-hidden transition-all duration-300"
-                  ref={mobileDropdownRef}
-                >
-                  <div className="flex flex-col">
-                    <div className="bg-yellow-custom py-3 px-4 text-blue-custom font-bold flex items-center">
-                      <span className="ml-2">Filtrar por estado</span>
-                      <span
-                        className="ml-auto cursor-pointer pr-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsFilterOpen(false);
-                        }}
-                      >
-                        ✕
-                      </span>
-                    </div>
-                    <div className="py-2">
-                      {filters.map((filter) => (
-                        <div
-                          key={filter.id}
-                          className="hover:bg-gray-50 py-3 px-4 cursor-pointer border-b border-gray-200 transition-colors last:border-b-0"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Detener propagación
-                            handleFilterSelect(filter.id);
-                          }}
-                        >
-                          <div className="flex items-center">
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 ${filter.borderClass} flex items-center justify-center mr-3`}
-                            >
-                              {selectedFilter === filter.id && (
-                                <div
-                                  className={`w-2.5 h-2.5 rounded-full ${filter.bgClass}`}
-                                ></div>
-                              )}
-                            </div>
-                            <span
-                              className={`font-medium text-sm ${filter.textClass}`}
-                            >
-                              {filter.label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Lado derecho: Vista de Lista y Barra de Búsqueda */}
-          <div className="flex space-x-4 items-center">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* Botón para alternar entre vistas */}
             <button
               className="hidden md:flex items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
               onClick={toggleViewMode}
             >
-              <span className="bg-yellow-custom text-white px-4 py-2 flex items-center h-full hover:bg-opacity-80">
+              <span className="bg-yellow-custom text-white px-3 py-2 flex items-center h-full hover:bg-opacity-80">
                 <img src={Tablesurvey} alt="Vista de lista" className="w-5 h-5" />
               </span>
-              <span className="bg-blue-custom text-white px-5 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
-                <img src={Filter} alt="Filtrar" className="w-5 h-5 mr-4" />
-                {viewMode === 'cards' ? 'Cambiar a vista de Tablero' : 'Cambiar a vista de Lista'}
+              <span className="bg-blue-custom text-white px-4 py-2 font-semibold flex items-center h-full text-sm hover:bg-opacity-80">
+                <img src={Filter} alt="Filtrar" className="w-5 h-5 mr-2" />
+                <span className="hidden lg:inline">
+                  {viewMode === 'cards' ? 'Cambiar a vista de Tablero' : 'Cambiar a vista de Lista'}
+                </span>
+                <span className="lg:hidden">Vista</span>
               </span>
             </button>
 
@@ -341,18 +290,18 @@ const DashboardLayout = ({
               <img src={Tablesurvey} alt="Vista de lista" className="w-5 h-5" />
             </button>
 
-            {/* Barra de Búsqueda con reconocimiento de voz */}
-            <div className="relative flex items-center w-48 md:w-64 lg:w-50">
+            {/* Barra de Búsqueda con reconocimiento de voz - VERSIÓN OPTIMIZADA PARA MÓVIL */}
+            <div className="relative flex items-center w-auto sm:w-48 md:w-64">
               {/* Ícono de búsqueda */}
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <span className="absolute left-2 top-1/2 transform -translate-y-1/2">
                 <img src={zoomIcon} alt="Zoom" className="h-4 sm:h-5" />
               </span>
 
-              {/* Input */}
+              {/* Input - Versión optimizada para móvil */}
               <input
                 type="text"
-                placeholder="Buscar encuesta"
-                className="border border-gray-300 rounded-full py-2 pl-10 pr-10 w-full"
+                placeholder={window.innerWidth < 640 ? "" : "Buscar encuesta"}
+                className="border border-gray-300 rounded-full py-1.5 sm:py-2 pl-8 sm:pl-10 pr-8 sm:pr-10 w-32 sm:w-full focus:outline-none focus:ring-2 focus:ring-blue-custom focus:border-transparent text-sm"
                 value={searchTerm}
                 onChange={(e) => {
                   if (onSearchChange) {
@@ -365,13 +314,13 @@ const DashboardLayout = ({
               <button
                 onClick={handleVoiceSearch}
                 disabled={!browserSupportsSpeechRecognition}
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isListening ? 'animate-pulse' : ''}`}
+                className={`absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 ${isListening ? 'animate-pulse' : ''}`}
               >
                 <span className={`flex items-center justify-center ${isListening ? 'text-red-500' : ''}`}>
                   <img 
                     src={voiceIcon} 
                     alt="Voice" 
-                    className={`h-6 sm:h-8 ${isListening ? 'filter hue-rotate-90' : ''}`} 
+                    className={`h-4 sm:h-5 ${isListening ? 'filter hue-rotate-90' : ''}`} 
                   />
                   {isListening && (
                     <span className="absolute h-2 w-2 rounded-full bg-red-500 top-0 right-0"></span>
@@ -379,46 +328,98 @@ const DashboardLayout = ({
                 </span>
               </button>
             </div>
-
-
           </div>
         </div>
-      </div>
 
-      {/* Indicador visual del filtro seleccionado solo para dispositivos móviles */}
-      {selectedFilter !== 'all' && (
-        <div className="md:hidden w-full mt-2">
-          <div className="flex items-center">
-            <span className="text-gray-600 mr-2">Filtrando por:</span>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium text-white ${currentFilter.bgClass}`}
+        {/* Dropdown móvil (aparece cuando se hace clic en el icono) */}
+        {isFilterOpen && (
+          <div className="md:hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div
+              className="bg-white rounded-3xl shadow-lg border border-gray-200 w-72 overflow-hidden transition-all duration-300"
+              ref={mobileDropdownRef}
             >
-              {currentFilter.label}
-            </span>
-            <button
-              className="ml-2 text-gray-500 hover:text-gray-700"
-              onClick={() => handleFilterSelect('all')}
-            >
-              ✕
-            </button>
+              <div className="flex flex-col">
+                <div className="bg-yellow-custom py-3 px-4 text-blue-custom font-bold flex items-center">
+                  <span className="ml-2">Filtrar por estado</span>
+                  <span
+                    className="ml-auto cursor-pointer pr-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    ✕
+                  </span>
+                </div>
+                <div className="py-2">
+                  {filters.map((filter) => (
+                    <div
+                      key={filter.id}
+                      className="hover:bg-gray-50 py-3 px-4 cursor-pointer border-b border-gray-200 transition-colors last:border-b-0"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Detener propagación
+                        handleFilterSelect(filter.id);
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 ${filter.borderClass} flex items-center justify-center mr-3`}
+                        >
+                          {selectedFilter === filter.id && (
+                            <div
+                              className={`w-2.5 h-2.5 rounded-full ${filter.bgClass}`}
+                            ></div>
+                          )}
+                        </div>
+                        <span
+                          className={`font-medium text-sm ${filter.textClass}`}
+                        >
+                          {filter.label}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Indicador visual de reconocimiento de voz activo */}
-      {isListening && (
-        <div className="w-full mt-2 mb-2 px-12">
-          <div className="flex items-center justify-center">
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-              Escuchando... "{transcript}"
-            </span>
+        {/* Indicador visual del filtro seleccionado solo para dispositivos móviles */}
+        {selectedFilter !== 'all' && (
+          <div className="md:hidden w-full px-4 sm:px-8 mb-2">
+            <div className="flex items-center">
+              <span className="text-gray-600 mr-2 text-sm">Filtrando por:</span>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium text-white ${currentFilter.bgClass}`}
+              >
+                {currentFilter.label}
+              </span>
+              <button
+                className="ml-2 text-gray-500 hover:text-gray-700"
+                onClick={() => handleFilterSelect('all')}
+              >
+                ✕
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Contenido principal */}
-      <div className="w-full">
-        {children}
+        {/* Indicador visual de reconocimiento de voz activo */}
+        {isListening && (
+          <div className="w-full mb-2 px-4 sm:px-8 md:px-12">
+            <div className="flex items-center justify-center">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+                Escuchando... "{transcript}"
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Contenido principal */}
+        <div className="w-full px-4 sm:px-8 md:px-12">
+          {children}
+        </div>
       </div>
     </MainLayout>
   );

@@ -104,19 +104,19 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetai
   };
 
   return (
-    <div className="flex flex-col gap-4 p-12 w-full -mt-8">
+    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8 lg:p-12 w-full">
       {filteredCards.length === 0 ? (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center text-gray-500 text-xl"
+          className="text-center text-gray-500 text-lg sm:text-xl"
         >
           No se encontraron encuestas que coincidan con los criterios de búsqueda
         </motion.div>
       ) : (
         <AnimatePresence>
-          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredCards.map((card, index) => (
               <motion.div
                 key={card.name + index}
@@ -124,63 +124,72 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetai
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                layout // Importante para animaciones de layout
-                className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-300"
+                layout
+                className="bg-white p-5 sm:p-6 rounded-2xl shadow-md flex flex-col justify-between border border-gray-100"
               >
-                <div className="flex items-center mb-4">
-                  {/* Contenedor redondo con color dinámico */}
-                  <div className={`h-10 w-10 flex items-center justify-center rounded-full ${getStatusColor(card.estado)}`}>
+                {/* Card Header */}
+                <div className="flex items-center mb-4 sm:mb-5">
+                  <div className={`h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full ${getStatusColor(card.estado)}`}>
                     <img
                       src={bannerImage}
                       alt="icon"
-                      className="h-6 w-6"
+                      className="h-6 w-6 sm:h-7 sm:w-7"
                     />
                   </div>
-                  <h2 className="text-lg font-semibold ml-4">Encuesta {card.name}</h2>
+                  <div className="ml-4">
+                    <h2 className="text-base sm:text-xl font-bold text-blue-900">Encuesta</h2>
+                    <h3 className="text-base sm:text-xl font-bold text-blue-900">{card.name}</h3>
+                  </div>
                 </div>
-                <div className="space-y-2 flex-grow">
-                  <p className="flex justify-between items-center">
-                    <span className="font-bold text-gray-700">Estado de la encuesta:</span>
+                
+                {/* Card Body */}
+                <div className="space-y-3 sm:space-y-4 flex-grow">
+                  <div className="flex flex-row justify-between items-center">
+                    <span className="text-gray-700 text-sm sm:text-base">Estado de la Encuesta:</span>
                     <span
-                      className={`px-3 py-1 rounded-md border font-semibold ${getTextColor(card.estado)} ${getBorderColor(card.estado)}`}
+                      className={`px-3 py-1 sm:px-4 sm:py-2 rounded-md border font-medium text-sm sm:text-base ${getTextColor(card.estado)} ${getBorderColor(card.estado)}`}
                     >
                       {card.estado}
                     </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    <span className="flex items-center">
-                      <span className="font-bold text-gray-700 mr-1">Inicio:</span>
-                      <span>{card.fechaInicio}</span>
-                    </span>
-                    <span className="flex items-center">
-                      <span className="font-bold text-gray-700 mr-1">Final:</span>
-                      <span>{card.fechaFinal}</span>
-                    </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    <span className="font-bold text-gray-700">{card.tipo}:</span>
-                    <span>{card.total}</span>
-                  </p>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm sm:text-base">
+                      <span className="text-gray-700">Inicio: </span>
+                      <span className="font-semibold">{card.fechaInicio}</span>
+                    </div>
+                    <div className="text-sm sm:text-base">
+                      <span className="text-gray-700">Final: </span>
+                      <span className="font-semibold">{card.fechaFinal}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-sm sm:text-base">
+                    <span className="text-gray-700">{card.tipo}:</span>
+                    <span className="font-semibold">{card.total}</span>
+                  </div>
                 </div>
-                <div className="flex justify-center space-x-2 mt-4">
+                
+                {/* Card Footer */}
+                <div className="mt-4 sm:mt-5">
                   {card.estado === "Finalizada" && (
-                    <>
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
-                        className="flex items-center px-4 py-2 bg-purple-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        className="flex items-center justify-center w-full px-4 py-3 bg-purple-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90"
                         onClick={() => handleNavigation(card)}
                       >
                         <img src={Eyel} alt="Ver" className="h-5 w-5 mr-2" />
                         Ver
                       </button>
-                      <button className="flex items-center px-4 py-2 bg-purple-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button className="flex items-center justify-center w-full px-4 py-3 bg-purple-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90">
                         <img src={Download} alt="Descargar" className="h-5 w-5 mr-2" />
                         Descargar reporte
                       </button>
-                    </>
+                    </div>
                   )}
                   {card.estado === "Activa" && (
                     <button 
-                      className="flex items-center px-4 py-2 bg-green-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                      className="flex items-center justify-center w-full px-4 py-3 bg-green-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90"
                       onClick={() => handleNavigation(card)}
                     >
                       <img src={Eyel} alt="Ver Respuestas" className="h-5 w-5 mr-2" />
@@ -188,34 +197,34 @@ const DashboardCard = ({ searchTerm = '', stateFilter = 'all', onNavigateToDetai
                     </button>
                   )}
                   {card.estado === "Próxima a Finalizar" && (
-                    <>
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
-                        className="flex items-center px-4 py-2 bg-orange-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        className="flex items-center justify-center w-full px-4 py-3 bg-orange-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90"
                         onClick={() => handleNavigation(card)}
                       >
                         <img src={Eyel} alt="Ver" className="h-5 w-5 mr-2" />
                         Ver
                       </button>
-                      <button className="flex items-center px-4 py-2 bg-orange-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button className="flex items-center justify-center w-full px-4 py-3 bg-orange-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90">
                         <img src={Calendar} alt="Ampliar plazo" className="h-5 w-5 mr-2" />
                         Ampliar plazo
                       </button>
-                    </>
+                    </div>
                   )}
                   {card.estado === "Sin publicar" && (
-                    <>
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
-                        className="flex items-center px-4 py-2 bg-celeste-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105"
+                        className="flex items-center justify-center w-full px-4 py-3 bg-celeste-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90"
                         onClick={() => handleNavigation(card)}
                       >
                         <img src={Edit} alt="Editar" className="h-5 w-5 mr-2" />
                         Editar
                       </button>
-                      <button className="flex items-center px-4 py-2 bg-celeste-custom text-white rounded-full transition-all duration-300 hover:bg-opacity-80 hover:scale-105">
+                      <button className="flex items-center justify-center w-full px-4 py-3 bg-celeste-custom text-white text-sm font-medium rounded-full transition-all duration-300 hover:bg-opacity-90">
                         <img src={Done} alt="Publicar" className="h-5 w-5 mr-2" />
                         Publicar
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               </motion.div>
