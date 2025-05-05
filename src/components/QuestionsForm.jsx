@@ -277,7 +277,7 @@ const SavedQuestionForm = ({
   return (
     <div className="mb-6">
       {/* Contenedor principal del formulario guardado */}
-      <div className={`bg-red-800 flex flex-col gap-4 ${form.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={form.isCollapsed ? { minHeight: '50px' } : {}}>
+      <div className={`flex flex-col gap-4 ${form.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={form.isCollapsed ? { minHeight: '50px' } : {}}>
         {/* Cabecera con título */}
         <div className="flex items-center">
           <div className="w-2/3 relative pr-4">
@@ -462,7 +462,7 @@ const SavedQuestionForm = ({
                   {childForm.completed ? (
                     // For completed forms, render a collapsible version with the red background
                     <div className="w-5/6 ml-auto">
-                      <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-pink-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
+                      <div className={`flex flex-col gap-4 ${childForm.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-pink-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childForm.isCollapsed ? { minHeight: '50px' } : {}}>
                         {/* Cabecera con título */}
                         <div className="flex items-center">
                           <div className="w-2/3 relative pr-4">
@@ -693,7 +693,7 @@ const SavedQuestionForm = ({
                       ? "Guardar pregunta hija"
                       : "Agregar pregunta hija"}
                   </span>
-                  <div className="absolute right-4">
+                  <div className="absolute right-6">
                     {/* Icono AddCategory1 */}
                     <img
                       src={AddCategory1}
@@ -1319,7 +1319,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
       {/* Contenedor Principal del Formulario NUEVO */}
       <div key={formKey} className="mb-6">
-        <div className={`bg-green-800 flex flex-col gap-4 ${isNewFormCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isNewFormCollapsed ? { minHeight: '50px' } : {}}>
+        <div className={`bg-green-800 flex flex-col gap-4 ${isNewFormCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isNewFormCollapsed ? { minHeight: '50px' } : {}}>
 
           {/* Cabecera: Título, Botón Importar/Reset, Botón Colapsar */}
           <div className={`flex items-center ${isNewFormCollapsed ? 'mb-0' : 'mb-4'}`}>
@@ -1492,7 +1492,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                     {childFormData.completed ? (
                       // For completed forms, render an editable/collapsible version
                       <div className="w-5/6 ml-auto">
-                        <div className={`flex flex-col gap-4 ${childFormData.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-3xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childFormData.isCollapsed ? { minHeight: '50px' } : {}}>
+                        <div className={`flex flex-col gap-4 ${childFormData.isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-white shadow-2xl w-full transition-all duration-300 ease-in-out`} style={childFormData.isCollapsed ? { minHeight: '50px' } : {}}>
                           {/* Cabecera con título */}
                           <div className="flex items-center">
                             <div className="w-2/3 relative pr-4">
@@ -1704,7 +1704,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                         ? "Guardar pregunta hija"
                         : "Agregar pregunta hija"}
                     </span>
-                    <div className="absolute right-4">
+                    <div className="absolute right-6">
                       <img
                         src={AddCategory1}
                         alt="Agregar"
@@ -1731,7 +1731,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         >
           <span className={`font-work-sans text-2xl font-bold ${canActivateNewFormSwitches ? "text-blue-custom" : "text-gray-500"
             }`}>Agregar pregunta</span>
-          <div className="absolute right-4">
+          <div className="absolute right-6">
             <img src={AddCategory1} alt="Agregar" className={`w-8 h-8 ${!canActivateNewFormSwitches ? "opacity-50" : ""}`} />
           </div>
         </button>

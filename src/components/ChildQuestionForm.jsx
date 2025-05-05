@@ -391,7 +391,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   return (
     <div className="w-5/6 ml-auto"> {/* Contenedor que define el ancho */}
       {/* Contenedor Principal del Formulario */}
-      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-16 overflow-hidden' : 'p-6'} rounded-3xl bg-blue-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isCollapsed ? { minHeight: '70px' } : {}}>
+      <div className={`flex flex-col gap-4 ${isCollapsed ? 'py-2 px-6 h-15 overflow-hidden' : 'p-6'} rounded-xl bg-blue-900 shadow-2xl w-full transition-all duration-300 ease-in-out`} style={isCollapsed ? { minHeight: '50px' } : {}}>
 
         {/* Cabecera: Título y Botones */}
         <div className={`flex items-center ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
