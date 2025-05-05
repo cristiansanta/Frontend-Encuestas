@@ -264,21 +264,48 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     }
 
     // Preparar datos para enviar - sin intentar convertir el ID a número
-    let parentId;
-    if (typeof parentQuestionData.id === 'string' && !isNaN(Number(parentQuestionData.id))) {
-      parentId = Number(parentQuestionData.id);
-    } else if (typeof parentQuestionData.id === 'number') {
-      parentId = parentQuestionData.id;
-    } else {
-      // Último intento: usar un ID del localStorage o 0 como fallback
+    // Determinar el ID del padre de forma más robusta
+    let parentId = 0; // Valor predeterminado si todo falla
+
+    // 1. Intentar usar serverId primero si existe (más confiable)
+    if (parentQuestionData?.serverId && !isNaN(Number(parentQuestionData.serverId))) {
+      parentId = Number(parentQuestionData.serverId);
+      console.log('Usando serverId:', parentId);
+    }
+    // 2. Intentar usar el ID regular
+    else if (parentQuestionData?.id) {
+      if (typeof parentQuestionData.id === 'number') {
+        parentId = parentQuestionData.id;
+        console.log('Usando id numérico:', parentId);
+      }
+      else if (typeof parentQuestionData.id === 'string' && !isNaN(Number(parentQuestionData.id))) {
+        parentId = Number(parentQuestionData.id);
+        console.log('Usando id string convertido a número:', parentId);
+      }
+    }
+
+    // 3. Último recurso: verificar si hay un ID guardado en localStorage
+    if (parentId === 0) {
       const storedId = localStorage.getItem('questions_id');
-      parentId = storedId ? Number(storedId) : 0;
+      if (storedId && !isNaN(Number(storedId))) {
+        parentId = Number(storedId);
+        console.log('Usando ID de localStorage:', parentId);
+      }
+    }
+
+    // Verificación final - asegurarse que parentId no sea 0 ni undefined ni null
+    if (!parentId) {
+      console.error('No se pudo determinar un ID válido para la pregunta padre');
+      setErrorMessage('No se pudo determinar un ID válido para la pregunta padre. Intente guardar la pregunta padre primero.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return; // Detener la ejecución
     }
 
     // Para debugging
-    console.log('Tipo de parentQuestionData.id:', typeof parentQuestionData.id);
-    console.log('Valor de parentQuestionData.id:', parentQuestionData.id);
-    console.log('Valor convertido de parentId:', parentId);
+    console.log('Tipo de parentQuestionData:', typeof parentQuestionData);
+    console.log('parentQuestionData completo:', parentQuestionData);
+    console.log('Valor final de parentId:', parentId);
 
     const formData = {
       title: sanitizedTitle,
