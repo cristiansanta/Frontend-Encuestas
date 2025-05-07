@@ -136,7 +136,7 @@ export const Navbar = () => {
                     >
                         <value.icon
                             className="w-6 h-6"
-                            strokeColor={value.active ? "#39A900" : "#FFFFFF"}
+                            strokeColor={value.active ? "#00324D" : "#FFFFFF"}
                         />
                     </Link>
                 ))}
@@ -194,7 +194,7 @@ export const Navbar = () => {
                             )}
 
                             <value.icon
-                                strokeColor={value.active ? "#39A900" : "#FFFFFF"}
+                                strokeColor={value.active ? "#00324D" : "#FFFFFF"}
                                 className="w-6 h-6"
                             />
                             <span>{value.label}</span>

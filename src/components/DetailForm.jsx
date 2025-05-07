@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import RichTextEditor from './TextBoxDetail.jsx';
 import Addsurvey from '../assets/img/addsurvey.svg'; // Assuming this is used somewhere or can be removed if not
-import { SurveyContext } from '../Provider/SurveyContext';
 import selectCategory from '../assets/img/selectCategory.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
 import trashcan from '../assets/img/trashCan.svg';
 import calendar2 from '../assets/img/calendar2.svg';
-import ok from '../assets/img/Ok.svg';
-import Modal from './Modal';
-import Calendar from './Calendar';
-import CategoryDropdown from './CategoryDropdown';
+
 import { getSections, updateSections, removeSection, addSection } from '../services/SectionsStorage';
 import DOMPurify from 'dompurify';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import ok from '../assets/img/Ok.svg';
+
+import RichTextEditor from './TextBoxDetail';
+import { SurveyContext } from '../Provider/SurveyContext';
+import Modal from './Modal';
+import Calendar from './Calendar';
+import CategoryDropdown from './CategoryDropdown';
 
 // Constante para la longitud máxima del nombre de sección
 const MAX_SECTION_NAME_LENGTH = 50;
