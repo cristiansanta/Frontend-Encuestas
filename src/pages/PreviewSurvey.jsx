@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SurveyContext } from '../Provider/SurveyContext';
 import SurveyLayout from '../components/SurveyLayout';
 import Button from '../components/Button';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Importaciones de imágenes
 import ViewIcon from '../assets/img/viewicon.svg';
-import { useNavigate } from 'react-router-dom';
 import Seccion from '../assets/img/seccion.svg';
 import SeccionWhite from '../assets/img/seccionwhite.svg';
 import Calendar from '../assets/img/calendar2.svg';
-import { motion, AnimatePresence } from 'framer-motion';
 import Select from '../assets/img/select.svg';
 import SelectBlue from '../assets/img/selectblue.svg';
 
@@ -19,17 +22,39 @@ import trueFalse from '../assets/img/trueFalse.svg';
 
 const PreviewSurvey = () => {
   const navigate = useNavigate();
+  
+  // Obtener contexto de la encuesta
+  const { surveyData, getPreviewData } = useContext(SurveyContext);
+  
+  // Estado local para la vista previa
+  const [previewData, setPreviewData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
-  const [expandedSections, setExpandedSections] = useState({
-    personal: false,
-    laboral: false,
-    academica: false
-  });
+  const [expandedSections, setExpandedSections] = useState({});
   const [expandedQuestions, setExpandedQuestions] = useState({});
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // Preparar los datos para la vista previa al montar el componente
+  useEffect(() => {
+    const preparePreview = () => {
+      const preview = getPreviewData();
+      setPreviewData(preview);
+      
+      // Inicializar estados de expansión de secciones
+      const initialExpandedSections = {};
+      if (preview.sections && preview.sections.length > 0) {
+        preview.sections.forEach(section => {
+          initialExpandedSections[section.id] = false;
+        });
+        setExpandedSections(initialExpandedSections);
+      }
+    };
+    
+    preparePreview();
+  }, [getPreviewData]);
+
+  // Efectos para el scroll
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -44,33 +69,39 @@ const PreviewSurvey = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+  // Obtener título de la encuesta y categoría
+  const categoryData = previewData?.category || JSON.parse(localStorage.getItem('selectedCategory')) || null;
+  const headerTitle = `Previsualización de la encuesta: ${
+    previewData?.title || 
+    (categoryData ? `${categoryData[0][0]} ${categoryData[0][1]}` : 'Perfil Personal y Profesional')
+  }`;
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
-  const categoryData = JSON.parse(localStorage.getItem('selectedCategory'));
-  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[0][0]} ${categoryData[0][1]}` : 'Perfil Personal y Profesional'}`;
-
+  // Funciones para manejar publicación y guardado
   const handlePublish = () => {
     setIsSaving(true);
+    
+    // Aquí iría la lógica para enviar la encuesta completa al servidor
+    // Simulación de guardado para este ejemplo
     setTimeout(() => {
       setIsSaving(false);
       setShowButtons(false);
+      
+      // Podríamos limpiar los datos de la encuesta actual al publicar
+      // clearSurveyData(); // Descomentar si quieres limpiar los datos al publicar
+      
       navigate('/survey-list');
     }, 1500);
   };
 
   const handleSaveDraft = () => {
     setIsSaving(true);
+    
+    // Aquí iría la lógica para guardar el borrador en el servidor
+    // Simulación de guardado para este ejemplo
     setTimeout(() => {
       setIsSaving(false);
       setShowButtons(false);
@@ -80,6 +111,13 @@ const PreviewSurvey = () => {
 
   const handlePreviewSurvey = () => {
     navigate('/preview-details'); // Redirige a la ruta de SurveyDetails
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const toggleSection = (section) => {
@@ -96,6 +134,19 @@ const PreviewSurvey = () => {
     }));
   };
 
+  // Mapear los tipos de preguntas de nuestro sistema a nombres más amigables
+  const getQuestionTypeName = (typeId) => {
+    const types = {
+      1: 'Respuesta Abierta',
+      2: 'Numérica',
+      3: 'Opción Única',
+      4: 'Opción Multiple',
+      5: 'Falso / Verdadero',
+      6: 'Fecha'
+    };
+    return types[typeId] || 'Desconocido';
+  };
+  // Componente auxiliar para las secciones colapsables
   const CollapsibleSection = ({ title, isOpen, onToggle, icon, children }) => {
     const sectionRef = useRef(null);
 
@@ -145,6 +196,7 @@ const PreviewSurvey = () => {
     );
   };
 
+  // Componente para mostrar una pregunta individual
   const SurveyQuestion = ({
     id,
     question,
@@ -176,7 +228,6 @@ const PreviewSurvey = () => {
         window.scrollTo(0, currentScrollY);
       }, 0);
     };
-
     return (
       <div className={`${hasIndent ? 'ml-8' : ''} mb-4`} ref={questionRef}>
         <div className="border border-gray-200 bg-white rounded-xl overflow-hidden">
@@ -211,7 +262,10 @@ const PreviewSurvey = () => {
 
               <div className="mb-4">
                 <p className="text-dark-blue-custom font-bold mb-1">Descripción de la pregunta</p>
-                <p className="text-gray-700">{description}</p>
+                <div 
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
               </div>
 
               <div className="mb-2">
@@ -224,6 +278,7 @@ const PreviewSurvey = () => {
                     'un campo como el que se enseña a continuación donde podrá ingresar texto'}.
                 </p>
 
+                {/* Renderizado del tipo de pregunta específico */}
                 {type === 'Opción Única' && options && (
                   <div className="space-y-2">
                     {options.map((option, index) => (
@@ -239,7 +294,7 @@ const PreviewSurvey = () => {
                     ))}
                   </div>
                 )}
-
+                {/* Renderizado para opciones múltiples */}
                 {type === 'Opción Multiple' && options && (
                   <div className="space-y-2">
                     {options.map((option, index) => (
@@ -255,6 +310,7 @@ const PreviewSurvey = () => {
                   </div>
                 )}
 
+                {/* Renderizado para respuesta abierta */}
                 {type === 'Respuesta Abierta' && (
                   <div className="border rounded-lg p-3 bg-white">
                     <div className="flex justify-between">
@@ -269,6 +325,7 @@ const PreviewSurvey = () => {
                   </div>
                 )}
 
+                {/* Renderizado para fecha */}
                 {type === 'Fecha' && (
                   <div className="border rounded-lg p-3 bg-white flex justify-between items-center">
                     <span className="text-gray-400">DD/MM/AAAA</span>
@@ -276,6 +333,7 @@ const PreviewSurvey = () => {
                   </div>
                 )}
 
+                {/* Renderizado para verdadero/falso */}
                 {type === 'Falso / Verdadero' && (
                   <div className="flex space-x-4">
                     <div className="flex items-center space-x-2">
@@ -299,6 +357,7 @@ const PreviewSurvey = () => {
                   </div>
                 )}
 
+                {/* Renderizado para respuesta numérica */}
                 {type === 'Numérica' && (
                   <div className="border rounded-lg p-3 bg-white">
                     <input
@@ -315,6 +374,20 @@ const PreviewSurvey = () => {
       </div>
     );
   };
+  // Si los datos aún no están listos, mostrar un cargador
+  if (!previewData) {
+    return (
+      <SurveyLayout
+        currentView="PreviewSurvey"
+        headerTitle="Cargando vista previa..."
+        showNavButton={false}
+      >
+        <div className="flex justify-center items-center h-64">
+          <p>Cargando datos de la encuesta...</p>
+        </div>
+      </SurveyLayout>
+    );
+  }
 
   return (
     <SurveyLayout
@@ -370,11 +443,11 @@ const PreviewSurvey = () => {
       <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-dark-blue-custom">
-            Encuesta sobre tu Perfil Personal y Profesional
+            {previewData.title || "Encuesta sobre tu Perfil Personal y Profesional"}
           </h1>
           <button
             className="flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
-            onClick={handlePreviewSurvey} // Llama a la función para redirigir
+            onClick={handlePreviewSurvey}
           >
             <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
               <img src={ViewIcon} alt="Previsualizar encuesta" className="w-5 h-5" />
@@ -386,34 +459,26 @@ const PreviewSurvey = () => {
             </span>
           </button>
         </div>
-
+        {/* Mostrar secciones */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones</h2>
           <div className="flex flex-wrap gap-4">
-            <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Información Personal</span>
-            </motion.div>
-            <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Laboral</span>
-            </motion.div>
-            <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Académica</span>
-            </motion.div>
+            {previewData.sections && previewData.sections.map((section) => (
+              <motion.div
+                key={section.id}
+                className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
+                whileHover={{ scale: 1.05 }}
+              >
+                <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
+                <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">
+                  {section.name}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
 
+        {/* Mostrar rango de fechas */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Rango de tiempo</h2>
           <div className="flex gap-6">
@@ -422,7 +487,9 @@ const PreviewSurvey = () => {
               whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
             >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de inicio:</span>
-              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">
+                {new Date(previewData.startDate).toLocaleDateString('es-ES')}
+              </span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
             </motion.div>
             <motion.div
@@ -430,151 +497,81 @@ const PreviewSurvey = () => {
               whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
             >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de finalización:</span>
-              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">
+                {new Date(previewData.endDate).toLocaleDateString('es-ES')}
+              </span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
             </motion.div>
           </div>
         </div>
 
+        {/* Descripción de la encuesta */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Descripción de la Encuesta</h2>
           <div className="border p-4 rounded-lg bg-gray-50">
-            <p>
-              Esta encuesta tiene como objetivo recopilar información sobre tus datos generales, tu experiencia laboral y tu trayectoria
-              académica. Las preguntas están organizadas en tres secciones: la primera se enfoca en tus datos personales básicos, la segunda
-              en tu experiencia profesional, y la tercera en tu formación académica. El propósito de esta encuesta es obtener una visión
-              completa de tu perfil para diversos fines, como análisis de tendencias laborales y académicas. Tu participación es valiosa y te
-              agradecemos por dedicar tiempo a completarla.
-            </p>
+            <div dangerouslySetInnerHTML={{ __html: previewData.description }} />
           </div>
         </div>
-
+        {/* Secciones con preguntas */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Preguntas de la Encuesta</h2>
+          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones de la Encuesta</h2>
 
-          <CollapsibleSection
-            title="Información Personal"
-            isOpen={expandedSections.personal}
-            onToggle={() => toggleSection('personal')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="nombre"
-              question="Nombre"
-              description="Ingrese su nombre completo tal como aparece en su documento de identificación."
-              type="Respuesta Abierta"
-              placeholder="Ej: Luis Perez Gomez"
-            />
+          {previewData.sections && previewData.sections.map((section) => {
+            // Buscar todas las preguntas que pertenecen a esta sección
+            const sectionQuestions = previewData.questions.filter(
+              q => q.section && q.section.id === section.id
+            );
 
-            <SurveyQuestion
-              id="fecha_nacimiento"
-              question="Fecha de nacimiento"
-              description="Ingresa tu fecha de nacimiento para ayudarnos a conocer tu edad."
-              type="Fecha"
-            />
-
-            <SurveyQuestion
-              id="genero"
-              question="¿En qué género te identificas?"
-              description="Selecciona el género con el que te identificas."
-              type="Opción Única"
-              options={["Masculino", "Femenino", "Otro", "Prefiero no decirlo"]}
-            />
-
-            <SurveyQuestion
-              id="referencia"
-              question="¿Cómo prefieres que nos refiramos a ti?"
-              description="Queremos asegurarnos de utilizar el lenguaje con el que te sientas más cómod@. Si tienes una preferencia específica en términos de género o pronombres, puedes compartirla con nosotros."
-              type="Respuesta Abierta"
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="paises"
-              question="¿En cual de los siguientes países has vivido?"
-              description="Selecciona los países en los que has vivido durante tu vida."
-              type="Opción Multiple"
-              options={["Colombia", "Venezuela", "Peru", "Chile", "Ecuador", "Argentina", "Uruguay", "Mexico", "Paraguay", "Panama", "Costa Rica"]}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Experiencia Laboral"
-            isOpen={expandedSections.laboral}
-            onToggle={() => toggleSection('laboral')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="num_trabajos"
-              question="¿En cuántos trabajos has tenido experiencia laboral hasta ahora?"
-              description="Indica el número de empleos formales en los que has trabajado."
-              type="Numérica"
-            />
-
-            <SurveyQuestion
-              id="situacion_laboral"
-              question="¿Cuál es tu situación laboral actual?"
-              description="Selecciona la opción que mejor describe tu situación laboral en este momento."
-              type="Opción Única"
-              options={["Empleado a tiempo completo", "Empleado a tiempo parcial", "Trabajador independiente", "Estudiante", "Desempleado", "Jubilado"]}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Experiencia Académica"
-            isOpen={expandedSections.academica}
-            onToggle={() => toggleSection('academica')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="nivel_educativo"
-              question="¿Qué nivel educativo has alcanzado hasta el momento?"
-              description="Selecciona el nivel educativo más alto que has completado."
-              type="Opción Única"
-              options={["Primaria", "Secundaria", "Técnico/Tecnológico", "Pregrado Universitario", "Especialización", "Maestría", "Doctorado"]}
-            />
-
-            <SurveyQuestion
-              id="cursando_estudios"
-              question="¿Actualmente estás cursando estudios académicos?"
-              description="Indícanos si actualmente estás estudiando de manera formal."
-              type="Falso / Verdadero"
-            />
-
-            <SurveyQuestion
-              id="tipo_estudio"
-              question="¿Qué tipo de estudio estás cursando actualmente?"
-              description="Selecciona el tipo de estudio que estás realizando en este momento."
-              type="Opción Única"
-              options={["Pregrado Universitario", "Postgrado", "Curso de formación", "Certificación"]}
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="area_conocimiento"
-              question="¿En qué área de conocimiento se enmarca tu estudio?"
-              description="Selecciona el área principal de tu formación actual."
-              type="Opción Única"
-              options={["Ciencias Sociales", "Ciencias Naturales", "Ingeniería", "Ciencias de la Salud", "Artes y Humanidades", "Ciencias Económicas", "Otra"]}
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="etapa_formacion"
-              question="¿En qué etapa de tu formación te encuentras actualmente?"
-              description="Indícanos en qué fase de tus estudios actuales te encuentras."
-              type="Opción Única"
-              options={["Inicio", "Intermedio", "Final", "Tesis/Proyecto final"]}
-              hasIndent={true}
-            />
-          </CollapsibleSection>
+            return (
+              <CollapsibleSection
+                key={section.id}
+                title={section.name}
+                isOpen={expandedSections[section.id] || false}
+                onToggle={() => toggleSection(section.id)}
+                icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
+              >
+                {sectionQuestions.length === 0 ? (
+                  <p className="text-gray-500 italic">No hay preguntas en esta sección.</p>
+                ) : (
+                  sectionQuestions.map((question) => (
+                    <React.Fragment key={question.id}>
+                      <SurveyQuestion
+                        id={question.id}
+                        question={question.title}
+                        description={question.description}
+                        type={getQuestionTypeName(question.questionType)}
+                        options={question.options}
+                      />
+                      
+                      {/* Renderizar preguntas hijas si existen */}
+                      {question.childForms && question.childForms.length > 0 && (
+                        <div className="ml-8 mt-2">
+                          {question.childForms.map((childForm) => (
+                            <SurveyQuestion
+                              key={childForm.id}
+                              id={childForm.id}
+                              question={childForm.data.title}
+                              description={childForm.data.description}
+                              type={getQuestionTypeName(childForm.data.questionType)}
+                              options={childForm.data.options}
+                              hasIndent={true}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
+              </CollapsibleSection>
+            );
+          })}
         </div>
 
         <div className="flex justify-center mt-8">
           <div>
             <p className="text-dark-blue-custom">
               Para <span className="font-bold">Publicar</span> y <span className="font-bold">Guardar</span> sin publicar regresa al inicio de esta página:
-              <a
+              
                 href="#"
                 onClick={(e) => {e.preventDefault(); scrollToTop();}}
                 className="text-green-600 underline ml-1"

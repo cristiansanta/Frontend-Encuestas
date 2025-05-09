@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import RichTextEditor from './TextBoxDetail.jsx';
-import Addsurvey from '../assets/img/addsurvey.svg'; // Assuming this is used somewhere or can be removed if not
+import Addsurvey from '../assets/img/addsurvey.svg';
 import { SurveyContext } from '../Provider/SurveyContext';
 import selectCategory from '../assets/img/selectCategory.svg';
 import Selectsurvey from '../assets/img/selectsurvey.svg';
@@ -18,7 +18,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 // Constante para la longitud máxima del nombre de sección
 const MAX_SECTION_NAME_LENGTH = 50;
 
-// Componente para el elemento arrastrable de sección (Sin cambios respecto a tu original)
+// Componente para el elemento arrastrable de sección
 const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const ref = useRef(null);
@@ -56,7 +56,7 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
       <div className="flex items-center justify-between w-full bg-gray-100 rounded-full overflow-hidden">
         <div className="flex items-center flex-grow py-2">
           <div className="text-dark-blue-custom mx-3 cursor-grab">
-             {/* SVG Drag Handle */}
+            {/* SVG Drag Handle */}
             <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="3" cy="3" r="1.5" /><circle cx="3" cy="9" r="1.5" /><circle cx="3" cy="15" r="1.5" /><circle cx="9" cy="3" r="1.5" /><circle cx="9" cy="9" r="1.5" /><circle cx="9" cy="15" r="1.5" /><circle cx="15" cy="3" r="1.5" /><circle cx="15" cy="9" r="1.5" /><circle cx="15" cy="15" r="1.5" /></svg>
           </div>
           <span className="font-work-sans text-lg font-medium text-dark-blue-custom">{name}</span>
@@ -69,35 +69,45 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
         >
           <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
           {/* Tooltip JSX */}
-          {showTooltip && ( <div className="tooltip-container absolute z-10 right-full top-1/2 transform -translate-y-1/2 mr-2"> <div className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap" style={{ backgroundColor: '#002C4D', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)' }}> Eliminar sección </div> <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45" style={{ width: '10px', height: '10px', backgroundColor: '#002C4D' }}></div> </div> )}
+          {showTooltip && (<div className="tooltip-container absolute z-10 right-full top-1/2 transform -translate-y-1/2 mr-2"> <div className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap" style={{ backgroundColor: '#002C4D', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)' }}> Eliminar sección </div> <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45" style={{ width: '10px', height: '10px', backgroundColor: '#002C4D' }}></div> </div>)}
         </button>
       </div>
     </div>
   );
 };
-
 const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
-  const { selectedCategory, setSelectedCategory, categories } = useContext(SurveyContext);
+  const {
+    surveyData,
+    createNewEncuesta,
+    currentEncuesta,
+    setCurrentEncuesta,
+    updateCurrentEncuesta,
+    addSeccionToCurrentEncuesta,
+    nextStep
+  } = useContext(SurveyContext);
 
-  // Estados originales
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  // Estados inicializados con datos del contexto
+  const [title, setTitle] = useState(surveyData.title || '');
+  const [description, setDescription] = useState(surveyData.description || '');
   const [accessToken, setAccessToken] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
   const [modalStatus, setModalStatus] = useState('error');
   const [isFormValid, setIsFormValid] = useState(false);
+
+  // Fechas inicializadas con datos del contexto
   const today = new Date();
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(surveyData.startDate ? new Date(surveyData.startDate) : today);
+  const [endDate, setEndDate] = useState(surveyData.endDate ? new Date(surveyData.endDate) : today);
+
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const selectCategoryButtonRef = useRef(null);
 
-  // Estado para TODAS las secciones (fuente de verdad)
-  const [sections, setSections] = useState([
+  // Estado para TODAS las secciones (inicializado con datos del contexto)
+  const [sections, setSections] = useState(surveyData.sections || [
     { id: 1, name: 'Información personal' },
     { id: 2, name: 'Experiencia Laboral' },
     { id: 3, name: 'Experiencia Académica' }
@@ -107,16 +117,14 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   const [newSectionName, setNewSectionName] = useState('');
   const [inputError, setInputError] = useState('');
 
-  // --- NUEVO ESTADO ---
   // Estado para las secciones filtradas que se mostrarán
   const [filteredSections, setFilteredSections] = useState([]);
-  // --- FIN NUEVO ESTADO ---
 
-  // Verificar validez del formulario (basado en 'sections', no 'filteredSections')
+  // Verificar validez del formulario
   useEffect(() => {
     const isTitleValid = title.trim() !== '';
     const isCategoryValid = selectedCategory && selectedCategory.length > 0;
-    const isSectionsValid = sections.length > 0; // Usa la lista original para validar
+    const isSectionsValid = sections.length > 0;
 
     const formIsValid = isTitleValid && isCategoryValid && isSectionsValid;
     setIsFormValid(formIsValid);
@@ -124,7 +132,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     if (onFormValidChange) {
       onFormValidChange(formIsValid);
     }
-  }, [title, selectedCategory, sections, onFormValidChange]); // Depende de 'sections'
+  }, [title, selectedCategory, sections, onFormValidChange]);
 
   // Cargar token y secciones iniciales
   useEffect(() => {
@@ -133,7 +141,6 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       setAccessToken(token);
     } else {
       console.error('No se encontró el token de acceso. Inicia sesión nuevamente.');
-      // Mostrar modal de error (código original)
       setModalTitle('Error de autenticación');
       setModalMessage('No se encontró el token de acceso. Por favor, inicia sesión de nuevo.');
       setModalStatus('error');
@@ -141,42 +148,53 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     }
 
     const storedSections = getSections();
-    const initialSections = storedSections.length > 0 ? storedSections : sections;
+
+    // Si hay secciones en el contexto, usarlas; de lo contrario, usar las de localStorage
+    const initialSections = surveyData.sections && surveyData.sections.length > 0
+      ? surveyData.sections
+      : storedSections.length > 0 ? storedSections : sections;
+
     setSections(initialSections);
-    // Inicializa filteredSections con la lista completa al inicio
-    // setFilteredSections(initialSections); // Ahora manejado por el efecto de filtro
+    setFilteredSections(initialSections);
 
-    if (storedSections.length === 0 && sections.length > 0) {
-      updateSections(sections);
+    // Sincronizar con el contexto y localStorage
+    if (initialSections.length > 0) {
+      updateSurveyField('sections', initialSections);
+      updateSections(initialSections);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Ejecutar solo al montar
-
-  // --- NUEVO EFECTO ---
-  // Efecto para filtrar las secciones cuando cambia el input o la lista original
+  }, []);
+  // Efecto para filtrar secciones
   useEffect(() => {
     const searchTerm = newSectionName.trim().toLowerCase();
     if (searchTerm === '') {
-      setFilteredSections(sections); // Mostrar todas si no hay filtro
+      setFilteredSections(sections);
     } else {
       const filtered = sections.filter(section =>
         section.name.toLowerCase().includes(searchTerm)
       );
-      setFilteredSections(filtered); // Mostrar filtradas
+      setFilteredSections(filtered);
     }
-  }, [newSectionName, sections]); // Depende del término de búsqueda y la lista original
-  // --- FIN NUEVO EFECTO ---
+  }, [newSectionName, sections]);
+
+  // Sincronizar datos con el contexto cuando cambian los estados locales
+  useEffect(() => {
+    updateSurveyField('title', title);
+    updateSurveyField('description', description);
+    updateSurveyField('startDate', startDate);
+    updateSurveyField('endDate', endDate);
+    updateSurveyField('sections', sections);
+  }, [title, description, startDate, endDate, sections]);
 
   const closeModal = () => setIsModalOpen(false);
 
-  // Sincronizar fecha de fin si la de inicio cambia (código original)
+  // Sincronizar fecha de fin si la de inicio cambia
   useEffect(() => {
     if (endDate < startDate) {
       setEndDate(startDate);
     }
-  }, [startDate, endDate]); // Añadir endDate a las dependencias si no estaba
+  }, [startDate, endDate]);
 
-  // Cerrar calendarios si se abre el dropdown de categoría (código original)
+  // Cerrar calendarios si se abre el dropdown de categoría
   useEffect(() => {
     if (showCategoryDropdown) {
       setShowStartCalendar(false);
@@ -184,7 +202,6 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     }
   }, [showCategoryDropdown]);
 
-  // Funciones originales (sin cambios)
   const showErrorMessage = () => {
     setModalTitle('Alerta');
     setModalMessage('Por favor, complete todos los campos requeridos antes de continuar.');
@@ -193,7 +210,6 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   };
 
   const handleSuccess = () => {
-    // Código original para éxito
     setTitle('');
     setDescription('');
     setModalTitle('Éxito');
@@ -202,26 +218,32 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     setIsModalOpen(true);
   };
 
-  const handleStartDateChange = (date) => setStartDate(date);
-  const handleEndDateChange = (date) => setEndDate(date);
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    updateSurveyField('startDate', date);
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    updateSurveyField('endDate', date);
+  };
 
   const handleSelectCategories = (selectedCategoryIds) => {
-     // Código original para manejar selección de categoría
     if (selectedCategoryIds && selectedCategoryIds.length > 0) {
       const categoryId = selectedCategoryIds[0];
       const category = categories.find(cat => cat[0] === categoryId);
       if (category) {
         setSelectedCategory([category]);
+        updateSurveyField('category', [category]);
       }
     }
   };
-
-  // Función para validar nombre de sección (código original)
+  // Función para validar nombre de sección
   const validateSectionName = (name) => {
     return name.trim().replace(/\s+/g, ' ').substring(0, MAX_SECTION_NAME_LENGTH);
   };
 
-  // Función para AÑADIR sección (actualiza 'sections')
+  // Función para AÑADIR sección
   const handleAddSection = () => {
     const trimmedName = newSectionName.trim();
     if (trimmedName === '') {
@@ -247,9 +269,10 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     setNewSectionName(''); // Limpia el input
     setInputError(''); // Limpia el error
 
-    // Guardar en localStorage
+    // Guardar en localStorage y actualizar el contexto
     addSection(newSection);
-    updateSections(updatedSections); // Guarda la lista completa actualizada
+    updateSections(updatedSections);
+    updateSurveyField('sections', updatedSections);
   };
 
   // Manejar cambio en el input (actualiza filtro y valida para añadir)
@@ -274,17 +297,17 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       handleAddSection();
     }
   };
-
-  // Función para ELIMINAR sección (actualiza 'sections')
+  // Función para ELIMINAR sección
   const handleRemoveSection = (id) => {
     const updatedSections = sections.filter(section => section.id !== id);
     setSections(updatedSections); // Actualiza la lista original (dispara el efecto de filtro)
 
-    // Actualizar localStorage
+    // Actualizar localStorage y el contexto
     removeSection(id);
     updateSections(updatedSections);
+    updateSurveyField('sections', updatedSections);
 
-    // Disparar evento (código original)
+    // Disparar evento para otros componentes
     const event = new CustomEvent('sectionRemoved', { detail: { id, updatedSections } });
     window.dispatchEvent(event);
   };
@@ -297,46 +320,93 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
 
     setSections(updatedSections); // Actualiza la lista original (dispara el efecto de filtro)
     updateSections(updatedSections); // Guarda el nuevo orden en localStorage
+    updateSurveyField('sections', updatedSections); // Actualiza en el contexto
   };
 
-  // Función para guardar (usa la lista 'sections' original)
+  // Función para guardar y continuar
   const handleSave = () => {
     if (!isFormValid) {
       showErrorMessage();
       return;
     }
-    if (onSaveAndContinue) {
-      onSaveAndContinue({
-        title: sanitizedTitle,
-        description: sanitizedDescription,
-        id_category: selectedCategory[0][0],
-        startDate,
-        endDate,
-        sections, // <- Enviar la lista original completa y ordenada
-        accessToken
+    
+    // Si no hay una encuesta actual, crear una nueva
+    if (!currentEncuesta) {
+      // Determinar la categoría (usar "Sin categoría" si no hay selección)
+      const categoriaId = selectedCategory && selectedCategory.length > 0 
+        ? selectedCategory[0][0] 
+        : 2; // ID 2 corresponde a "Sin categoría" en tu JSON
+      
+      // Convertir las secciones al formato correcto
+      const seccionesFormateadas = sections.map((section, index) => ({
+        id: section.id,
+        nombre: section.name,
+        orden: index + 1,
+        preguntas: []
+      }));
+      
+      // Crear la nueva encuesta
+      const nuevaEncuesta = createNewEncuesta(categoriaId, {
+        titulo: sanitizedTitle,
+        descripcion: sanitizedDescription,
+        fechaInicio: startDate.toISOString().split('T')[0],
+        fechaFinalizacion: endDate.toISOString().split('T')[0],
+        secciones: seccionesFormateadas
       });
+      
+      if (nuevaEncuesta) {
+        nextStep(); // Avanzar al siguiente paso
+      } else {
+        showErrorMessage();
+      }
+    } else {
+      // Si ya existe una encuesta, actualizarla
+      
+      // Convertir las secciones al formato correcto
+      const seccionesFormateadas = sections.map((section, index) => ({
+        id: section.id,
+        nombre: section.name,
+        orden: index + 1,
+        preguntas: []
+      }));
+      
+      // Actualizar la encuesta existente
+      const exito = updateCurrentEncuesta({
+        titulo: sanitizedTitle,
+        descripcion: sanitizedDescription,
+        rangoDeTiempo: {
+          fechaInicio: startDate.toISOString().split('T')[0],
+          fechaFinalizacion: endDate.toISOString().split('T')[0]
+        },
+        secciones: seccionesFormateadas
+      });
+      
+      if (exito) {
+        nextStep(); // Avanzar al siguiente paso
+      } else {
+        showErrorMessage();
+      }
     }
   };
 
-  // Función original para truncar texto
+  // Función para truncar texto
   const truncateText = (text, maxLength = 12) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
   };
-
-  // Función original para manejar clic en botón de categoría
+  // Función para manejar clic en botón de categoría
   const handleCategoryButtonClick = () => {
     setShowStartCalendar(false);
     setShowEndCalendar(false);
     setShowCategoryDropdown(!showCategoryDropdown); // Alterna visibilidad del dropdown
   };
 
-  // Sanitizar datos (código original)
+  // Sanitizar datos
   const sanitizedTitle = title ? DOMPurify.sanitize(title) : '';
   const sanitizedDescription = description ? DOMPurify.sanitize(description) : '';
 
-  // Manejar cambio en título (código original)
+  // Manejar cambio en título
   const handleTitleChange = (e) => {
     if (e.target.value.length <= 50) {
       setTitle(e.target.value);
@@ -346,9 +416,9 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // --- INICIO JSX ---
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-white shadow-2xl w-full">
-      {/* Encabezado con título y categoría (ESTRUCTURA ORIGINAL RESTAURADA) */}
+      {/* Encabezado con título y categoría */}
       <div className="flex justify-between items-center p-6">
-        {/* Input de Título (Original) */}
+        {/* Input de Título */}
         <div className="w-2/3 relative">
           <input
             type="text"
@@ -363,7 +433,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           </div>
         </div>
 
-        {/* Botón de Categoría y Dropdown (ESTRUCTURA ORIGINAL RESTAURADA) */}
+        {/* Botón de Categoría y Dropdown */}
         <div className="w-1/3 flex justify-end">
           {selectedCategory && selectedCategory.length > 0 ? (
             // Vista cuando hay categoría seleccionada
@@ -416,8 +486,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
               </span>
             </button>
           )}
-
-          {/* Dropdown de categorías (Original) */}
+          {/* Dropdown de categorías */}
           <CategoryDropdown
             isOpen={showCategoryDropdown}
             onOpenChange={setShowCategoryDropdown}
@@ -426,20 +495,19 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             anchorRef={selectCategoryButtonRef} // Ref del botón para posicionamiento
           />
         </div>
-        {/* --- FIN SECCIÓN CATEGORÍA RESTAURADA --- */}
       </div>
 
-      {/* Contenedor principal de dos columnas (Original) */}
+      {/* Contenedor principal de dos columnas */}
       <div className="flex flex-col lg:flex-row -mt-6">
-        {/* Columna izquierda (Fechas, Descripción - Original) */}
+        {/* Columna izquierda (Fechas, Descripción) */}
         <div className="flex-1 flex flex-col gap-3 p-6">
-          {/* Rango de tiempo (Original) */}
+          {/* Rango de tiempo */}
           <div className="mb-4">
             <div className="mb-1 border border-white p-0">
               <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
             </div>
             <div className="flex flex-col space-y-4 w-fit">
-              {/* Calendario Inicio (Original) */}
+              {/* Calendario Inicio */}
               <div className="border border-white relative">
                 <Calendar
                   initialDate={startDate}
@@ -455,7 +523,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   }}
                 />
               </div>
-              {/* Calendario Fin (Original) */}
+              {/* Calendario Fin */}
               <div className="border border-white relative">
                 <Calendar
                   initialDate={endDate}
@@ -475,7 +543,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             </div>
           </div>
 
-          {/* Sección de descripción (Original) */}
+          {/* Sección de descripción */}
           <div className="mb-4">
             <div className="mb-2 border border-white">
               <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Descripción de la Encuesta</h2>
@@ -483,19 +551,21 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             <div className="border border-white">
               <RichTextEditor
                 value={description}
-                onChange={(value) => setDescription(DOMPurify.sanitize(value))}
+                onChange={(value) => {
+                  const sanitized = DOMPurify.sanitize(value);
+                  setDescription(sanitized);
+                  updateSurveyField('description', sanitized);
+                }}
               />
             </div>
           </div>
         </div>
-
         {/* Columna derecha (Secciones - CON FILTRO INTEGRADO) */}
         <div className="flex-1 flex flex-col gap-4 p-6">
-          {/* Título y Descripción Secciones (Original) */}
+          {/* Título y Descripción Secciones */}
           <div className="-mb-2">
             <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Secciones</h2>
             <p className="font-work-sans text-sm mb-3 text-gray-600">
-              {/* Texto ligeramente ajustado para reflejar filtro */}
               Agrega las secciones en las que clasificarás las preguntas y define el orden en el que se presentarán al encuestado.
             </p>
           </div>
@@ -505,26 +575,24 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             <div className="relative">
               <input
                 type="text"
-                value={newSectionName} // Controlado por el estado
-                onChange={handleInputChange} // Actualiza filtro y valida para añadir
-                onKeyDown={handleKeyDown} // Añade con Enter si es válido
-                placeholder="Escriba para filtrar o añadir sección" // Placeholder actualizado
+                value={newSectionName}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Escriba para filtrar o añadir sección"
                 maxLength={MAX_SECTION_NAME_LENGTH}
-                // Borde rojo solo si hay error al *intentar añadir*
                 className={`w-full rounded-full border ${inputError ? 'border-red-500' : 'border-gray-300'} px-4 py-3 pr-12 outline-none focus:border-green-500 transition-colors`}
                 style={{ fontFamily: "'Work Sans', sans-serif" }}
               />
               {/* Botón '+' (Añadir) */}
               <button
                 onClick={handleAddSection}
-                // Habilitado solo si no está vacío Y no hay error de validación *para añadir*
                 className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${newSectionName.trim() !== '' && !inputError
                   ? 'bg-green-500 text-white hover:bg-green-600'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   } transition-colors`}
                 disabled={newSectionName.trim() === '' || !!inputError}
               >
-                 {/* Icono '+' */}
+                {/* Icono '+' */}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
               </button>
             </div>
@@ -534,47 +602,61 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             )}
           </div>
 
-          {/* Lista de secciones con drag and drop (RENDERIZA 'filteredSections') */}
+          {/* Lista de secciones con drag and drop */}
           <DndProvider backend={HTML5Backend}>
             <div className="max-h-96 overflow-y-auto scrollbar-image-match pr-4">
-              {/* --- RENDERIZADO MODIFICADO --- */}
               {filteredSections.length === 0 ? (
-                 <p className="text-sm text-gray-500 italic text-center py-4">
-                    {/* Mensaje dinámico si no hay resultados */}
-                    {newSectionName.trim() === '' ? 'No hay secciones creadas' : 'No hay secciones que coincidan'}
-                 </p>
+                <p className="text-sm text-gray-500 italic text-center py-4">
+                  {/* Mensaje dinámico si no hay resultados */}
+                  {newSectionName.trim() === '' ? 'No hay secciones creadas' : 'No hay secciones que coincidan'}
+                </p>
               ) : (
-                 // Mapear sobre la lista FILTRADA
-                 filteredSections.map((section) => {
-                   // IMPORTANTE: Encontrar el índice ORIGINAL en la lista 'sections'
-                   const originalIndex = sections.findIndex(s => s.id === section.id);
+                // Mapear sobre la lista FILTRADA
+                filteredSections.map((section) => {
+                  // IMPORTANTE: Encontrar el índice ORIGINAL en la lista 'sections'
+                  const originalIndex = sections.findIndex(s => s.id === section.id);
 
-                   // Comprobación de seguridad (no debería ocurrir)
-                   if (originalIndex === -1) {
-                       console.warn(`Section with id ${section.id} not found in original sections list.`);
-                       return null;
-                   };
+                  // Comprobación de seguridad (no debería ocurrir)
+                  if (originalIndex === -1) {
+                    console.warn(`Section with id ${section.id} not found in original sections list.`);
+                    return null;
+                  };
 
-                   return (
-                     <DraggableSectionItem
-                       key={section.id} // Usar ID estable como key
-                       id={section.id}
-                       index={originalIndex} // Pasar el ÍNDICE ORIGINAL al componente draggable
-                       name={section.name}
-                       moveItem={moveItem} // moveItem opera sobre la lista original 'sections'
-                       onRemove={handleRemoveSection} // onRemove opera sobre la lista original 'sections'
-                     />
-                   );
-                 })
+                  return (
+                    <DraggableSectionItem
+                      key={section.id}
+                      id={section.id}
+                      index={originalIndex}
+                      name={section.name}
+                      moveItem={moveItem}
+                      onRemove={handleRemoveSection}
+                    />
+                  );
+                })
               )}
-              {/* --- FIN RENDERIZADO MODIFICADO --- */}
             </div>
           </DndProvider>
         </div>
-        {/* --- FIN COLUMNA DERECHA --- */}
       </div>
 
-      {/* Modal para mensajes (Original) */}
+      {/* Botón de Guardar y Continuar */}
+      <div className="p-6 flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={!isFormValid}
+          className={`py-2 px-6 rounded-xl flex items-center transition-colors shadow-md ${isFormValid
+              ? 'bg-green-500 text-white hover:bg-green-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+        >
+          <span className="font-work-sans text-lg font-semibold">Guardar y Continuar</span>
+          <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </button>
+      </div>
+
+      {/* Modal para mensajes */}
       <Modal
         isOpen={isModalOpen}
         title={DOMPurify.sanitize(modalTitle)}
@@ -587,7 +669,6 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
         status={modalStatus}
       />
     </div>
-     // --- FIN JSX ---
   );
 };
 
