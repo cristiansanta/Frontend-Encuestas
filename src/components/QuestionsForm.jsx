@@ -13,7 +13,7 @@ import {
   TrueFalsePreview,
   DatePreview
 } from './QuestionPreviewComponents';
-import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
+import { getSections, getSelectedSection, saveSelectedSection } from '../services/SurveyFormStorage.js';
 import {
   getBankQuestions,
   addQuestionToBank,

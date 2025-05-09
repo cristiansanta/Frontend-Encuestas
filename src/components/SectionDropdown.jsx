@@ -5,7 +5,7 @@ import {
   updateSections,
   addSection,
   removeSection
-} from '../services/SectionsStorage';
+} from '../services/SurveyFormStorage.js';
 import ok from '../assets/img/Ok.svg';
 import trashcan from '../assets/img/trashCan.svg';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';

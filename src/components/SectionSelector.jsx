@@ -3,9 +3,8 @@ import {
   getSections,
   updateSections,
   addSection,
-  getSelectedSection, // Puede que no lo necesites aquí si el padre maneja el estado inicial
-  saveSelectedSection // Asegúrate que esta función pueda manejar 'null'
-} from '../services/SectionsStorage';
+
+} from '../services/SurveyFormStorage';
 
 // Importaciones de imágenes (Asegúrate que las rutas sean correctas)
 import cancel from '../assets/img/cancel.svg';

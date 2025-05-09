@@ -10,14 +10,14 @@ import {
   TrueFalsePreview,
   DatePreview
 } from './QuestionPreviewComponents';
-import { getSections, getSelectedSection, saveSelectedSection } from '../services/SectionsStorage';
+import { getSections, getSelectedSection } from '../services/SurveyFormStorage.js';
 import {
   getBankQuestions,
   addQuestionToBank,
   removeSimilarQuestionFromBank,
   isSimilarQuestionInBank
 } from '../services/BankQuestionsStorage';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify';0
 
 // Importaciones de imágenes
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';
