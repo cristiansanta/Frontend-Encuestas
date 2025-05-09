@@ -20,6 +20,14 @@ import {
   removeSimilarQuestionFromBank,
   isSimilarQuestionInBank
 } from '../services/BankQuestionsStorage';
+// Importar el nuevo servicio de almacenamiento de preguntas
+import { 
+  saveQuestions, 
+  getQuestions, 
+  addQuestion, 
+  updateQuestion, 
+  removeQuestion 
+} from '../services/QuestionsStorage';
 import DOMPurify from 'dompurify';
 
 // Importaciones de imágenes
@@ -129,6 +137,9 @@ const SavedQuestionForm = ({
     };
 
     onUpdate(form.id, updatedParentData);
+    // También guardar en localStorage mediante el servicio
+    updateQuestion(form.id, updatedParentData);
+    
     console.log("SavedQuestionForm: Notificando actualización de datos del padre:", updatedParentData);
   };
 
@@ -204,7 +215,6 @@ const SavedQuestionForm = ({
     setAddToBank(false);
     setIsBankDropdownOpen(false);
   };
-
   // Agregar pregunta hija
   const handleAddChildQuestionClick = () => {
     // Validaciones básicas
@@ -269,6 +279,8 @@ const SavedQuestionForm = ({
         isParentQuestion: true, // Asegurarse que el form principal también tiene el flag actualizado
       };
       onUpdate(form.id, updatedForm);
+      // También actualizar en localStorage
+      updateQuestion(form.id, updatedForm);
     }
   };
 
@@ -344,7 +356,6 @@ const SavedQuestionForm = ({
             </div>
           </div>
         </div>
-
         {/* Contenido expandido editable */}
         {!form.isCollapsed && (
           <>
@@ -491,7 +502,6 @@ const SavedQuestionForm = ({
                               </div>
                             )}
                           </div>
-
                           {/* Botones de acción */}
                           <div className="w-1/3 flex items-center justify-end gap-3">
                             {/* Botón para eliminar */}
@@ -518,6 +528,8 @@ const SavedQuestionForm = ({
                                   );
                                   // Update the parent with the new children array
                                   onUpdate(form.id, { ...form, childForms: updatedChildForms });
+                                  // También actualizar en localStorage
+                                  updateQuestion(form.id, { ...form, childForms: updatedChildForms });
                                 }}
                                 className="focus:outline-none transform transition-transform duration-300 hover:opacity-80"
                                 style={{ transform: childForm.isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -637,7 +649,6 @@ const SavedQuestionForm = ({
               ))}
             </div>
           )}
-
           {/* Botón: Agregar pregunta hija PREGUNTA PREVIAMENTE GUARDADA */}
           <div className="mt-3 flex justify-end">
             {(() => {
@@ -724,7 +735,6 @@ const SwitchOption = ({ value, onChange, label, disabled = false }) => (
     </span>
   </div>
 );
-
 // Componente Principal actualizado
 const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // --- Estados ---
@@ -790,6 +800,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       // Cargar preguntas del banco
       const storedBankQuestions = getBankQuestions();
       setBankQuestions(storedBankQuestions);
+      
+      // NUEVO: Cargar preguntas guardadas de localStorage
+      const storedQuestions = getQuestions();
+      if (storedQuestions.length > 0) {
+        setSavedForms(storedQuestions);
+      }
     };
 
     loadInitialData();
@@ -809,6 +825,11 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         const storedBankQuestions = getBankQuestions();
         setBankQuestions(storedBankQuestions);
       }
+      // NUEVO: Escuchar cambios en las preguntas guardadas
+      if (e.key === 'survey_questions') {
+        const storedQuestions = getQuestions();
+        setSavedForms(storedQuestions);
+      }
     };
     window.addEventListener('storage', handleStorageChange);
 
@@ -825,11 +846,18 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setBankQuestions(event.detail);
     };
     window.addEventListener('bankQuestionsUpdated', handleBankQuestionsUpdated);
+    
+    // NUEVO: Listener para cambios en preguntas
+    const handleQuestionsUpdated = (event) => {
+      setSavedForms(event.detail);
+    };
+    window.addEventListener('questionsUpdated', handleQuestionsUpdated);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('sectionRemoved', handleSectionRemoved);
       window.removeEventListener('bankQuestionsUpdated', handleBankQuestionsUpdated);
+      window.removeEventListener('questionsUpdated', handleQuestionsUpdated);
     };
   }, []);
 
@@ -840,8 +868,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setNewChildFormCompleted(true);
     }
   }, [isParentQuestion]);
-
-
   // Verificar cambios
   const hasNewFormChanges =
     selectedQuestionType !== null ||
@@ -858,28 +884,43 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
 
   // Toggle para expandir/contraer un formulario guardado
   const toggleSavedFormCollapse = (formId) => {
-    setSavedForms(prevForms =>
-      prevForms.map(form =>
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.map(form =>
         form.id === formId
           ? { ...form, isCollapsed: !form.isCollapsed }
           : form
-      )
-    );
+      );
+      // NUEVO: Guardar en localStorage
+      saveQuestions(updatedForms);
+      return updatedForms;
+    });
   };
 
   // Actualizar un formulario guardado
   const updateSavedForm = (formId, updatedFormData) => {
     console.log("QuestionsForm: Recibida actualización para form ID:", formId);
-    setSavedForms(prevForms =>
-      prevForms.map(form =>
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.map(form =>
         form.id === formId ? { ...form, ...updatedFormData } : form
-      )
-    );
+      );
+      // NUEVO: Guardar en localStorage
+      saveQuestions(updatedForms);
+      return updatedForms;
+    });
   };
 
   // Eliminar un formulario guardado
   const handleDeleteSavedForm = (formId) => {
-    setSavedForms(prevForms => prevForms.filter(form => form.id !== formId));
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.filter(form => form.id !== formId);
+      // NUEVO: Guardar en localStorage
+      saveQuestions(updatedForms);
+      return updatedForms;
+    });
+    
+    // NUEVO: También eliminar usando el servicio
+    removeQuestion(formId);
+    
     setErrorMessage('Pregunta eliminada.');
     setModalStatus('success');
     setIsModalOpen(true);
@@ -888,8 +929,8 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // NUEVAS FUNCIONES para manejar preguntas hijas en formularios guardados
   const handleAddNewChildToSavedForm = (parentId) => {
     console.log("QuestionsForm: Añadiendo estructura de hijo para padre ID:", parentId);
-    setSavedForms(prevForms =>
-      prevForms.map(form => {
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.map(form => {
         if (form.id === parentId) {
           const childFormId = `child_${Date.now()}`;
           let effectiveParentId = form.serverId && !isNaN(Number(form.serverId)) ? Number(form.serverId) : form.id;
@@ -910,21 +951,31 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             data: null
           };
           console.log("QuestionsForm: Nueva estructura de hijo creada:", newChildForm);
-          return {
+          const updatedForm = {
             ...form,
             childForms: [...(form.childForms || []), newChildForm],
             isParentQuestion: true,
           };
+          
+          // NUEVO: También actualizar en localStorage 
+          updateQuestion(form.id, updatedForm);
+          
+          return updatedForm;
         }
         return form;
-      })
-    );
+      });
+      
+      // NUEVO: Guardar toda la lista actualizada
+      saveQuestions(updatedForms);
+      
+      return updatedForms;
+    });
   };
 
   const handleUpdateChildInSavedForm = (parentId, childId, childData) => {
     console.log("QuestionsForm: Actualizando hijo ID:", childId, "en padre ID:", parentId);
-    setSavedForms(prevForms =>
-      prevForms.map(form => {
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.map(form => {
         if (form.id === parentId) {
           const updatedChildForms = (form.childForms || []).map(child => {
             if (child.id === childId) {
@@ -938,28 +989,53 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             }
             return child;
           });
-          return {
+          
+          const updatedForm = {
             ...form,
             childForms: updatedChildForms,
           };
+          
+          // NUEVO: También actualizar en localStorage
+          updateQuestion(form.id, updatedForm);
+          
+          return updatedForm;
         }
         return form;
-      })
-    );
+      });
+      
+      // NUEVO: Guardar toda la lista actualizada
+      saveQuestions(updatedForms);
+      
+      return updatedForms;
+    });
   };
-
   const handleRemoveChildFromSavedForm = (parentId, childId) => {
     console.log("QuestionsForm: Eliminando hijo ID:", childId, "de padre ID:", parentId);
-    setSavedForms(prevForms =>
-      prevForms.map(form => {
+    setSavedForms(prevForms => {
+      const updatedForms = prevForms.map(form => {
         if (form.id === parentId) {
           const updatedChildForms = (form.childForms || []).filter(child => child.id !== childId);
           console.log("QuestionsForm: Hijos restantes:", updatedChildForms);
-          return { ...form, childForms: updatedChildForms };
+          
+          const updatedForm = { 
+            ...form, 
+            childForms: updatedChildForms 
+          };
+          
+          // NUEVO: También actualizar en localStorage
+          updateQuestion(form.id, updatedForm);
+          
+          return updatedForm;
         }
         return form;
-      })
-    );
+      });
+      
+      // NUEVO: Guardar toda la lista actualizada
+      saveQuestions(updatedForms);
+      
+      return updatedForms;
+    });
+    
     setErrorMessage('Pregunta hija eliminada.');
     setModalStatus('info');
     setIsModalOpen(true);
@@ -1062,7 +1138,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setAddToBank(false); // Por defecto, NO activamos el switch de añadir al banco
     setIsBankDropdownOpen(false);
   };
-
   // --- Handlers para el NUEVO formulario ---
 
   // Seleccionar tipo de pregunta
@@ -1175,7 +1250,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     const remainingForms = newChildForms.filter(form => form.id !== childId);
     setNewChildFormCompleted(remainingForms.every(f => f.completed)); // Habilitar si no quedan pendientes
   };
-
   // Enviar formulario - Manejar guardado del NUEVO formulario
   const handleSubmitNewQuestion = async () => {
     // Validación de datos
@@ -1252,7 +1326,17 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         addQuestionToBank(bankData);
       }
 
-      setSavedForms(prevForms => [...prevForms, savedFormEntry]);
+      // MODIFICADO: Actualizar el estado y guardar en localStorage
+      setSavedForms(prevForms => {
+        const updatedForms = [...prevForms, savedFormEntry];
+        // Guardar en localStorage
+        saveQuestions(updatedForms);
+        return updatedForms;
+      });
+      
+      // NUEVO: También añadir usando el servicio
+      addQuestion(savedFormEntry);
+      
       resetNewForm(true); // Resetear form nuevo
       setErrorMessage('Pregunta agregada correctamente.');
       setModalStatus('success');
@@ -1299,7 +1383,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const hasValidChildToSave = newChildForms.some(child =>
     !child.completed && childFormValidities[child.id]
   );
-
   // --- Renderizado JSX ---
   return (
     <>
@@ -1358,7 +1441,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                     />
                   </span>
                   <span className="bg-yellow-custom px-4 py-1">
-                    <span className="font-work-sans text-sm font-semibold text-blue-custom whitespace-nowrap">
+                  <span className="font-work-sans text-sm font-semibold text-blue-custom whitespace-nowrap">
                       {hasNewFormChanges
                         ? "Volver a empezar"
                         : "Importar desde el Banco"
@@ -1518,7 +1601,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                 </div>
                               )}
                             </div>
-
                             {/* Botones de acción */}
                             <div className="w-1/3 flex items-center justify-end gap-3">
                               {/* Botón para eliminar */}
@@ -1651,7 +1733,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             {/* Botón Agregar pregunta hija PREGUNTAS HIJAS GUARDADAS PRIMERO COMO TEMPORALES */}
             <div className="mt-3 flex justify-end">
               {(() => {
-
                 // Variable para verificar si hay hijos válidos para guardar
                 const hasValidChildToSave = newChildForms.some(child =>
                   !child.completed && childFormValidities[child.id]
