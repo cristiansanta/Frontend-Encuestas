@@ -394,10 +394,6 @@ visibility: visible;
 width: 24px;
 height: 24px;
 }
-/* Agregamos un espacio en la parte inferior para el navbar móvil */
-body {
-padding-bottom: 60px;
-}
 }
 
 /* Elemento invisible para ampliar el área de detección del hover */
