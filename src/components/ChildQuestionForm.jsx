@@ -17,7 +17,7 @@ import {
   removeSimilarQuestionFromBank,
   isSimilarQuestionInBank
 } from '../services/BankQuestionsStorage';
-import DOMPurify from 'dompurify';0
+import DOMPurify from 'dompurify';
 
 // Importaciones de imágenes
 import collapseExpandButton from '../assets/img/collapseExpandButton.svg';

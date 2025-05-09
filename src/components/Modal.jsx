@@ -16,7 +16,7 @@ const Modal = ({
   const modalStyle = status === 'error' ? 'bg--600' : 'bg-green-600'; // Ajuste según el estado
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center border bor bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg p-8 shadow-lg max-w-sm w-full mx-auto text-center">
         <h2 className="text-center text-2xl font-bold text-[#00324D] mb-4">{title}</h2>
         <p className="text-center text-xl mb-4">{message}</p>
