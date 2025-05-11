@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import SurveyLayout from '../components/SurveyLayout';
 import DetailForm from '../components/DetailForm';
 import { SurveyContext } from '../Provider/SurveyContext';
+import { getSurveyInfo, updateSurveyInfoField } from '../services/SurveyInfoStorage';
 import { useNavigate } from 'react-router-dom';
 import DataSender from '../components/DataSender';
 
@@ -10,20 +11,14 @@ const SurveyCreate = () => {
   const navigate = useNavigate();
   const [formIsValid, setFormIsValid] = useState(false);
   const [formData, setFormData] = useState(null);
-  
-  // Guardar en localStorage si hay una categoría seleccionada
-  if (selectedCategory) {
-    localStorage.setItem('selectedCategory', JSON.stringify(selectedCategory));
-  }
-  
-  // Recuperar datos de categoría del localStorage
-  const categorydata = localStorage.getItem('selectedCategory');
-  const parsedCategoryData = JSON.parse(categorydata);
-  
+
+  // Obtener datos desde el servicio
+  const surveyInfo = getSurveyInfo();
+  const categoryData = selectedCategory || surveyInfo.selectedCategory;
+
   // Crear el título del header basado en la categoría seleccionada
-  const headerTitle = `Configuración de la encuesta: Categoría seleccionada: ${
-    parsedCategoryData ? `${parsedCategoryData[0][0]} ${parsedCategoryData[0][1]}` : ''
-  }`;
+  const headerTitle = `Configuración de la encuesta: Categoría seleccionada: ${categoryData ? `${categoryData[0][1]}` : ''
+    }`;
 
   // Manejar el cambio de validez del formulario
   const handleFormValidChange = (isValid) => {
@@ -44,7 +39,7 @@ const SurveyCreate = () => {
       // Si tenemos los datos, podemos enviarlos
       // Aquí se implementaría la lógica de DataSender
       const { title, description, id_category, accessToken } = formData;
-      
+
       // Ejemplo de uso de DataSender (ajustar según tu implementación)
       // Este componente se renderizaría condicionalmente
       return (
@@ -65,14 +60,14 @@ const SurveyCreate = () => {
   };
 
   return (
-    <SurveyLayout 
+    <SurveyLayout
       currentView="SurveyCreate"
       headerTitle={headerTitle}
       navButtonType="save"
       onNavButtonClick={handleNavButtonClick}
       navButtonDisabled={!formIsValid}
     >
-      <DetailForm 
+      <DetailForm
         onFormValidChange={handleFormValidChange}
         onSaveAndContinue={handleSaveAndContinue}
       />

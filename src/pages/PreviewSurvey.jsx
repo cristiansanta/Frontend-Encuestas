@@ -13,6 +13,8 @@ import SelectBlue from '../assets/img/selectblue.svg';
 // Importar servicios para obtener datos guardados
 import { getSections } from '../services/SectionsStorage';
 import { getQuestions } from '../services/QuestionsStorage';
+import { getSurveyInfo } from '../services/SurveyInfoStorage';
+
 
 // Íconos para tipos de pregunta
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -29,7 +31,7 @@ const PreviewSurvey = () => {
   const [expandedQuestions, setExpandedQuestions] = useState({});
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  
+
   // Estados para gestionar secciones y preguntas cargadas
   const [sections, setSections] = useState([]);
   const [sectionQuestions, setSectionQuestions] = useState({});
@@ -48,7 +50,7 @@ const PreviewSurvey = () => {
       5: 'Falso / Verdadero',
       6: 'Fecha'
     };
-    
+
     return questionTypes[typeId] || 'Desconocido';
   };
 
@@ -78,17 +80,17 @@ const PreviewSurvey = () => {
     // Cargar secciones
     const storedSections = getSections();
     setSections(storedSections);
-    
+
     // Inicializar estado expandido para las secciones
     const initialExpandedSections = {};
     storedSections.forEach(section => {
       initialExpandedSections[section.id] = false; // Todas cerradas por defecto
     });
     setExpandedSections(initialExpandedSections);
-    
+
     // Cargar preguntas
     const storedQuestions = getQuestions();
-    
+
     // Agrupar preguntas por sección
     const questionsBySection = storedQuestions.reduce((acc, question) => {
       const sectionId = question.section?.id;
@@ -96,10 +98,10 @@ const PreviewSurvey = () => {
         if (!acc[sectionId]) {
           acc[sectionId] = [];
         }
-        
+
         // Añadir pregunta principal
         acc[sectionId].push(question);
-        
+
         // Si tiene preguntas hijas, añadirlas también
         if (question.childForms && question.childForms.length > 0) {
           question.childForms.forEach(childForm => {
@@ -117,32 +119,41 @@ const PreviewSurvey = () => {
       }
       return acc;
     }, {});
-    
+
     setSectionQuestions(questionsBySection);
-    
+
     // Detectar si hay secciones con preguntas y expandirlas automáticamente
     const sectionsWithQuestions = {};
     storedSections.forEach(section => {
-      sectionsWithQuestions[section.id] = 
-        questionsBySection[section.id] && 
+      sectionsWithQuestions[section.id] =
+        questionsBySection[section.id] &&
         questionsBySection[section.id].length > 0;
     });
     setExpandedSections(sectionsWithQuestions);
-    
+
     // Cargar información general de la encuesta desde localStorage
-    const surveyInfo = localStorage.getItem('survey_info');
+    const surveyInfo = getSurveyInfo();
     if (surveyInfo) {
-      try {
-        const parsedInfo = JSON.parse(surveyInfo);
-        setSurveyTitle(parsedInfo.title || 'Encuesta sobre tu Perfil Personal y Profesional');
-        setSurveyDescription(parsedInfo.description || '');
-        setStartDate(parsedInfo.startDate || '');
-        setEndDate(parsedInfo.endDate || '');
-      } catch (error) {
-        console.error('Error al procesar información de la encuesta:', error);
+      setSurveyTitle(surveyInfo.title || 'Encuesta sobre tu Perfil Personal y Profesional');
+      setSurveyDescription(surveyInfo.description || '');
+
+      // Asegurar que las fechas sean objetos Date
+      if (surveyInfo.startDate) {
+        if (typeof surveyInfo.startDate === 'string') {
+          setStartDate(new Date(surveyInfo.startDate));
+        } else {
+          setStartDate(surveyInfo.startDate);
+        }
+      }
+
+      if (surveyInfo.endDate) {
+        if (typeof surveyInfo.endDate === 'string') {
+          setEndDate(new Date(surveyInfo.endDate));
+        } else {
+          setEndDate(surveyInfo.endDate);
+        }
       }
     }
-    
   }, []);
 
   const scrollToTop = () => {
@@ -152,8 +163,9 @@ const PreviewSurvey = () => {
     });
   };
 
-  const categoryData = JSON.parse(localStorage.getItem('selectedCategory'));
-  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[0][1]}` : 'Perfil Personal y Profesional'}`;
+  const surveyInfo = getSurveyInfo();
+  const categoryData = surveyInfo.selectedCategory;
+  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[1]}` : 'Perfil Personal y Profesional'}`;
 
   const handlePublish = () => {
     setIsSaving(true);
@@ -318,11 +330,11 @@ const PreviewSurvey = () => {
                 <p className="text-gray-500 italic mb-3">
                   El encuestado verá {options ? 'las siguientes opciones en pantalla' :
                     type === 'Fecha' ? 'el siguiente campo y al dar click podrá seleccionar la fecha en un calendario' :
-                    'un campo como el que se enseña a continuación donde podrá ingresar texto'}.
+                      'un campo como el que se enseña a continuación donde podrá ingresar texto'}.
                 </p>
                 {type === 'Opción Única' && (
                   <div className="space-y-2">
-                    {options ? 
+                    {options ?
                       options.map((option, index) => (
                         <div key={index} className="flex items-center space-x-2">
                           <input
@@ -333,7 +345,7 @@ const PreviewSurvey = () => {
                           />
                           <label htmlFor={`radio-${id}-${index}`}>{option}</label>
                         </div>
-                      )) : 
+                      )) :
                       // Opciones de ejemplo si no hay opciones definidas
                       ['Opción 1', 'Opción 2', 'Opción 3'].map((option, index) => (
                         <div key={index} className="flex items-center space-x-2">
@@ -352,7 +364,7 @@ const PreviewSurvey = () => {
 
                 {type === 'Opción Multiple' && (
                   <div className="space-y-2">
-                    {options ? 
+                    {options ?
                       options.map((option, index) => (
                         <div key={index} className="flex items-center space-x-2">
                           <input
@@ -362,7 +374,7 @@ const PreviewSurvey = () => {
                           />
                           <label htmlFor={`checkbox-${id}-${index}`}>{option}</label>
                         </div>
-                      )) : 
+                      )) :
                       // Opciones de ejemplo si no hay opciones definidas
                       ['Opción 1', 'Opción 2', 'Opción 3'].map((option, index) => (
                         <div key={index} className="flex items-center space-x-2">
@@ -440,31 +452,31 @@ const PreviewSurvey = () => {
   };
 
   // Formatear fecha para mostrar
-  const formatDate = (dateString) => {
-    if (!dateString) return "DD/MM/YY";
-    
+  const formatDate = (dateInput) => {
+    if (!dateInput) return "DD/MM/YY";
+
     try {
-      // Si es un string de fecha ISO
-      if (typeof dateString === 'string') {
-        const date = new Date(dateString);
-        // Formatear como DD/MM/YY
-        return date.toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: '2-digit'
-        });
+      let date;
+      // Convertir a objeto Date si es string
+      if (typeof dateInput === 'string') {
+        date = new Date(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = dateInput;
+      } else {
+        return "DD/MM/YY"; // Valor por defecto si no es válido
       }
-      
-      // Si es un objeto Date
-      if (dateString instanceof Date) {
-        return dateString.toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: '2-digit'
-        });
+
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return "DD/MM/YY";
       }
-      
-      return "DD/MM/YY";
+
+      // Formatear como DD/MM/YY
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(-2);
+
+      return `${day}/${month}/${year}`;
     } catch (error) {
       console.error("Error formateando fecha:", error);
       return "DD/MM/YY";
@@ -528,7 +540,7 @@ const PreviewSurvey = () => {
           </h1>
           <button
             className="flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
-            onClick={handlePreviewSurvey} // Llama a la función para redirigir
+            onClick={handlePreviewSurvey}
           >
             <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
               <img src={ViewIcon} alt="Previsualizar encuesta" className="w-5 h-5" />
@@ -539,6 +551,22 @@ const PreviewSurvey = () => {
               </span>
             </span>
           </button>
+        </div>
+
+        <div className="mb-4">
+          <div className="flex items-center">
+            <motion.div
+              className="flex items-center border border-gray-300 rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
+            >
+              <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg font-semibold">
+                Categoría
+              </span>
+              <span className="bg-gray-100 px-4 py-2 rounded-r-lg">
+                {categoryData ? categoryData[0][1] : 'Sin categoría'}
+              </span>
+            </motion.div>
+          </div>
         </div>
 
         <div className="mb-6">
@@ -613,10 +641,10 @@ const PreviewSurvey = () => {
             </p>
           ) : (
             sections.map(section => {
-              const sectionHasQuestions = 
-                sectionQuestions[section.id] && 
+              const sectionHasQuestions =
+                sectionQuestions[section.id] &&
                 sectionQuestions[section.id].length > 0;
-                
+
               return (
                 <CollapsibleSection
                   key={section.id}
@@ -654,7 +682,7 @@ const PreviewSurvey = () => {
               Para <span className="font-bold">Publicar</span> y <span className="font-bold">Guardar</span> sin publicar regresa al inicio de esta página:
               <a
                 href="#"
-                onClick={(e) => {e.preventDefault(); scrollToTop();}}
+                onClick={(e) => { e.preventDefault(); scrollToTop(); }}
                 className="text-green-600 underline ml-1"
               >
                 click aquí
