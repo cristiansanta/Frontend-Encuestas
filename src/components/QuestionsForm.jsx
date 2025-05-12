@@ -705,8 +705,7 @@ const SavedQuestionForm = ({
               // incluso cuando está contraída
               const parentFormIsValid =
                 form.title?.trim() !== '' &&
-                form.questionType !== null &&
-                form.section !== null;
+                form.questionType !== null;
 
               // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
               const canEnableButton = (
@@ -939,8 +938,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // Determinar si se pueden activar switches
   const canActivateNewFormSwitches =
     title.trim() !== '' &&
-    selectedQuestionType !== null &&
-    selectedSection !== null;
+    selectedQuestionType !== null;
 
   const canActivateParentQuestionSwitch =
     canActivateNewFormSwitches && canBecomeParentQuestion(selectedQuestionType);
@@ -1315,24 +1313,44 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   };
   // Enviar formulario - Manejar guardado del NUEVO formulario
   const handleSubmitNewQuestion = async () => {
-    // Validación de datos
-    if (!title.trim() || !selectedQuestionType || !selectedSection) {
-      setErrorMessage('Título, Tipo de Pregunta y Sección son requeridos.');
+    // Validación de datos - ahora solo título y tipo son requeridos
+    if (!title.trim()) {
+      setErrorMessage('El título de la pregunta es requerido.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+
+    if (!selectedQuestionType) {
+      setErrorMessage('Debe seleccionar un tipo de pregunta.');
       setModalStatus('error');
       setIsModalOpen(true);
       return;
     }
 
     const sanitizedTitle = DOMPurify.sanitize(title.trim());
-    const cleanDescription = DOMPurify.sanitize(description);
+
+    // FIX: Ensure description is never null - use empty string as fallback
+    const cleanDescription = DOMPurify.sanitize(description || '');
+    // If the description is completely empty, provide a default value
+    const finalDescription = isDescriptionNotEmpty(cleanDescription)
+      ? cleanDescription
+      : '<p>Sin descripción</p>';
+
+    // Usar una sección por defecto si no hay seleccionada
+    const effectiveSection = selectedSection || {
+      id: 'default_section',
+      name: 'Sin sección'
+    };
+
     const parentFormData = {
       title: sanitizedTitle,
-      descrip: cleanDescription,
+      descrip: finalDescription, // Use the non-null description
       validate: mandatory ? 'Requerido' : 'Opcional',
       cod_padre: 0,
       bank: addToBank,
       type_questions_id: selectedQuestionType,
-      section_id: selectedSection.id,
+      section_id: effectiveSection.id,
       questions_conditions: isParentQuestion,
       creator_id: 1, // O obtener del usuario logueado
     };
@@ -1355,13 +1373,19 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       console.log("QuestionsForm: Pregunta padre guardada en servidor con ID:", serverId);
       localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
 
+      // Crear una sección por defecto si no se seleccionó ninguna
+      const effectiveSection = selectedSection || {
+        id: 'default_section',
+        name: 'Sin sección'
+      };
+
       const savedFormEntry = {
         id: formKey,
         serverId: Number(serverId),
         title: sanitizedTitle,
         description: cleanDescription,
         questionType: selectedQuestionType,
-        section: selectedSection,
+        section: effectiveSection,
         mandatory: mandatory,
         isParentQuestion: isParentQuestion,
         addToBank: addToBank,
@@ -1805,8 +1829,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 // incluso cuando está contraída
                 const parentFormIsValid =
                   title.trim() !== '' &&
-                  selectedQuestionType !== null &&
-                  selectedSection !== null;
+                  selectedQuestionType !== null;
 
                 // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
                 const canEnableButton = (

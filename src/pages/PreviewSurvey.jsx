@@ -88,48 +88,83 @@ const PreviewSurvey = () => {
     });
     setExpandedSections(initialExpandedSections);
 
+    // FIX: Verificar si ya existe la sección "Sin sección"
+    let hasDefaultSection = storedSections.some(s => s.id === 'default_section');
+
     // Cargar preguntas
     const storedQuestions = getQuestions();
 
-    // Agrupar preguntas por sección
+    // Agrupar preguntas por sección, agregando "Sin sección" para las que no tengan
     const questionsBySection = storedQuestions.reduce((acc, question) => {
-      const sectionId = question.section?.id;
-      if (sectionId) {
-        if (!acc[sectionId]) {
-          acc[sectionId] = [];
-        }
+      // Determinar el ID de sección efectivo
+      let sectionId;
+      let sectionName;
 
-        // Añadir pregunta principal
-        acc[sectionId].push(question);
-
-        // Si tiene preguntas hijas, añadirlas también
-        if (question.childForms && question.childForms.length > 0) {
-          question.childForms.forEach(childForm => {
-            if (childForm.completed && childForm.data) {
-              // Marcar como pregunta hija
-              acc[sectionId].push({
-                ...childForm.data,
-                isChildQuestion: true,
-                parentId: question.id,
-                id: childForm.id // Asegurar que la pregunta hija tenga un ID
-              });
-            }
-          });
-        }
+      if (question.section && question.section.id) {
+        // La pregunta tiene una sección
+        sectionId = question.section.id;
+        sectionName = question.section.name;
+      } else {
+        // La pregunta no tiene sección - usar "Sin sección"
+        sectionId = 'default_section';
+        sectionName = 'Sin sección';
+        hasDefaultSection = true; // Indicar que necesitamos la sección por defecto
       }
+
+      // Asegurar que existe el array para esta sección
+      if (!acc[sectionId]) {
+        acc[sectionId] = [];
+      }
+
+      // Añadir pregunta principal
+      acc[sectionId].push({
+        ...question,
+        section: { id: sectionId, name: sectionName } // Asegurar que la sección esté completa
+      });
+
+      // Si tiene preguntas hijas, añadirlas también
+      if (question.childForms && question.childForms.length > 0) {
+        question.childForms.forEach(childForm => {
+          if (childForm.completed && childForm.data) {
+            // Marcar como pregunta hija
+            acc[sectionId].push({
+              ...childForm.data,
+              section: { id: sectionId, name: sectionName }, // Usar misma sección del padre
+              isChildQuestion: true,
+              parentId: question.id,
+              id: childForm.id
+            });
+          }
+        });
+      }
+
       return acc;
     }, {});
 
     setSectionQuestions(questionsBySection);
 
-    // Detectar si hay secciones con preguntas y expandirlas automáticamente
-    const sectionsWithQuestions = {};
-    storedSections.forEach(section => {
-      sectionsWithQuestions[section.id] =
-        questionsBySection[section.id] &&
-        questionsBySection[section.id].length > 0;
+    // FIX: Asegurarse de que TODAS las secciones aparezcan en la vista previa, no solo las que tienen preguntas
+    // Comenzar asegurando que todas las secciones de storedSections están incluidas
+    let updatedSections = [...storedSections];
+
+    // Añadir "Sin sección" si es necesario
+    if (!hasDefaultSection && questionsBySection['default_section'] &&
+      questionsBySection['default_section'].length > 0) {
+      updatedSections = [...updatedSections, { id: 'default_section', name: 'Sin sección' }];
+    }
+
+    // Asegurarse de que todas las secciones estén en nuestro estado
+    setSections(updatedSections);
+
+    // Inicializar el estado expandedSections con todas las secciones
+    const expandedSectionsState = {};
+    updatedSections.forEach(section => {
+      // Una sección se expande si tiene preguntas
+      expandedSectionsState[section.id] =
+        questionsBySection[section.id] && questionsBySection[section.id].length > 0;
     });
-    setExpandedSections(sectionsWithQuestions);
+
+    setExpandedSections(expandedSectionsState);
 
     // Cargar información general de la encuesta desde localStorage
     const surveyInfo = getSurveyInfo();

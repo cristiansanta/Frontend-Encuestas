@@ -254,10 +254,11 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     // Sanitización
     const sanitizedTitle = DOMPurify.sanitize(title.trim());
     const cleanDescription = DOMPurify.sanitize(description || '');
-    if (!cleanDescription) {
-      setErrorMessage('La descripción no puede estar vacía.');
-      setModalStatus('error'); setIsModalOpen(true); return;
-    }
+
+    // FIX: Verificar que la descripción no esté vacía y proporcionar un valor por defecto si lo está
+    const finalDescription = isDescriptionNotEmpty(cleanDescription)
+      ? cleanDescription
+      : '<p>Sin descripción</p>';
 
     // Si está marcado para añadir al banco, guardar en el banco
     if (addToBank) {
@@ -310,7 +311,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
     const formData = {
       title: sanitizedTitle,
-      descrip: cleanDescription,
+      descrip: finalDescription, // Usar la descripción procesada que nunca será nula
       validate: mandatory ? 'Requerido' : 'Opcional',
       cod_padre: parentId, // Usar el ID convertido a número explícitamente
       bank: addToBank,
@@ -351,7 +352,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
         onSave({
           id: responseData.id,
           title: sanitizedTitle,
-          description: cleanDescription,
+          description: finalDescription, // Asegurar que también usamos la misma descripción final
           questionType: selectedQuestionType,
           section: selectedSection,
           mandatory: mandatory
