@@ -778,7 +778,12 @@ const SwitchOption = ({ value, onChange, label, disabled = false }) => (
   </div>
 );
 // Componente Principal actualizado
-const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
+const QuestionsForm = forwardRef(({
+  onAddChildQuestion,
+  onQuestionsValidChange, // Nueva prop para validación
+  onConfiguringChange,     // Nueva prop para estado de configuración
+  ...props
+}, ref) => {
   // --- Estados ---
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -808,6 +813,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const [savedForms, setSavedForms] = useState([]);
   const [formKey, setFormKey] = useState(`form_${Date.now()}`);
 
+  // Estado para rastrear si hay una pregunta en configuración
+  const [isConfiguring, setIsConfiguring] = useState(false);
+
   // Referencias
   const bankButtonRef = useRef(null);
   const childFormRefs = useRef({});
@@ -818,6 +826,39 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
   }
   // --- Efectos ---
+  useEffect(() => {
+    const storedQuestions = getQuestions();
+    if (storedQuestions.length > 0) {
+      setSavedForms(storedQuestions);
+    }
+
+    // Notificar al padre sobre la validez inicial (si hay preguntas guardadas)
+    if (onQuestionsValidChange) {
+      onQuestionsValidChange(storedQuestions.length > 0);
+    }
+  }, [onQuestionsValidChange]);
+
+  // Efecto para determinar si se está configurando una pregunta
+  useEffect(() => {
+    // Se está configurando si:
+    // 1. Hay cambios en el formulario nuevo, o
+    // 2. Se está editando alguna pregunta guardada
+    const isCurrentlyConfiguring = hasNewFormChanges;
+
+    setIsConfiguring(isCurrentlyConfiguring);
+
+    // Notificar al componente padre
+    if (onConfiguringChange) {
+      onConfiguringChange(isCurrentlyConfiguring);
+    }
+  }, [hasNewFormChanges, onConfiguringChange]);
+
+  // Efecto para notificar sobre la validez del formulario cuando cambian las preguntas guardadas
+  useEffect(() => {
+    if (onQuestionsValidChange) {
+      onQuestionsValidChange(savedForms.length > 0);
+    }
+  }, [savedForms, onQuestionsValidChange]);
 
   useEffect(() => {
     // Si el tipo de pregunta cambia a uno que no puede ser madre, desactivar isParentQuestion
