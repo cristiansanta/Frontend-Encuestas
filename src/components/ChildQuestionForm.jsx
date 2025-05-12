@@ -83,8 +83,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   const canActivateSwitches =
     title.trim() !== '' &&
     selectedQuestionType !== null &&
-    selectedSection !== null &&
-    isDescriptionNotEmpty(description);
+    selectedSection !== null;
 
   // --- Efectos ---
 
@@ -231,9 +230,11 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     if (isSaved) return;
 
     // Validación de datos
-    if (!title.trim() || !isDescriptionNotEmpty(description)) {
-      setErrorMessage('El título y la descripción son requeridos.');
-      setModalStatus('error'); setIsModalOpen(true); return;
+    if (!title.trim()) {
+      setErrorMessage('El título es requerido.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
     }
     if (!selectedQuestionType) {
       setErrorMessage('Debe seleccionar un tipo de respuesta.');
@@ -252,7 +253,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
     // Sanitización
     const sanitizedTitle = DOMPurify.sanitize(title.trim());
-    const cleanDescription = isDescriptionNotEmpty(description) ? DOMPurify.sanitize(description) : '';
+    const cleanDescription = DOMPurify.sanitize(description || '');
     if (!cleanDescription) {
       setErrorMessage('La descripción no puede estar vacía.');
       setModalStatus('error'); setIsModalOpen(true); return;

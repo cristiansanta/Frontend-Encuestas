@@ -11,7 +11,7 @@ import Modal from './Modal';
 import Calendar from './Calendar';
 import CategoryDropdown from './CategoryDropdown';
 import { getSections, updateSections, removeSection, addSection } from '../services/SectionsStorage';
-import { updateSurveyInfoField, getSurveyInfo } from '../services/SurveyInfoStorage';
+import { getSurveyInfo, updateSurveyInfoField, saveSurveyInfo } from '../services/SurveyInfoStorage';
 import DOMPurify from 'dompurify';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -150,6 +150,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     if (storedSections.length === 0 && sections.length > 0) {
       updateSections(sections);
     }
+
     const surveyInfo = getSurveyInfo();
     if (surveyInfo.title) {
       setTitle(surveyInfo.title);
@@ -157,11 +158,33 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     if (surveyInfo.description) {
       setDescription(surveyInfo.description);
     }
+
+    const todayDate = new Date(); // La fecha actual
+
+    // Manejar fecha de inicio
     if (surveyInfo.startDate) {
-      setStartDate(surveyInfo.startDate);
+      // Convertir a Date si es un string
+      const startDateObj = typeof surveyInfo.startDate === 'string'
+        ? new Date(surveyInfo.startDate)
+        : surveyInfo.startDate;
+      setStartDate(startDateObj);
+    } else {
+      // No hay fecha guardada, usar y guardar la actual
+      setStartDate(todayDate);
+      updateSurveyInfoField('startDate', todayDate);
     }
+
+    // Manejar fecha de finalización
     if (surveyInfo.endDate) {
-      setEndDate(surveyInfo.endDate);
+      // Convertir a Date si es un string
+      const endDateObj = typeof surveyInfo.endDate === 'string'
+        ? new Date(surveyInfo.endDate)
+        : surveyInfo.endDate;
+      setEndDate(endDateObj);
+    } else {
+      // No hay fecha guardada, usar y guardar la actual
+      setEndDate(todayDate);
+      updateSurveyInfoField('endDate', todayDate);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
 
