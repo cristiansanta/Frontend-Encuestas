@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SurveyLayout from '../components/SurveyLayout';
 import Button from '../components/Button';
 import ViewIcon from '../assets/img/viewicon.svg';
@@ -9,6 +9,12 @@ import Calendar from '../assets/img/calendar2.svg';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from '../assets/img/select.svg';
 import SelectBlue from '../assets/img/selectblue.svg';
+
+// Importar servicios para obtener datos guardados
+import { getSections } from '../services/SectionsStorage';
+import { getQuestions } from '../services/QuestionsStorage';
+import { getSurveyInfo } from '../services/SurveyInfoStorage';
+
 
 // Íconos para tipos de pregunta
 import openAnswer from '../assets/img/OpenAnswer.svg';
@@ -21,15 +27,34 @@ const PreviewSurvey = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
-  const [expandedSections, setExpandedSections] = useState({
-    personal: false,
-    laboral: false,
-    academica: false
-  });
+  const [expandedSections, setExpandedSections] = useState({});
   const [expandedQuestions, setExpandedQuestions] = useState({});
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // Estados para gestionar secciones y preguntas cargadas
+  const [sections, setSections] = useState([]);
+  const [sectionQuestions, setSectionQuestions] = useState({});
+  const [surveyTitle, setSurveyTitle] = useState('');
+  const [surveyDescription, setSurveyDescription] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Función auxiliar para obtener el nombre del tipo de pregunta
+  const getQuestionTypeName = (typeId) => {
+    const questionTypes = {
+      1: 'Respuesta Abierta',
+      2: 'Numérica',
+      3: 'Opción Única',
+      4: 'Opción Multiple',
+      5: 'Falso / Verdadero',
+      6: 'Fecha'
+    };
+
+    return questionTypes[typeId] || 'Desconocido';
+  };
+
+  // Gestor de scroll y progreso
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -50,6 +75,87 @@ const PreviewSurvey = () => {
     };
   }, []);
 
+  // Cargar datos al iniciar el componente
+  useEffect(() => {
+    // Cargar secciones
+    const storedSections = getSections();
+    setSections(storedSections);
+
+    // Inicializar estado expandido para las secciones
+    const initialExpandedSections = {};
+    storedSections.forEach(section => {
+      initialExpandedSections[section.id] = false; // Todas cerradas por defecto
+    });
+    setExpandedSections(initialExpandedSections);
+
+    // Cargar preguntas
+    const storedQuestions = getQuestions();
+
+    // Agrupar preguntas por sección
+    const questionsBySection = storedQuestions.reduce((acc, question) => {
+      const sectionId = question.section?.id;
+      if (sectionId) {
+        if (!acc[sectionId]) {
+          acc[sectionId] = [];
+        }
+
+        // Añadir pregunta principal
+        acc[sectionId].push(question);
+
+        // Si tiene preguntas hijas, añadirlas también
+        if (question.childForms && question.childForms.length > 0) {
+          question.childForms.forEach(childForm => {
+            if (childForm.completed && childForm.data) {
+              // Marcar como pregunta hija
+              acc[sectionId].push({
+                ...childForm.data,
+                isChildQuestion: true,
+                parentId: question.id,
+                id: childForm.id // Asegurar que la pregunta hija tenga un ID
+              });
+            }
+          });
+        }
+      }
+      return acc;
+    }, {});
+
+    setSectionQuestions(questionsBySection);
+
+    // Detectar si hay secciones con preguntas y expandirlas automáticamente
+    const sectionsWithQuestions = {};
+    storedSections.forEach(section => {
+      sectionsWithQuestions[section.id] =
+        questionsBySection[section.id] &&
+        questionsBySection[section.id].length > 0;
+    });
+    setExpandedSections(sectionsWithQuestions);
+
+    // Cargar información general de la encuesta desde localStorage
+    const surveyInfo = getSurveyInfo();
+    if (surveyInfo) {
+      setSurveyTitle(surveyInfo.title || 'Encuesta sobre tu Perfil Personal y Profesional');
+      setSurveyDescription(surveyInfo.description || '');
+
+      // Asegurar que las fechas sean objetos Date
+      if (surveyInfo.startDate) {
+        if (typeof surveyInfo.startDate === 'string') {
+          setStartDate(new Date(surveyInfo.startDate));
+        } else {
+          setStartDate(surveyInfo.startDate);
+        }
+      }
+
+      if (surveyInfo.endDate) {
+        if (typeof surveyInfo.endDate === 'string') {
+          setEndDate(new Date(surveyInfo.endDate));
+        } else {
+          setEndDate(surveyInfo.endDate);
+        }
+      }
+    }
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -57,8 +163,9 @@ const PreviewSurvey = () => {
     });
   };
 
-  const categoryData = JSON.parse(localStorage.getItem('selectedCategory'));
-  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[0][0]} ${categoryData[0][1]}` : 'Perfil Personal y Profesional'}`;
+  const surveyInfo = getSurveyInfo();
+  const categoryData = surveyInfo.selectedCategory;
+  const headerTitle = `Previsualización de la encuesta: ${categoryData ? `${categoryData[1]}` : 'Perfil Personal y Profesional'}`;
 
   const handlePublish = () => {
     setIsSaving(true);
@@ -81,11 +188,10 @@ const PreviewSurvey = () => {
   const handlePreviewSurvey = () => {
     navigate('/preview-details'); // Redirige a la ruta de SurveyDetails
   };
-
-  const toggleSection = (section) => {
+  const toggleSection = (sectionId) => {
     setExpandedSections(prev => ({
       ...prev,
-      [section]: !prev[section]
+      [sectionId]: !prev[sectionId]
     }));
   };
 
@@ -96,6 +202,7 @@ const PreviewSurvey = () => {
     }));
   };
 
+  // Componente para secciones plegables/desplegables
   const CollapsibleSection = ({ title, isOpen, onToggle, icon, children }) => {
     const sectionRef = useRef(null);
 
@@ -145,6 +252,7 @@ const PreviewSurvey = () => {
     );
   };
 
+  // Componente para renderizar una pregunta individual
   const SurveyQuestion = ({
     id,
     question,
@@ -157,6 +265,7 @@ const PreviewSurvey = () => {
     const isOpen = expandedQuestions[id] || false;
     const questionRef = useRef(null);
 
+    // Mapeo de tipos de pregunta a íconos
     const questionTypeIcons = {
       'Respuesta Abierta': openAnswer,
       'Numérica': number,
@@ -221,37 +330,63 @@ const PreviewSurvey = () => {
                 <p className="text-gray-500 italic mb-3">
                   El encuestado verá {options ? 'las siguientes opciones en pantalla' :
                     type === 'Fecha' ? 'el siguiente campo y al dar click podrá seleccionar la fecha en un calendario' :
-                    'un campo como el que se enseña a continuación donde podrá ingresar texto'}.
+                      'un campo como el que se enseña a continuación donde podrá ingresar texto'}.
                 </p>
-
-                {type === 'Opción Única' && options && (
+                {type === 'Opción Única' && (
                   <div className="space-y-2">
-                    {options.map((option, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name={`radio-${id}`}
-                          id={`radio-${id}-${index}`}
-                          className="w-5 h-5"
-                        />
-                        <label htmlFor={`radio-${id}-${index}`}>{option}</label>
-                      </div>
-                    ))}
+                    {options ?
+                      options.map((option, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name={`radio-${id}`}
+                            id={`radio-${id}-${index}`}
+                            className="w-5 h-5"
+                          />
+                          <label htmlFor={`radio-${id}-${index}`}>{option}</label>
+                        </div>
+                      )) :
+                      // Opciones de ejemplo si no hay opciones definidas
+                      ['Opción 1', 'Opción 2', 'Opción 3'].map((option, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name={`radio-${id}`}
+                            id={`radio-${id}-${index}`}
+                            className="w-5 h-5"
+                          />
+                          <label htmlFor={`radio-${id}-${index}`}>{option}</label>
+                        </div>
+                      ))
+                    }
                   </div>
                 )}
 
-                {type === 'Opción Multiple' && options && (
+                {type === 'Opción Multiple' && (
                   <div className="space-y-2">
-                    {options.map((option, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={`checkbox-${id}-${index}`}
-                          className="w-5 h-5"
-                        />
-                        <label htmlFor={`checkbox-${id}-${index}`}>{option}</label>
-                      </div>
-                    ))}
+                    {options ?
+                      options.map((option, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`checkbox-${id}-${index}`}
+                            className="w-5 h-5"
+                          />
+                          <label htmlFor={`checkbox-${id}-${index}`}>{option}</label>
+                        </div>
+                      )) :
+                      // Opciones de ejemplo si no hay opciones definidas
+                      ['Opción 1', 'Opción 2', 'Opción 3'].map((option, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`checkbox-${id}-${index}`}
+                            className="w-5 h-5"
+                          />
+                          <label htmlFor={`checkbox-${id}-${index}`}>{option}</label>
+                        </div>
+                      ))
+                    }
                   </div>
                 )}
 
@@ -316,6 +451,37 @@ const PreviewSurvey = () => {
     );
   };
 
+  // Formatear fecha para mostrar
+  const formatDate = (dateInput) => {
+    if (!dateInput) return "DD/MM/YY";
+
+    try {
+      let date;
+      // Convertir a objeto Date si es string
+      if (typeof dateInput === 'string') {
+        date = new Date(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = dateInput;
+      } else {
+        return "DD/MM/YY"; // Valor por defecto si no es válido
+      }
+
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return "DD/MM/YY";
+      }
+
+      // Formatear como DD/MM/YY
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(-2);
+
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Error formateando fecha:", error);
+      return "DD/MM/YY";
+    }
+  };
   return (
     <SurveyLayout
       currentView="PreviewSurvey"
@@ -370,11 +536,11 @@ const PreviewSurvey = () => {
       <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-dark-blue-custom">
-            Encuesta sobre tu Perfil Personal y Profesional
+            {surveyTitle || "Encuesta sobre tu Perfil Personal y Profesional"}
           </h1>
           <button
             className="flex items-stretch rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
-            onClick={handlePreviewSurvey} // Llama a la función para redirigir
+            onClick={handlePreviewSurvey}
           >
             <span className="bg-blue-custom text-white px-4 py-1 flex items-center justify-center hover:bg-opacity-80">
               <img src={ViewIcon} alt="Previsualizar encuesta" className="w-5 h-5" />
@@ -387,42 +553,54 @@ const PreviewSurvey = () => {
           </button>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones</h2>
-          <div className="flex flex-wrap gap-4">
+        <div className="mb-4">
+          <div className="flex items-center">
             <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
+              className="flex items-center border border-gray-300 rounded-lg overflow-hidden"
+              whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
             >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Información Personal</span>
-            </motion.div>
-            <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Laboral</span>
-            </motion.div>
-            <motion.div
-              className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={Seccion} alt="Ver" className="w-5 h-5 mr-2" />
-              <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">Experiencia Académica</span>
+              <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg font-semibold">
+                Categoría
+              </span>
+              <span className="bg-gray-100 px-4 py-2 rounded-r-lg">
+                {categoryData ? categoryData[0][1] : 'Sin categoría'}
+              </span>
             </motion.div>
           </div>
         </div>
 
         <div className="mb-6">
+          <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones</h2>
+          <div className="flex flex-wrap gap-4">
+            {sections.map(section => (
+              <motion.div
+                key={section.id}
+                className="bg-gray-100 rounded-full py-2 px-4 flex items-center transition-transform duration-300 ease-in-out transform hover:bg-gray-200"
+                whileHover={{ scale: 1.05 }}
+              >
+                <img src={Seccion} alt="Sección" className="w-5 h-5 mr-2" />
+                <span className="transition-colors duration-300 ease-in-out hover:text-blue-500">
+                  {section.name}
+                </span>
+              </motion.div>
+            ))}
+            {sections.length === 0 && (
+              <p className="text-gray-500 italic">No hay secciones creadas para esta encuesta.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Rango de tiempo</h2>
-          <div className="flex gap-6">
+          <div className="flex gap-6 flex-wrap">
             <motion.div
               className="flex items-center border border-gray-300 rounded-lg overflow-hidden"
               whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
             >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de inicio:</span>
-              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">
+                {formatDate(startDate) || "DD/MM/YY"}
+              </span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
             </motion.div>
             <motion.div
@@ -430,144 +608,72 @@ const PreviewSurvey = () => {
               whileHover={{ scale: 1.02, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)" }}
             >
               <span className="bg-dark-blue-custom text-white px-4 py-2 rounded-l-lg">Fecha de finalización:</span>
-              <span className="border-r border-gray-300 px-4 py-2">02/10/25</span>
+              <span className="border-r border-gray-300 px-4 py-2">
+                {formatDate(endDate) || "DD/MM/YY"}
+              </span>
               <img src={Calendar} alt="Ver" className="w-5 h-5 mx-2" />
             </motion.div>
           </div>
         </div>
-
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Descripción de la Encuesta</h2>
           <div className="border p-4 rounded-lg bg-gray-50">
-            <p>
-              Esta encuesta tiene como objetivo recopilar información sobre tus datos generales, tu experiencia laboral y tu trayectoria
-              académica. Las preguntas están organizadas en tres secciones: la primera se enfoca en tus datos personales básicos, la segunda
-              en tu experiencia profesional, y la tercera en tu formación académica. El propósito de esta encuesta es obtener una visión
-              completa de tu perfil para diversos fines, como análisis de tendencias laborales y académicas. Tu participación es valiosa y te
-              agradecemos por dedicar tiempo a completarla.
-            </p>
+            {surveyDescription ? (
+              <div dangerouslySetInnerHTML={{ __html: surveyDescription }} />
+            ) : (
+              <p>
+                Esta encuesta tiene como objetivo recopilar información sobre tus datos generales, tu experiencia laboral y tu trayectoria
+                académica. Las preguntas están organizadas en tres secciones: la primera se enfoca en tus datos personales básicos, la segunda
+                en tu experiencia profesional, y la tercera en tu formación académica. El propósito de esta encuesta es obtener una visión
+                completa de tu perfil para diversos fines, como análisis de tendencias laborales y académicas. Tu participación es valiosa y te
+                agradecemos por dedicar tiempo a completarla.
+              </p>
+            )}
           </div>
         </div>
 
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-dark-blue-custom mb-4">Secciones de la Encuesta</h2>
 
-          <CollapsibleSection
-            title="Información Personal"
-            isOpen={expandedSections.personal}
-            onToggle={() => toggleSection('personal')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="nombre"
-              question="Nombre"
-              description="Ingrese su nombre completo tal como aparece en su documento de identificación."
-              type="Respuesta Abierta"
-              placeholder="Ej: Luis Perez Gomez"
-            />
+          {sections.length === 0 ? (
+            <p className="text-center text-gray-500 italic py-6">
+              No hay secciones creadas para esta encuesta. Regresa al paso 1 para crear secciones.
+            </p>
+          ) : (
+            sections.map(section => {
+              const sectionHasQuestions =
+                sectionQuestions[section.id] &&
+                sectionQuestions[section.id].length > 0;
 
-            <SurveyQuestion
-              id="fecha_nacimiento"
-              question="Fecha de nacimiento"
-              description="Ingresa tu fecha de nacimiento para ayudarnos a conocer tu edad."
-              type="Fecha"
-            />
-
-            <SurveyQuestion
-              id="genero"
-              question="¿En qué género te identificas?"
-              description="Selecciona el género con el que te identificas."
-              type="Opción Única"
-              options={["Masculino", "Femenino", "Otro", "Prefiero no decirlo"]}
-            />
-
-            <SurveyQuestion
-              id="referencia"
-              question="¿Cómo prefieres que nos refiramos a ti?"
-              description="Queremos asegurarnos de utilizar el lenguaje con el que te sientas más cómod@. Si tienes una preferencia específica en términos de género o pronombres, puedes compartirla con nosotros."
-              type="Respuesta Abierta"
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="paises"
-              question="¿En cual de los siguientes países has vivido?"
-              description="Selecciona los países en los que has vivido durante tu vida."
-              type="Opción Multiple"
-              options={["Colombia", "Venezuela", "Peru", "Chile", "Ecuador", "Argentina", "Uruguay", "Mexico", "Paraguay", "Panama", "Costa Rica"]}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Experiencia Laboral"
-            isOpen={expandedSections.laboral}
-            onToggle={() => toggleSection('laboral')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="num_trabajos"
-              question="¿En cuántos trabajos has tenido experiencia laboral hasta ahora?"
-              description="Indica el número de empleos formales en los que has trabajado."
-              type="Numérica"
-            />
-
-            <SurveyQuestion
-              id="situacion_laboral"
-              question="¿Cuál es tu situación laboral actual?"
-              description="Selecciona la opción que mejor describe tu situación laboral en este momento."
-              type="Opción Única"
-              options={["Empleado a tiempo completo", "Empleado a tiempo parcial", "Trabajador independiente", "Estudiante", "Desempleado", "Jubilado"]}
-            />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            title="Experiencia Académica"
-            isOpen={expandedSections.academica}
-            onToggle={() => toggleSection('academica')}
-            icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
-          >
-            <SurveyQuestion
-              id="nivel_educativo"
-              question="¿Qué nivel educativo has alcanzado hasta el momento?"
-              description="Selecciona el nivel educativo más alto que has completado."
-              type="Opción Única"
-              options={["Primaria", "Secundaria", "Técnico/Tecnológico", "Pregrado Universitario", "Especialización", "Maestría", "Doctorado"]}
-            />
-
-            <SurveyQuestion
-              id="cursando_estudios"
-              question="¿Actualmente estás cursando estudios académicos?"
-              description="Indícanos si actualmente estás estudiando de manera formal."
-              type="Falso / Verdadero"
-            />
-
-            <SurveyQuestion
-              id="tipo_estudio"
-              question="¿Qué tipo de estudio estás cursando actualmente?"
-              description="Selecciona el tipo de estudio que estás realizando en este momento."
-              type="Opción Única"
-              options={["Pregrado Universitario", "Postgrado", "Curso de formación", "Certificación"]}
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="area_conocimiento"
-              question="¿En qué área de conocimiento se enmarca tu estudio?"
-              description="Selecciona el área principal de tu formación actual."
-              type="Opción Única"
-              options={["Ciencias Sociales", "Ciencias Naturales", "Ingeniería", "Ciencias de la Salud", "Artes y Humanidades", "Ciencias Económicas", "Otra"]}
-              hasIndent={true}
-            />
-
-            <SurveyQuestion
-              id="etapa_formacion"
-              question="¿En qué etapa de tu formación te encuentras actualmente?"
-              description="Indícanos en qué fase de tus estudios actuales te encuentras."
-              type="Opción Única"
-              options={["Inicio", "Intermedio", "Final", "Tesis/Proyecto final"]}
-              hasIndent={true}
-            />
-          </CollapsibleSection>
+              return (
+                <CollapsibleSection
+                  key={section.id}
+                  title={section.name}
+                  isOpen={expandedSections[section.id] || false}
+                  onToggle={() => toggleSection(section.id)}
+                  icon={<img src={SeccionWhite} alt="Ver" className="w-5 h-5" />}
+                >
+                  {sectionHasQuestions ? (
+                    sectionQuestions[section.id].map(question => (
+                      <SurveyQuestion
+                        key={question.id}
+                        id={question.id}
+                        question={question.title}
+                        description={question.description}
+                        type={getQuestionTypeName(question.questionType)}
+                        options={question.options || null}
+                        hasIndent={question.isChildQuestion}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500 italic py-4">
+                      No hay preguntas en esta sección. Regresa al paso 2 para crear preguntas.
+                    </p>
+                  )}
+                </CollapsibleSection>
+              );
+            })
+          )}
         </div>
 
         <div className="flex justify-center mt-8">
@@ -576,7 +682,7 @@ const PreviewSurvey = () => {
               Para <span className="font-bold">Publicar</span> y <span className="font-bold">Guardar</span> sin publicar regresa al inicio de esta página:
               <a
                 href="#"
-                onClick={(e) => {e.preventDefault(); scrollToTop();}}
+                onClick={(e) => { e.preventDefault(); scrollToTop(); }}
                 className="text-green-600 underline ml-1"
               >
                 click aquí

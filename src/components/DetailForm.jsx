@@ -6,6 +6,7 @@ import trashcan from '../assets/img/trashCan.svg';
 import calendar2 from '../assets/img/calendar2.svg';
 
 import { getSections, updateSections, removeSection, addSection } from '../services/SectionsStorage';
+import { getSurveyInfo, updateSurveyInfoField, saveSurveyInfo } from '../services/SurveyInfoStorage';
 import DOMPurify from 'dompurify';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -58,7 +59,7 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
       <div className="flex items-center justify-between w-full bg-gray-100 rounded-full overflow-hidden">
         <div className="flex items-center flex-grow py-2">
           <div className="text-dark-blue-custom mx-3 cursor-grab">
-             {/* SVG Drag Handle */}
+            {/* SVG Drag Handle */}
             <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="3" cy="3" r="1.5" /><circle cx="3" cy="9" r="1.5" /><circle cx="3" cy="15" r="1.5" /><circle cx="9" cy="3" r="1.5" /><circle cx="9" cy="9" r="1.5" /><circle cx="9" cy="15" r="1.5" /><circle cx="15" cy="3" r="1.5" /><circle cx="15" cy="9" r="1.5" /><circle cx="15" cy="15" r="1.5" /></svg>
           </div>
           <span className="font-work-sans text-lg font-medium text-dark-blue-custom">{name}</span>
@@ -71,7 +72,7 @@ const DraggableSectionItem = ({ id, index, name, moveItem, onRemove }) => {
         >
           <img src={trashcan} alt="Eliminar Sección" className="w-5 h-5" />
           {/* Tooltip JSX */}
-          {showTooltip && ( <div className="tooltip-container absolute z-10 right-full top-1/2 transform -translate-y-1/2 mr-2"> <div className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap" style={{ backgroundColor: '#002C4D', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)' }}> Eliminar sección </div> <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45" style={{ width: '10px', height: '10px', backgroundColor: '#002C4D' }}></div> </div> )}
+          {showTooltip && (<div className="tooltip-container absolute z-10 right-full top-1/2 transform -translate-y-1/2 mr-2"> <div className="bg-dark-blue-custom text-white px-3 py-2 rounded-md text-sm whitespace-nowrap" style={{ backgroundColor: '#002C4D', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)' }}> Eliminar sección </div> <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45" style={{ width: '10px', height: '10px', backgroundColor: '#002C4D' }}></div> </div>)}
         </button>
       </div>
     </div>
@@ -151,7 +152,109 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     if (storedSections.length === 0 && sections.length > 0) {
       updateSections(sections);
     }
+
+    const surveyInfo = getSurveyInfo();
+    if (surveyInfo.title) {
+      setTitle(surveyInfo.title);
+    }
+    if (surveyInfo.description) {
+      setDescription(surveyInfo.description);
+    }
+
+    const todayDate = new Date(); // La fecha actual
+
+    // Manejar fecha de inicio
+    if (surveyInfo.startDate) {
+      // Convertir a Date si es un string
+      const startDateObj = typeof surveyInfo.startDate === 'string'
+        ? new Date(surveyInfo.startDate)
+        : surveyInfo.startDate;
+      setStartDate(startDateObj);
+    } else {
+      // No hay fecha guardada, usar y guardar la actual
+      setStartDate(todayDate);
+      updateSurveyInfoField('startDate', todayDate);
+    }
+
+    // Manejar fecha de finalización
+    if (surveyInfo.endDate) {
+      // Convertir a Date si es un string
+      const endDateObj = typeof surveyInfo.endDate === 'string'
+        ? new Date(surveyInfo.endDate)
+        : surveyInfo.endDate;
+      setEndDate(endDateObj);
+    } else {
+      // No hay fecha guardada, usar y guardar la actual
+      setEndDate(todayDate);
+      updateSurveyInfoField('endDate', todayDate);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+
+    const handleSurveyInfoUpdated = (event) => {
+      const updatedInfo = event.detail;
+
+      if (updatedInfo.title !== undefined) {
+        setTitle(updatedInfo.title);
+      }
+
+      if (updatedInfo.description !== undefined) {
+        setDescription(updatedInfo.description);
+      }
+
+      // Actualizar fechas si cambian
+      if (updatedInfo.startDate !== undefined) {
+        const newStartDate = typeof updatedInfo.startDate === 'string'
+          ? new Date(updatedInfo.startDate)
+          : updatedInfo.startDate;
+        setStartDate(newStartDate);
+      }
+
+      if (updatedInfo.endDate !== undefined) {
+        const newEndDate = typeof updatedInfo.endDate === 'string'
+          ? new Date(updatedInfo.endDate)
+          : updatedInfo.endDate;
+        setEndDate(newEndDate);
+      }
+    };
+
+    // Listener para evento de localStorage
+    const handleStorageChange = (e) => {
+      if (e.key === 'survey_info') {
+        try {
+          const updatedInfo = JSON.parse(e.newValue);
+
+          if (updatedInfo.title !== undefined) {
+            setTitle(updatedInfo.title);
+          }
+
+          if (updatedInfo.description !== undefined) {
+            setDescription(updatedInfo.description);
+          }
+
+          // Actualizar fechas si cambian
+          if (updatedInfo.startDate !== undefined) {
+            setStartDate(new Date(updatedInfo.startDate));
+          }
+
+          if (updatedInfo.endDate !== undefined) {
+            setEndDate(new Date(updatedInfo.endDate));
+          }
+        } catch (error) {
+          console.error('Error parsing survey info from storage event:', error);
+        }
+      }
+    };
+
+    // Registrar listeners
+    window.addEventListener('surveyInfoUpdated', handleSurveyInfoUpdated);
+    window.addEventListener('storage', handleStorageChange);
+
+    // Limpiar listeners al desmontar
+    return () => {
+      window.removeEventListener('surveyInfoUpdated', handleSurveyInfoUpdated);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []); // Ejecutar solo al montar
 
   // --- NUEVO EFECTO ---
@@ -175,6 +278,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   useEffect(() => {
     if (endDate < startDate) {
       setEndDate(startDate);
+      updateSurveyInfoField('endDate', startDate);
     }
   }, [startDate, endDate]); // Añadir endDate a las dependencias si no estaba
 
@@ -204,16 +308,30 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
     setIsModalOpen(true);
   };
 
-  const handleStartDateChange = (date) => setStartDate(date);
-  const handleEndDateChange = (date) => setEndDate(date);
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    updateSurveyInfoField('startDate', date);
+
+    // Asegurar que endDate no sea anterior a startDate
+    if (endDate < date) {
+      setEndDate(date);
+      updateSurveyInfoField('endDate', date);
+    }
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    updateSurveyInfoField('endDate', date);
+  };
 
   const handleSelectCategories = (selectedCategoryIds) => {
-     // Código original para manejar selección de categoría
+    // Código original para manejar selección de categoría
     if (selectedCategoryIds && selectedCategoryIds.length > 0) {
       const categoryId = selectedCategoryIds[0];
       const category = categories.find(cat => cat[0] === categoryId);
       if (category) {
         setSelectedCategory([category]);
+        updateSurveyInfoField('selectedCategory', [category]);
       }
     }
   };
@@ -307,6 +425,17 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       showErrorMessage();
       return;
     }
+
+    const surveyInfo = {
+      title: sanitizedTitle,
+      description: sanitizedDescription,
+      startDate,
+      endDate,
+      selectedCategory: selectedCategory && selectedCategory.length > 0 ? selectedCategory[0] : null
+    };
+
+    saveSurveyInfo(surveyInfo); // Esta función habría que añadirla al servicio
+
     if (onSaveAndContinue) {
       onSaveAndContinue({
         title: sanitizedTitle,
@@ -314,7 +443,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
         id_category: selectedCategory[0][0],
         startDate,
         endDate,
-        sections, // <- Enviar la lista original completa y ordenada
+        sections,
         accessToken
       });
     }
@@ -341,8 +470,17 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Manejar cambio en título (código original)
   const handleTitleChange = (e) => {
     if (e.target.value.length <= 50) {
-      setTitle(e.target.value);
+      const newTitle = e.target.value;
+      setTitle(newTitle);
+      // Guardar en localStorage mediante el servicio
+      updateSurveyInfoField('title', newTitle);
     }
+  };
+
+  // Agregar handler para guardar descripción cuando cambia
+  const handleDescriptionChange = (value) => {
+    setDescription(value);
+    updateSurveyInfoField('description', value);
   };
 
   // --- INICIO JSX ---
@@ -485,7 +623,11 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             <div className="border border-white">
               <RichTextEditor
                 value={description}
-                onChange={(value) => setDescription(DOMPurify.sanitize(value))}
+                onChange={(value) => {
+                  const sanitizedValue = DOMPurify.sanitize(value);
+                  setDescription(sanitizedValue);
+                  updateSurveyInfoField('description', sanitizedValue);
+                }}
               />
             </div>
           </div>
@@ -526,7 +668,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
                   } transition-colors`}
                 disabled={newSectionName.trim() === '' || !!inputError}
               >
-                 {/* Icono '+' */}
+                {/* Icono '+' */}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
               </button>
             </div>
@@ -541,33 +683,33 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
             <div className="max-h-96 overflow-y-auto scrollbar-image-match pr-4">
               {/* --- RENDERIZADO MODIFICADO --- */}
               {filteredSections.length === 0 ? (
-                 <p className="text-sm text-gray-500 italic text-center py-4">
-                    {/* Mensaje dinámico si no hay resultados */}
-                    {newSectionName.trim() === '' ? 'No hay secciones creadas' : 'No hay secciones que coincidan'}
-                 </p>
+                <p className="text-sm text-gray-500 italic text-center py-4">
+                  {/* Mensaje dinámico si no hay resultados */}
+                  {newSectionName.trim() === '' ? 'No hay secciones creadas' : 'No hay secciones que coincidan'}
+                </p>
               ) : (
-                 // Mapear sobre la lista FILTRADA
-                 filteredSections.map((section) => {
-                   // IMPORTANTE: Encontrar el índice ORIGINAL en la lista 'sections'
-                   const originalIndex = sections.findIndex(s => s.id === section.id);
+                // Mapear sobre la lista FILTRADA
+                filteredSections.map((section) => {
+                  // IMPORTANTE: Encontrar el índice ORIGINAL en la lista 'sections'
+                  const originalIndex = sections.findIndex(s => s.id === section.id);
 
-                   // Comprobación de seguridad (no debería ocurrir)
-                   if (originalIndex === -1) {
-                       console.warn(`Section with id ${section.id} not found in original sections list.`);
-                       return null;
-                   };
+                  // Comprobación de seguridad (no debería ocurrir)
+                  if (originalIndex === -1) {
+                    console.warn(`Section with id ${section.id} not found in original sections list.`);
+                    return null;
+                  };
 
-                   return (
-                     <DraggableSectionItem
-                       key={section.id} // Usar ID estable como key
-                       id={section.id}
-                       index={originalIndex} // Pasar el ÍNDICE ORIGINAL al componente draggable
-                       name={section.name}
-                       moveItem={moveItem} // moveItem opera sobre la lista original 'sections'
-                       onRemove={handleRemoveSection} // onRemove opera sobre la lista original 'sections'
-                     />
-                   );
-                 })
+                  return (
+                    <DraggableSectionItem
+                      key={section.id} // Usar ID estable como key
+                      id={section.id}
+                      index={originalIndex} // Pasar el ÍNDICE ORIGINAL al componente draggable
+                      name={section.name}
+                      moveItem={moveItem} // moveItem opera sobre la lista original 'sections'
+                      onRemove={handleRemoveSection} // onRemove opera sobre la lista original 'sections'
+                    />
+                  );
+                })
               )}
               {/* --- FIN RENDERIZADO MODIFICADO --- */}
             </div>
@@ -589,7 +731,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
         status={modalStatus}
       />
     </div>
-     // --- FIN JSX ---
+    // --- FIN JSX ---
   );
 };
 

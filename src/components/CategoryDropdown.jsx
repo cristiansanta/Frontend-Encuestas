@@ -3,6 +3,7 @@ import ok from '../assets/img/Ok.svg';
 import cancel from '../assets/img/cancel.svg';
 import { useContext } from 'react';
 import { SurveyContext } from '../Provider/SurveyContext';
+import { updateSurveyInfoField } from '../services/SurveyInfoStorage';
 
 // Constante para la longitud máxima del texto de búsqueda
 const MAX_SEARCH_LENGTH = 50;
@@ -15,7 +16,7 @@ const CategoryDropdown = ({
   anchorRef
 }) => {
   const { categories, selectedCategory, setSelectedCategory } = useContext(SurveyContext);
-  
+
   const [searchText, setSearchText] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [inputError, setInputError] = useState('');
@@ -65,7 +66,7 @@ const CategoryDropdown = ({
   // Manejar entrada de texto para búsqueda
   const handleInputChange = (e) => {
     const value = e.target.value;
-    
+
     // Validar longitud en tiempo real
     if (value.length <= MAX_SEARCH_LENGTH) {
       setSearchText(value);
@@ -92,12 +93,15 @@ const CategoryDropdown = ({
     if (selectedCategoryId) {
       // Buscar la categoría seleccionada para obtener su información completa
       const selectedCategoryInfo = categories.find(cat => cat[0] === selectedCategoryId);
-      
+
       // Actualizar el contexto con la categoría seleccionada
       if (selectedCategoryInfo) {
         setSelectedCategory([selectedCategoryInfo]);
+
+
+        updateSurveyInfoField('selectedCategory', [selectedCategoryInfo]);
       }
-      
+
       // Notificar al componente padre con la categoría seleccionada
       if (onSelectCategories) {
         onSelectCategories([selectedCategoryId]);
@@ -112,7 +116,7 @@ const CategoryDropdown = ({
       onCancel();
     }
     onOpenChange(false);
-    
+
     // Si había una categoría seleccionada anteriormente, mantenerla
     if (selectedCategory && selectedCategory.length > 0) {
       setSelectedCategoryId(selectedCategory[0][0]);
@@ -152,8 +156,8 @@ const CategoryDropdown = ({
         <div className="relative flex items-center">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+              <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <input
@@ -179,7 +183,7 @@ const CategoryDropdown = ({
         <div className="flex items-center py-2 border-b border-gray-300 font-semibold text-dark-blue-custom">
           <span className="flex-1">Nombre de categoría</span>
         </div>
-        
+
         {filteredCategories.length === 0 ? (
           <p className="text-sm text-gray-500 italic py-3">No se encontraron categorías</p>
         ) : (
@@ -222,17 +226,16 @@ const CategoryDropdown = ({
           <img src={cancel} alt="Cancelar" width="18" height="18" className="mr-2" />
           Cancelar
         </button>
-        
+
         <button
           onClick={handleAccept}
           disabled={!isAcceptButtonEnabled}
           onMouseEnter={() => isAcceptButtonEnabled && setHoverState({ ...hoverState, accept: true })}
           onMouseLeave={() => isAcceptButtonEnabled && setHoverState({ ...hoverState, accept: false })}
-          className={`py-2 px-6 rounded-full flex items-center text-sm transition-colors ${
-            !isAcceptButtonEnabled
+          className={`py-2 px-6 rounded-full flex items-center text-sm transition-colors ${!isAcceptButtonEnabled
               ? 'bg-gray-400 text-white cursor-not-allowed'
               : 'bg-green-500 text-white hover:bg-green-600'
-          }`}
+            }`}
         >
           <img src={ok} alt="Aceptar" width="18" height="18" className="mr-2" />
           Aceptar

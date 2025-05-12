@@ -1,13 +1,14 @@
 import React, { createContext, useState, useEffect } from 'react';
-
+import { getSurveyInfo, updateSurveyInfoField } from '../services/SurveyInfoStorage';
 // Crear el contexto para la encuesta
 const SurveyContext = createContext();
 
 // Crear el proveedor del contexto
 const SurveyProvider = ({ children }) => {
   const [survey, setSurvey] = useState({ id: null, title: '' });
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  
+  const surveyInfo = getSurveyInfo();
+  const [selectedCategory, setSelectedCategory] = useState(surveyInfo.selectedCategory || null);
+
   // Estado para almacenar todas las categorías disponibles
   // Formato: array de arrays donde cada elemento es [id, nombre]
   const [categories, setCategories] = useState([
@@ -18,6 +19,12 @@ const SurveyProvider = ({ children }) => {
     [5, 'Educación y Capacitación'],
     [6, 'Salud y Bienestar']
   ]);
+  // Efecto para sincronizar cambios en selectedCategory con el servicio
+  useEffect(() => {
+    if (selectedCategory) {
+      updateSurveyInfoField('selectedCategory', selectedCategory);
+    }
+  }, [selectedCategory]);
 
   // Opcional: Puedes cargar categorías desde una API cuando el componente se monte
   useEffect(() => {
@@ -38,11 +45,11 @@ const SurveyProvider = ({ children }) => {
   }, []);
 
   return (
-    <SurveyContext.Provider 
-      value={{ 
-        survey, 
-        setSurvey, 
-        selectedCategory, 
+    <SurveyContext.Provider
+      value={{
+        survey,
+        setSurvey,
+        selectedCategory,
         setSelectedCategory,
         categories,
         setCategories
