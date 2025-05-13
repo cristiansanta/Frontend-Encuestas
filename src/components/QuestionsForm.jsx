@@ -1473,7 +1473,7 @@ const QuestionsForm = forwardRef(({
     // If the description is completely empty, provide a default value
     const finalDescription = isDescriptionNotEmpty(cleanDescription)
       ? cleanDescription
-      : '<p>Sin descripción</p>';
+      : 'Sin descripción';
 
     // Usar una sección por defecto si no hay seleccionada
     const effectiveSection = selectedSection || {
