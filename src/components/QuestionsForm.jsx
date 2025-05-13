@@ -80,7 +80,8 @@ const SavedQuestionForm = ({
   onAddChildQuestion,
   onDeleteForm,
   onUpdateChildInSavedForm,
-  onRemoveChildFromSavedForm
+  onRemoveChildFromSavedForm,
+  onEditingChange // Nueva prop para informar cuando se está editando
 }) => {
   const [isEditing, setIsEditing] = useState(!form.isCollapsed);
   const [title, setTitle] = useState(form.title || '');
@@ -99,6 +100,16 @@ const SavedQuestionForm = ({
 
   // Nuevo estado para monitorear la validez de los formularios hijos
   const [childFormValidities, setChildFormValidities] = useState({});
+
+  // Efecto para notificar cuando cambia el estado de edición
+  useEffect(() => {
+    if (onEditingChange) {
+      // Consideramos que está en edición solo si está expandido y en modo edición
+      const isCurrentlyEditing = isEditing && !form.isCollapsed;
+      onEditingChange(isCurrentlyEditing);
+    }
+  }, [isEditing, form.isCollapsed, onEditingChange]);
+
   const canBecomeParentQuestion = (questionTypeId) => {
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
   };
@@ -141,8 +152,6 @@ const SavedQuestionForm = ({
       setIsParentQuestionState(false);
     }
   }, [selectedQuestionType]);
-
-
 
   // Efecto para sincronizar isEditing con el estado de colapso
   useEffect(() => {
@@ -203,7 +212,6 @@ const SavedQuestionForm = ({
       removeSimilarQuestionFromBank(questionDataForBank);
     }
   };
-
   const handleChildFormValidityChange = (childId, isValid) => {
     console.log(`SavedQuestionForm: Validez del hijo ${childId} cambió a ${isValid}`);
     setChildFormValidities(prev => ({
@@ -705,8 +713,7 @@ const SavedQuestionForm = ({
               // incluso cuando está contraída
               const parentFormIsValid =
                 form.title?.trim() !== '' &&
-                form.questionType !== null &&
-                form.section !== null;
+                form.questionType !== null;
 
               // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
               const canEnableButton = (
@@ -778,8 +785,14 @@ const SwitchOption = ({ value, onChange, label, disabled = false }) => (
     </span>
   </div>
 );
-// Componente Principal actualizado
-const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
+
+// Componente Principal actualizado con funcionalidad para validación del botón Continuar
+const QuestionsForm = forwardRef(({
+  onAddChildQuestion,
+  onQuestionsValidChange, // Nueva prop para informar validez
+  onConfiguringChange,    // Nueva prop para informar configuración
+  ...props
+}, ref) => {
   // --- Estados ---
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -809,6 +822,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const [savedForms, setSavedForms] = useState([]);
   const [formKey, setFormKey] = useState(`form_${Date.now()}`);
 
+  // Nuevos estados para controlar la validación del botón Continuar
+  const [isConfiguring, setIsConfiguring] = useState(false);
+  const [editingSavedForms, setEditingSavedForms] = useState({});
+  const [hasValidQuestions, setHasValidQuestions] = useState(false);
   // Referencias
   const bankButtonRef = useRef(null);
   const childFormRefs = useRef({});
@@ -818,7 +835,40 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     // Solo tipos 3 (Opción Única), 4 (Opción Multiple) y 5 (Falso / Verdadero) pueden ser madres
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
   }
+
   // --- Efectos ---
+
+  // Verificar cambios en el nuevo formulario
+  const hasNewFormChanges =
+    selectedQuestionType !== null ||
+    selectedSection !== null ||
+    title.trim() !== '';
+
+  // Efecto para determinar si se está configurando una pregunta
+  useEffect(() => {
+    // Se está configurando si:
+    // 1. Hay cambios en el formulario nuevo, o
+    // 2. Se está editando alguna pregunta guardada
+    const isAnyFormEditing = Object.values(editingSavedForms).some(editing => editing);
+    const isCurrentlyConfiguring = hasNewFormChanges || isAnyFormEditing;
+
+    setIsConfiguring(isCurrentlyConfiguring);
+
+    // Notificar al componente padre
+    if (onConfiguringChange) {
+      onConfiguringChange(isCurrentlyConfiguring);
+    }
+  }, [hasNewFormChanges, editingSavedForms, onConfiguringChange]);
+
+  // Efecto para notificar sobre la validez del formulario cuando cambian las preguntas guardadas
+  useEffect(() => {
+    const hasSavedQuestions = savedForms.length > 0;
+    setHasValidQuestions(hasSavedQuestions);
+
+    if (onQuestionsValidChange) {
+      onQuestionsValidChange(hasSavedQuestions);
+    }
+  }, [savedForms, onQuestionsValidChange]);
 
   useEffect(() => {
     // Si el tipo de pregunta cambia a uno que no puede ser madre, desactivar isParentQuestion
@@ -867,6 +917,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       const storedQuestions = getQuestions();
       if (storedQuestions.length > 0) {
         setSavedForms(storedQuestions);
+        setHasValidQuestions(true);
+        if (onQuestionsValidChange) {
+          onQuestionsValidChange(true);
+        }
       }
     };
 
@@ -891,6 +945,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       if (e.key === 'survey_questions') {
         const storedQuestions = getQuestions();
         setSavedForms(storedQuestions);
+        setHasValidQuestions(storedQuestions.length > 0);
+        if (onQuestionsValidChange) {
+          onQuestionsValidChange(storedQuestions.length > 0);
+        }
       }
     };
     window.addEventListener('storage', handleStorageChange);
@@ -912,6 +970,10 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     // NUEVO: Listener para cambios en preguntas
     const handleQuestionsUpdated = (event) => {
       setSavedForms(event.detail);
+      setHasValidQuestions(event.detail.length > 0);
+      if (onQuestionsValidChange) {
+        onQuestionsValidChange(event.detail.length > 0);
+      }
     };
     window.addEventListener('questionsUpdated', handleQuestionsUpdated);
 
@@ -921,7 +983,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       window.removeEventListener('bankQuestionsUpdated', handleBankQuestionsUpdated);
       window.removeEventListener('questionsUpdated', handleQuestionsUpdated);
     };
-  }, []);
+  }, [onQuestionsValidChange]);
 
   // Efecto para manejar cambios en isParentQuestion
   useEffect(() => {
@@ -930,20 +992,26 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setNewChildFormCompleted(true);
     }
   }, [isParentQuestion]);
-  // Verificar cambios
-  const hasNewFormChanges =
-    selectedQuestionType !== null ||
-    selectedSection !== null ||
-    title.trim() !== '';
+  // Función para manejar cuando una pregunta guardada está siendo editada
+  const handleSavedFormEditing = (formId, isEditing) => {
+    setEditingSavedForms(prev => {
+      const updated = { ...prev, [formId]: isEditing };
 
-  // Determinar si se pueden activar switches
-  const canActivateNewFormSwitches =
-    title.trim() !== '' &&
-    selectedQuestionType !== null &&
-    selectedSection !== null;
+      // Verificar si alguna pregunta guardada está siendo editada
+      const isSomeSavedFormEditing = Object.values(updated).some(value => value);
 
-  const canActivateParentQuestionSwitch =
-    canActivateNewFormSwitches && canBecomeParentQuestion(selectedQuestionType);
+      // Actualizar estado general de configuración
+      const isCurrentlyConfiguring = hasNewFormChanges || isSomeSavedFormEditing;
+      setIsConfiguring(isCurrentlyConfiguring);
+
+      // Notificar al padre
+      if (onConfiguringChange) {
+        onConfiguringChange(isCurrentlyConfiguring);
+      }
+
+      return updated;
+    });
+  };
 
   // Toggle para expandir/contraer un formulario guardado
   const toggleSavedFormCollapse = (formId) => {
@@ -978,6 +1046,14 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       const updatedForms = prevForms.filter(form => form.id !== formId);
       // NUEVO: Guardar en localStorage
       saveQuestions(updatedForms);
+
+      // Notificar si ya no hay preguntas válidas
+      const hasRemainingForms = updatedForms.length > 0;
+      setHasValidQuestions(hasRemainingForms);
+      if (onQuestionsValidChange) {
+        onQuestionsValidChange(hasRemainingForms);
+      }
+
       return updatedForms;
     });
 
@@ -1019,6 +1095,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
             childForms: [...(form.childForms || []), newChildForm],
             isParentQuestion: true,
           };
+
+          // Notificar que estamos configurando
+          setIsConfiguring(true);
+          if (onConfiguringChange) {
+            onConfiguringChange(true);
+          }
 
           // NUEVO: También actualizar en localStorage 
           updateQuestion(form.id, updatedForm);
@@ -1179,6 +1261,15 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setNewChildFormCompleted(true);
     setIsNewFormCollapsed(false);
     localStorage.removeItem("selectedOptionId");
+
+    // Notificar que ya no estamos configurando
+    if (hasNewFormChanges) {
+      setIsConfiguring(false);
+      if (onConfiguringChange) {
+        onConfiguringChange(false);
+      }
+    }
+
     // saveSelectedSection(null); // Opcional: limpiar sección global
     if (generateNewKey) setFormKey(`form_${Date.now()}`);
   };
@@ -1200,33 +1291,63 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setIsParentQuestion(question.isParentQuestion || false);
     setAddToBank(false); // Por defecto, NO activamos el switch de añadir al banco
     setIsBankDropdownOpen(false);
+
+    // Notificar que estamos configurando
+    setIsConfiguring(true);
+    if (onConfiguringChange) {
+      onConfiguringChange(true);
+    }
   };
+
   // --- Handlers para el NUEVO formulario ---
 
   // Seleccionar tipo de pregunta
   const handleQuestionTypeSelect = (typeId) => {
     setSelectedQuestionType(typeId);
     localStorage.setItem("selectedOptionId", typeId);
+
+    // Notificar que estamos configurando
+    setIsConfiguring(true);
+    if (onConfiguringChange) {
+      onConfiguringChange(true);
+    }
   };
 
   // Seleccionar sección
   const handleSectionSelect = (section) => {
     setSelectedSection(section);
     saveSelectedSection(section ? section.id : null);
+
+    // Notificar que estamos configurando
+    setIsConfiguring(true);
+    if (onConfiguringChange) {
+      onConfiguringChange(true);
+    }
   };
 
   // Cambiar título
   const handleTitleChange = (e) => {
     if (e.target.value.length <= 50) {
       setTitle(e.target.value);
+
+      // Notificar que estamos configurando
+      setIsConfiguring(true);
+      if (onConfiguringChange) {
+        onConfiguringChange(true);
+      }
     }
   };
 
   // Cambiar descripción
   const handleDescriptionChange = (value) => {
     setDescription(value);
-  };
 
+    // Notificar que estamos configurando
+    setIsConfiguring(true);
+    if (onConfiguringChange) {
+      onConfiguringChange(true);
+    }
+  };
   // Función para alternar colapso del nuevo formulario
   const toggleNewFormCollapse = () => setIsNewFormCollapsed(!isNewFormCollapsed);
 
@@ -1286,6 +1407,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setNewChildForms(prev => [...prev, newChild]);
     setNewChildFormCompleted(false); // Deshabilitar añadir otro
     setIsNewFormCollapsed(false); // Expandir para ver el hijo en edición
+
+    // Notificar que estamos configurando
+    setIsConfiguring(true);
+    if (onConfiguringChange) {
+      onConfiguringChange(true);
+    }
   };
 
   // Manejar cuando se guarda la pregunta hija en el NUEVO formulario
@@ -1313,26 +1440,55 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     const remainingForms = newChildForms.filter(form => form.id !== childId);
     setNewChildFormCompleted(remainingForms.every(f => f.completed)); // Habilitar si no quedan pendientes
   };
+
+  // Determina si se pueden activar los switches
+  const canActivateNewFormSwitches =
+    title.trim() !== '' &&
+    selectedQuestionType !== null;
+
+  const canActivateParentQuestionSwitch =
+    canActivateNewFormSwitches && canBecomeParentQuestion(selectedQuestionType);
+
   // Enviar formulario - Manejar guardado del NUEVO formulario
   const handleSubmitNewQuestion = async () => {
-    // Validación de datos
-    if (!title.trim() || !selectedQuestionType || !selectedSection) {
-      setErrorMessage('Título, Tipo de Pregunta y Sección son requeridos.');
+    // Validación de datos - ahora solo título y tipo son requeridos
+    if (!title.trim()) {
+      setErrorMessage('El título de la pregunta es requerido.');
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return;
+    }
+
+    if (!selectedQuestionType) {
+      setErrorMessage('Debe seleccionar un tipo de pregunta.');
       setModalStatus('error');
       setIsModalOpen(true);
       return;
     }
 
     const sanitizedTitle = DOMPurify.sanitize(title.trim());
-    const cleanDescription = DOMPurify.sanitize(description);
+
+    // FIX: Ensure description is never null - use empty string as fallback
+    const cleanDescription = DOMPurify.sanitize(description || '');
+    // If the description is completely empty, provide a default value
+    const finalDescription = isDescriptionNotEmpty(cleanDescription)
+      ? cleanDescription
+      : '<p>Sin descripción</p>';
+
+    // Usar una sección por defecto si no hay seleccionada
+    const effectiveSection = selectedSection || {
+      id: 'default_section',
+      name: 'Sin sección'
+    };
+
     const parentFormData = {
       title: sanitizedTitle,
-      descrip: cleanDescription,
+      descrip: finalDescription, // Use the non-null description
       validate: mandatory ? 'Requerido' : 'Opcional',
       cod_padre: 0,
       bank: addToBank,
       type_questions_id: selectedQuestionType,
-      section_id: selectedSection.id,
+      section_id: effectiveSection.id,
       questions_conditions: isParentQuestion,
       creator_id: 1, // O obtener del usuario logueado
     };
@@ -1355,13 +1511,19 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       console.log("QuestionsForm: Pregunta padre guardada en servidor con ID:", serverId);
       localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
 
+      // Crear una sección por defecto si no se seleccionó ninguna
+      const effectiveSection = selectedSection || {
+        id: 'default_section',
+        name: 'Sin sección'
+      };
+
       const savedFormEntry = {
         id: formKey,
         serverId: Number(serverId),
         title: sanitizedTitle,
-        description: cleanDescription,
+        description: finalDescription,
         questionType: selectedQuestionType,
-        section: selectedSection,
+        section: effectiveSection,
         mandatory: mandatory,
         isParentQuestion: isParentQuestion,
         addToBank: addToBank,
@@ -1388,19 +1550,33 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
         delete bankData.isCollapsed;
         addQuestionToBank(bankData);
       }
-
       // MODIFICADO: Actualizar el estado y guardar en localStorage
       setSavedForms(prevForms => {
         const updatedForms = [...prevForms, savedFormEntry];
         // Guardar en localStorage
         saveQuestions(updatedForms);
+
+        // Notificar que ahora hay preguntas válidas
+        setHasValidQuestions(true);
+        if (onQuestionsValidChange) {
+          onQuestionsValidChange(true);
+        }
+
         return updatedForms;
       });
 
       // NUEVO: También añadir usando el servicio
       addQuestion(savedFormEntry);
 
-      resetNewForm(true); // Resetear form nuevo
+      // Resetear form nuevo
+      resetNewForm(true);
+
+      // Notificar que ya no estamos configurando
+      setIsConfiguring(false);
+      if (onConfiguringChange) {
+        onConfiguringChange(false);
+      }
+
       setErrorMessage('Pregunta agregada correctamente.');
       setModalStatus('success');
       setIsModalOpen(true);
@@ -1413,10 +1589,24 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     }
   };
 
+  // Añadir esta función para manejar el cambio de validez
+  const handleChildFormValidityChange = (childId, isValid) => {
+    setChildFormValidities(prev => ({
+      ...prev,
+      [childId]: isValid
+    }));
+  };
+
+  const hasValidChildToSave = newChildForms.some(child =>
+    !child.completed && childFormValidities[child.id]
+  );
+
   // Exponer funciones al padre
   useImperativeHandle(ref, () => ({
     submitQuestionForm: handleSubmitNewQuestion,
-    addQuestion: handleSubmitNewQuestion
+    addQuestion: handleSubmitNewQuestion,
+    hasValidQuestions: () => hasValidQuestions,
+    isConfiguring: () => isConfiguring
   }));
 
   // Cerrar modal
@@ -1436,16 +1626,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     }
   };
 
-  // Añadir esta función para manejar el cambio de validez
-  const handleChildFormValidityChange = (childId, isValid) => {
-    setChildFormValidities(prev => ({
-      ...prev,
-      [childId]: isValid
-    }));
-  };
-  const hasValidChildToSave = newChildForms.some(child =>
-    !child.completed && childFormValidities[child.id]
-  );
   // --- Renderizado JSX ---
   return (
     <>
@@ -1460,6 +1640,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
           onUpdateChildInSavedForm={handleUpdateChildInSavedForm}
           onRemoveChildFromSavedForm={handleRemoveChildFromSavedForm}
           onDeleteForm={handleDeleteSavedForm}
+          onEditingChange={(isEditing) => handleSavedFormEditing(form.id, isEditing)}
         />
       ))}
 
@@ -1527,7 +1708,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               </div>
             </div>
           </div>
-
           {/* Contenido Colapsable del NUEVO Formulario */}
           {!isNewFormCollapsed && (
             <>
@@ -1582,13 +1762,27 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
               <div className="text-base md:text-lg flex flex-col md:flex-row justify-between gap-4 py-2 font-work-sans">
                 <SwitchOption
                   value={isParentQuestion}
-                  onChange={() => setIsParentQuestion(!isParentQuestion)}
+                  onChange={() => {
+                    setIsParentQuestion(!isParentQuestion);
+                    // Notificar que estamos configurando
+                    setIsConfiguring(true);
+                    if (onConfiguringChange) {
+                      onConfiguringChange(true);
+                    }
+                  }}
                   label="Convertir en pregunta madre"
                   disabled={!canActivateParentQuestionSwitch}
                 />
                 <SwitchOption
                   value={mandatory}
-                  onChange={() => setMandatory(!mandatory)}
+                  onChange={() => {
+                    setMandatory(!mandatory);
+                    // Notificar que estamos configurando
+                    setIsConfiguring(true);
+                    if (onConfiguringChange) {
+                      onConfiguringChange(true);
+                    }
+                  }}
                   label="¿Esta pregunta es obligatoria?"
                   disabled={!canActivateNewFormSwitches}
                 />
@@ -1652,6 +1846,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                       ? { ...child, data: { ...child.data, title: e.target.value } }
                                       : child
                                   ));
+
+                                  // Notificar que estamos configurando
+                                  setIsConfiguring(true);
+                                  if (onConfiguringChange) {
+                                    onConfiguringChange(true);
+                                  }
                                 }}
                                 placeholder="Titulo de Pregunta Hija"
                                 maxLength={50}
@@ -1715,6 +1915,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                             ? { ...child, data: { ...child.data, questionType: type.id } }
                                             : child
                                         ));
+
+                                        // Notificar que estamos configurando
+                                        setIsConfiguring(true);
+                                        if (onConfiguringChange) {
+                                          onConfiguringChange(true);
+                                        }
                                       }}
                                       className={`flex items-center space-x-2 px-4 py-1 rounded-full border transition-colors duration-200
                           ${childFormData.data?.questionType === type.id
@@ -1744,6 +1950,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                         ? { ...child, data: { ...child.data, description: value } }
                                         : child
                                     ));
+
+                                    // Notificar que estamos configurando
+                                    setIsConfiguring(true);
+                                    if (onConfiguringChange) {
+                                      onConfiguringChange(true);
+                                    }
                                   }}
                                 />
                               </div>
@@ -1758,6 +1970,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                         ? { ...child, data: { ...child.data, mandatory: !(child.data?.mandatory || false) } }
                                         : child
                                     ));
+
+                                    // Notificar que estamos configurando
+                                    setIsConfiguring(true);
+                                    if (onConfiguringChange) {
+                                      onConfiguringChange(true);
+                                    }
                                   }}
                                   label="¿Esta pregunta es obligatoria?"
                                 />
@@ -1769,6 +1987,12 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                                         ? { ...child, data: { ...child.data, addToBank: !(child.data?.addToBank || false) } }
                                         : child
                                     ));
+
+                                    // Notificar que estamos configurando
+                                    setIsConfiguring(true);
+                                    if (onConfiguringChange) {
+                                      onConfiguringChange(true);
+                                    }
                                   }}
                                   label="Añadir esta pregunta al banco de preguntas"
                                 />
@@ -1778,7 +2002,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                         </div>
                       </div>
                     ) : (
-                      // Formulario de edición hijo temporal (sin cambios)
+                      // For incomplete forms, render ChildQuestionForm DIRECTLY without additional container
                       <ChildQuestionForm
                         ref={(el) => { childFormRefs.current[childFormData.id] = el; }}
                         formId={childFormData.id}
@@ -1792,7 +2016,6 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 ))}
               </div>
             )}
-
             {/* Botón Agregar pregunta hija PREGUNTAS HIJAS GUARDADAS PRIMERO COMO TEMPORALES */}
             <div className="mt-3 flex justify-end">
               {(() => {
@@ -1805,8 +2028,7 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
                 // incluso cuando está contraída
                 const parentFormIsValid =
                   title.trim() !== '' &&
-                  selectedQuestionType !== null &&
-                  selectedSection !== null;
+                  selectedQuestionType !== null;
 
                 // Nueva condición combinada que es segura tanto para formularios contraídos como expandidos
                 const canEnableButton = (

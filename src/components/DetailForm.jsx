@@ -118,16 +118,14 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Verificar validez del formulario (basado en 'sections', no 'filteredSections')
   useEffect(() => {
     const isTitleValid = title.trim() !== '';
-    const isCategoryValid = selectedCategory && selectedCategory.length > 0;
-    const isSectionsValid = sections.length > 0; // Usa la lista original para validar
 
-    const formIsValid = isTitleValid && isCategoryValid && isSectionsValid;
+    const formIsValid = isTitleValid;
     setIsFormValid(formIsValid);
 
     if (onFormValidChange) {
       onFormValidChange(formIsValid);
     }
-  }, [title, selectedCategory, sections, onFormValidChange]); // Depende de 'sections'
+  }, [title, onFormValidChange]);
 
   // Cargar token y secciones iniciales
   useEffect(() => {
@@ -293,7 +291,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
   // Funciones originales (sin cambios)
   const showErrorMessage = () => {
     setModalTitle('Alerta');
-    setModalMessage('Por favor, complete todos los campos requeridos antes de continuar.');
+    setModalMessage('Por favor, ingrese un título para la encuesta antes de continuar.');
     setModalStatus('error');
     setIsModalOpen(true);
   };
@@ -426,23 +424,27 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       return;
     }
 
+    // Guardar toda la información de la encuesta
     const surveyInfo = {
       title: sanitizedTitle,
-      description: sanitizedDescription,
+      description: sanitizedDescription, // Puede estar vacío
       startDate,
       endDate,
+      // Manejar el caso donde no hay categoría seleccionada
       selectedCategory: selectedCategory && selectedCategory.length > 0 ? selectedCategory[0] : null
     };
 
-    saveSurveyInfo(surveyInfo); // Esta función habría que añadirla al servicio
+    saveSurveyInfo(surveyInfo);
 
     if (onSaveAndContinue) {
       onSaveAndContinue({
         title: sanitizedTitle,
         description: sanitizedDescription,
-        id_category: selectedCategory[0][0],
+        // Si no hay categoría seleccionada, pasar null o un valor por defecto
+        id_category: selectedCategory && selectedCategory.length > 0 ? selectedCategory[0][0] : null,
         startDate,
         endDate,
+        // Pasar las secciones aunque estén vacías
         sections,
         accessToken
       });
@@ -490,6 +492,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
       <div className="flex justify-between items-center p-6">
         {/* Input de Título (Original) */}
         <div className="w-2/3 relative">
+          <span className="text-red-500 absolute left-[-15px] top-0">*</span>
           <input
             type="text"
             value={title}
@@ -576,7 +579,8 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
           {/* Rango de tiempo (Original) */}
           <div className="mb-4">
             <div className="mb-1 border border-white p-0">
-              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Rango de tiempo</h2>
+              <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Rango de tiempo <span className="text-red-500">*</span>
+              </h2>
             </div>
             <div className="flex flex-col space-y-4 w-fit">
               {/* Calendario Inicio (Original) */}
@@ -637,7 +641,7 @@ const DetailForm = ({ onFormValidChange, onSaveAndContinue }) => {
         <div className="flex-1 flex flex-col gap-4 p-6">
           {/* Título y Descripción Secciones (Original) */}
           <div className="-mb-2">
-            <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Secciones</h2>
+            <h2 className="font-work-sans text-2xl font-bold text-dark-blue-custom">Crear Sección (Opcional)</h2>
             <p className="font-work-sans text-sm mb-3 text-gray-600">
               {/* Texto ligeramente ajustado para reflejar filtro */}
               Agrega las secciones en las que clasificarás las preguntas y define el orden en el que se presentarán al encuestado.
