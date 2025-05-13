@@ -44,7 +44,7 @@ const SwitchOption = ({ value, onChange, label, disabled = false }) => (
 );
 
 // Componente Principal para Pregunta Hija
-const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCancel, isSaved = false, ...props }, ref) => {
+const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCancel, isSaved = false, onEditingChange, ...props }, ref) => {
   // --- Estados ---
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -133,6 +133,23 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
       }
     }
   }, [title, selectedQuestionType, description, addToBank, canActivateSwitches, isSaved]);
+
+  useEffect(() => {
+    // Consideramos que el formulario está en edición si no está guardado y está abierto
+    const isCurrentlyEditing = !saved && !isCollapsed && !isSaved;
+
+    // Notificar al padre sobre el estado de edición
+    if (onEditingChange) {
+      onEditingChange(isCurrentlyEditing);
+    }
+
+    // Cleanup: notificar que ya no está en edición cuando el componente se desmonte
+    return () => {
+      if (onEditingChange) {
+        onEditingChange(false);
+      }
+    };
+  }, [saved, isCollapsed, isSaved, onEditingChange]);
 
   // Maneja la activación/desactivación del switch para el banco
   const handleBankSwitchChange = () => {
@@ -390,6 +407,10 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
       setModalStatus('success');
       setIsModalOpen(true);
 
+      if (onEditingChange) {
+        onEditingChange(false);
+      }
+
       return true; // Indicar éxito
 
     } catch (error) {
@@ -406,6 +427,11 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
   // Cancelar creación de pregunta hija
   const handleCancel = () => {
+    // Notificar que ya no está en edición
+    if (onEditingChange) {
+      onEditingChange(false);
+    }
+
     if (onCancel) {
       onCancel(formId);
     }

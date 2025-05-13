@@ -97,6 +97,7 @@ const SavedQuestionForm = ({
   const childFormRefs = useRef({});
   const bankButtonRef = useRef(null);
   const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [isChildFormEditing, setIsChildFormEditing] = useState(false);
 
   // Nuevo estado para monitorear la validez de los formularios hijos
   const [childFormValidities, setChildFormValidities] = useState({});
@@ -104,11 +105,21 @@ const SavedQuestionForm = ({
   // Efecto para notificar cuando cambia el estado de edición
   useEffect(() => {
     if (onEditingChange) {
-      // Consideramos que está en edición solo si está expandido y en modo edición
-      const isCurrentlyEditing = isEditing && !form.isCollapsed;
+      // Consideramos que está en edición si está expandido y en modo edición O si alguna pregunta hija está en edición
+      const isCurrentlyEditing = (isEditing && !form.isCollapsed) || isChildFormEditing;
       onEditingChange(isCurrentlyEditing);
     }
-  }, [isEditing, form.isCollapsed, onEditingChange]);
+  }, [isEditing, form.isCollapsed, isChildFormEditing, onEditingChange]);
+  const handleChildEditingChange = (isEditing) => {
+    console.log("SavedQuestionForm: Pregunta hija está siendo editada:", isEditing);
+    setIsChildFormEditing(isEditing);
+
+    // Notificar al padre sobre el cambio de estado de edición (combinando tanto edición del padre como de hijos)
+    if (onEditingChange) {
+      const isCurrentlyEditing = isEditing || (isEditing && !form.isCollapsed);
+      onEditingChange(isCurrentlyEditing);
+    }
+  };
 
   const canBecomeParentQuestion = (questionTypeId) => {
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
@@ -310,6 +321,15 @@ const SavedQuestionForm = ({
     if (!form.isCollapsed && isEditing) {
       saveParentChanges();
     }
+
+    // Si estamos colapsando y hay preguntas hijas en edición, notificar al padre
+    if (!form.isCollapsed && isChildFormEditing) {
+      setIsChildFormEditing(false);
+      if (onEditingChange) {
+        onEditingChange(false);
+      }
+    }
+
     onToggleCollapse(form.id);
   };
 
@@ -701,6 +721,7 @@ const SavedQuestionForm = ({
                       onSave={(childData) => handleSaveChildData(childForm.id, childData)}
                       onCancel={() => handleCancelChildCreation(childForm.id)}
                       onValidityChange={(isValid) => handleChildFormValidityChange(childForm.id, isValid)}
+                      onEditingChange={handleChildEditingChange} // Añadir esta prop
                     />
                   )}
                 </div>
