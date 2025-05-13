@@ -82,8 +82,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   // Determina si se pueden activar los switches - MOVIDO ANTES DE LOS EFECTOS
   const canActivateSwitches =
     title.trim() !== '' &&
-    selectedQuestionType !== null &&
-    selectedSection !== null;
+    selectedQuestionType !== null;
 
   // --- Efectos ---
 
@@ -100,8 +99,17 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
   // Efecto para verificar si el formulario está completo - AHORA canActivateSwitches YA EXISTE
   useEffect(() => {
-    setIsFormCompleted(canActivateSwitches);
-  }, [title, description, selectedQuestionType, canActivateSwitches]);
+    if (props.onValidityChange) {
+      // Comprobar que tenemos el formId
+      const isValid = title.trim() !== '' && selectedQuestionType !== null;
+
+      // Log para depuración
+      console.log(`ChildQuestionForm ${formId} enviando validez: ${isValid}`);
+
+      // Pasar el ID del formulario y el estado de validez
+      props.onValidityChange(formId, isValid);
+    }
+  }, [title, selectedQuestionType, props.onValidityChange, formId]);
 
   // Efecto para notificar al padre cuando cambia la validez del formulario
   useEffect(() => {
@@ -226,29 +234,39 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   };
 
   // Guardar la pregunta hija
+  // Guardar la pregunta hija
   const handleSubmit = async () => {
     if (isSaved) return;
+
+    console.log("ChildQuestionForm: Ejecutando handleSubmit");
+    console.log("Estado actual:", {
+      title,
+      selectedQuestionType,
+      canActivateSwitches,
+      formId,
+      parentQuestionData
+    });
 
     // Validación de datos
     if (!title.trim()) {
       setErrorMessage('El título es requerido.');
       setModalStatus('error');
       setIsModalOpen(true);
-      return;
+      return false;
     }
     if (!selectedQuestionType) {
       setErrorMessage('Debe seleccionar un tipo de respuesta.');
-      setModalStatus('error'); setIsModalOpen(true); return;
-    }
-    if (!selectedSection) {
-      setErrorMessage('Debe seleccionar una sección para la pregunta.');
-      setModalStatus('error'); setIsModalOpen(true); return;
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return false;
     }
 
     // Verificar que existe un ID del padre (pero ser más flexible con el formato)
     if (!parentQuestionData?.id) {
       setErrorMessage('No se puede crear la pregunta hija porque la pregunta padre no tiene un ID.');
-      setModalStatus('error'); setIsModalOpen(true); return;
+      setModalStatus('error');
+      setIsModalOpen(true);
+      return false;
     }
 
     // Sanitización
@@ -301,13 +319,16 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
       setErrorMessage('No se pudo determinar un ID válido para la pregunta padre. Intente guardar la pregunta padre primero.');
       setModalStatus('error');
       setIsModalOpen(true);
-      return; // Detener la ejecución
+      return false; // Detener la ejecución
     }
 
     // Para debugging
     console.log('Tipo de parentQuestionData:', typeof parentQuestionData);
     console.log('parentQuestionData completo:', parentQuestionData);
     console.log('Valor final de parentId:', parentId);
+
+    // Asegurarse de que selectedSection existe y tiene un id
+    const sectionId = selectedSection?.id || (parentQuestionData?.section?.id || 'default_section');
 
     const formData = {
       title: sanitizedTitle,
@@ -316,7 +337,7 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
       cod_padre: parentId, // Usar el ID convertido a número explícitamente
       bank: addToBank,
       type_questions_id: selectedQuestionType,
-      section_id: selectedSection.id,
+      section_id: sectionId,
       questions_conditions: false,
       creator_id: 1,
     };
@@ -346,28 +367,37 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
 
       // Marcar como guardado
       setSaved(true);
+      setIsFormCompleted(true);
 
-      // Notificar al componente padre que la pregunta hija se guardó correctamente
+      // Crear un objeto de datos completo para pasar al padre
+      const childData = {
+        id: responseData.id,
+        title: sanitizedTitle,
+        description: finalDescription,
+        questionType: selectedQuestionType,
+        section: selectedSection || parentQuestionData?.section,
+        mandatory: mandatory,
+        addToBank: addToBank
+      };
+
+      // Notificar al componente padre
+      console.log("ChildQuestionForm: Guardado exitoso, notificando al padre con datos:", childData);
       if (onSave) {
-        onSave({
-          id: responseData.id,
-          title: sanitizedTitle,
-          description: finalDescription, // Asegurar que también usamos la misma descripción final
-          questionType: selectedQuestionType,
-          section: selectedSection,
-          mandatory: mandatory
-        }, formId); // Pasar el ID del formulario
+        onSave(childData);
       }
 
       setErrorMessage('Pregunta hija agregada correctamente.');
       setModalStatus('success');
       setIsModalOpen(true);
 
+      return true; // Indicar éxito
+
     } catch (error) {
       console.error('Error al guardar los datos:', error);
       setErrorMessage(`Error al guardar la pregunta hija: ${error.message}. Intente nuevamente.`);
       setModalStatus('error');
       setIsModalOpen(true);
+      return false; // Indicar fallo
     }
   };
 
@@ -382,8 +412,36 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
   };
 
   // Exponer funciones al padre
+  // Exponer funciones al padre
   useImperativeHandle(ref, () => ({
-    submitChildQuestion: handleSubmit,
+    submitChildQuestion: () => {
+      console.log("ChildQuestionForm: Ejecutando submitChildQuestion");
+
+      // Log del estado actual para depuración
+      console.log("Estado actual:", {
+        title,
+        selectedQuestionType,
+        canActivateSwitches,
+        formId,
+        parentQuestionData
+      });
+
+      // Verificar que los datos son válidos antes de guardar
+      if (title.trim() !== '' && selectedQuestionType !== null) {
+        // Si los datos son válidos, ejecuta handleSubmit
+        return handleSubmit();
+      } else {
+        // Si los datos no son válidos, muestra un mensaje de error
+        console.error("ChildQuestionForm: No se puede guardar, faltan datos obligatorios");
+
+        // Mostrar mensaje al usuario
+        setErrorMessage('Completa el título y selecciona un tipo de pregunta para guardar.');
+        setModalStatus('error');
+        setIsModalOpen(true);
+
+        return false;  // Indica al componente padre que la operación falló
+      }
+    },
     resetChildForm: resetForm,
     isFormValid: () => canActivateSwitches,
     isFormCompleted: () => isFormCompleted,
