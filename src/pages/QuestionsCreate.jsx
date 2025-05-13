@@ -10,10 +10,10 @@ const QuestionsCreate = () => {
   const navigate = useNavigate();
   const questionsFormRef = useRef(null);
 
-  // Dos estados separados para controlar la validez:
-  // 1. Si hay preguntas guardadas
+  // Dos estados separados para controlar la validez del botón Continuar:
+  // 1. Si hay preguntas guardadas válidas
   const [hasValidQuestions, setHasValidQuestions] = useState(false);
-  // 2. Si el usuario está configurando una pregunta
+  // 2. Si el usuario está configurando una pregunta actualmente
   const [isConfiguringQuestion, setIsConfiguringQuestion] = useState(false);
 
   // Obtener la categoría del servicio en lugar de localStorage directo
