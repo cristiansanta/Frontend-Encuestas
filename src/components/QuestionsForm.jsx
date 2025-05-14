@@ -97,6 +97,7 @@ const SavedQuestionForm = ({
   const childFormRefs = useRef({});
   const bankButtonRef = useRef(null);
   const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [isChildFormEditing, setIsChildFormEditing] = useState(false);
 
   // Nuevo estado para monitorear la validez de los formularios hijos
   const [childFormValidities, setChildFormValidities] = useState({});
@@ -104,11 +105,21 @@ const SavedQuestionForm = ({
   // Efecto para notificar cuando cambia el estado de edición
   useEffect(() => {
     if (onEditingChange) {
-      // Consideramos que está en edición solo si está expandido y en modo edición
-      const isCurrentlyEditing = isEditing && !form.isCollapsed;
+      // Consideramos que está en edición si está expandido y en modo edición O si alguna pregunta hija está en edición
+      const isCurrentlyEditing = (isEditing && !form.isCollapsed) || isChildFormEditing;
       onEditingChange(isCurrentlyEditing);
     }
-  }, [isEditing, form.isCollapsed, onEditingChange]);
+  }, [isEditing, form.isCollapsed, isChildFormEditing, onEditingChange]);
+  const handleChildEditingChange = (isEditing) => {
+    console.log("SavedQuestionForm: Pregunta hija está siendo editada:", isEditing);
+    setIsChildFormEditing(isEditing);
+
+    // Notificar al padre sobre el cambio de estado de edición (combinando tanto edición del padre como de hijos)
+    if (onEditingChange) {
+      const isCurrentlyEditing = isEditing || (isEditing && !form.isCollapsed);
+      onEditingChange(isCurrentlyEditing);
+    }
+  };
 
   const canBecomeParentQuestion = (questionTypeId) => {
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
@@ -161,20 +172,21 @@ const SavedQuestionForm = ({
   // Determina si se pueden activar los switches
   const canActivateSwitches =
     title.trim() !== '' &&
-    selectedQuestionType !== null &&
-    selectedSection !== null;
+    selectedQuestionType !== null;
 
   const canActivateParentQuestionSwitch =
     canActivateSwitches && canBecomeParentQuestion(selectedQuestionType);
 
   // Guardar cambios en el formulario
   const saveParentChanges = () => {
+    // Usar una sección por defecto o nula si no hay seleccionada
+    const effectiveSection = selectedSection || null;
     const updatedParentData = {
       ...form,
       title: title.trim(),
       description,
       questionType: selectedQuestionType,
-      section: selectedSection,
+      section: effectiveSection,
       mandatory,
       isParentQuestion: isParentQuestionState,
       addToBank,
@@ -213,11 +225,22 @@ const SavedQuestionForm = ({
     }
   };
   const handleChildFormValidityChange = (childId, isValid) => {
-    console.log(`SavedQuestionForm: Validez del hijo ${childId} cambió a ${isValid}`);
-    setChildFormValidities(prev => ({
-      ...prev,
-      [childId]: isValid
-    }));
+    console.log(`QuestionsForm: Recibiendo validez para hijo ${childId}: ${isValid}`);
+
+    // Asegurarse de que childId existe
+    if (!childId) {
+      console.error('handleChildFormValidityChange: No se recibió childId válido');
+      return;
+    }
+
+    setChildFormValidities(prev => {
+      const updated = {
+        ...prev,
+        [childId]: isValid
+      };
+      console.log('Nuevo estado completo de childFormValidities:', updated);
+      return updated;
+    });
   };
 
   // Guardar la pregunta actual en el banco
@@ -273,12 +296,6 @@ const SavedQuestionForm = ({
       setIsModalOpen(true);
       return;
     }
-    if (!selectedSection) {
-      setErrorMessage('Debe seleccionar una sección para la pregunta madre.');
-      setModalStatus('error');
-      setIsModalOpen(true);
-      return;
-    }
 
     // Si está expandido, guardar cambios pendientes del padre antes de añadir hijo
     if (!form.isCollapsed && isEditing) {
@@ -304,6 +321,15 @@ const SavedQuestionForm = ({
     if (!form.isCollapsed && isEditing) {
       saveParentChanges();
     }
+
+    // Si estamos colapsando y hay preguntas hijas en edición, notificar al padre
+    if (!form.isCollapsed && isChildFormEditing) {
+      setIsChildFormEditing(false);
+      if (onEditingChange) {
+        onEditingChange(false);
+      }
+    }
+
     onToggleCollapse(form.id);
   };
 
@@ -695,6 +721,7 @@ const SavedQuestionForm = ({
                       onSave={(childData) => handleSaveChildData(childForm.id, childData)}
                       onCancel={() => handleCancelChildCreation(childForm.id)}
                       onValidityChange={(isValid) => handleChildFormValidityChange(childForm.id, isValid)}
+                      onEditingChange={handleChildEditingChange} // Añadir esta prop
                     />
                   )}
                 </div>
@@ -740,7 +767,7 @@ const SavedQuestionForm = ({
                       handleAddChildQuestionClick();
                     } else {
                       // Si la principal no es válida, mostrar un error
-                      setErrorMessage('Debe completar título, tipo de pregunta y sección de la pregunta principal antes de agregar una hija.');
+                      setErrorMessage('Debe completar título y tipo de pregunta para la pregunta principal antes de agregar una hija.');
                       setModalStatus('error');
                       setIsModalOpen(true);
                     }
@@ -1379,12 +1406,6 @@ const QuestionsForm = forwardRef(({
       setIsModalOpen(true);
       return;
     }
-    if (!selectedSection) {
-      setErrorMessage('Seleccione sección para pregunta madre.');
-      setModalStatus('error');
-      setIsModalOpen(true);
-      return;
-    }
 
     const parentId = formKey; // ID temporal del padre
     const parentQuestionData = {
@@ -1417,23 +1438,29 @@ const QuestionsForm = forwardRef(({
 
   // Manejar cuando se guarda la pregunta hija en el NUEVO formulario
   const handleSaveNewChildQuestion = (childId, childData) => {
-    console.log("QuestionsForm: Guardando hijo nuevo temporal ID:", childId);
+    console.log("QuestionsForm: Guardando hijo nuevo temporal ID:", childId, "con datos:", childData);
+
+    if (!childId || !childData) {
+      console.error('handleSaveNewChildQuestion: Datos insuficientes', { childId, childData });
+      return;
+    }
+
     setNewChildForms(prevForms =>
       prevForms.map(form =>
         form.id === childId ? {
           ...form,
           completed: true,
           data: childData,
-          isCollapsed: true // Set initial state as collapsed after saving
+          isCollapsed: true
         } : form
       )
     );
+
     setNewChildFormCompleted(true); // Habilitar añadir otro
     setErrorMessage('Pregunta hija temporal agregada.');
     setModalStatus('success');
     setIsModalOpen(true);
   };
-
   // Cancelar la creación de la pregunta hija en el NUEVO formulario
   const handleCancelNewChildQuestion = (childId) => {
     setNewChildForms(prevForms => prevForms.filter(form => form.id !== childId));
@@ -1591,10 +1618,22 @@ const QuestionsForm = forwardRef(({
 
   // Añadir esta función para manejar el cambio de validez
   const handleChildFormValidityChange = (childId, isValid) => {
-    setChildFormValidities(prev => ({
-      ...prev,
-      [childId]: isValid
-    }));
+    console.log(`QuestionsForm: Recibiendo validez para hijo ${childId}: ${isValid}`);
+
+    // Asegurarse de que childId existe
+    if (!childId) {
+      console.error('handleChildFormValidityChange: No se recibió childId válido');
+      return;
+    }
+
+    setChildFormValidities(prev => {
+      const updated = {
+        ...prev,
+        [childId]: isValid
+      };
+      console.log('Nuevo estado completo de childFormValidities:', updated);
+      return updated;
+    });
   };
 
   const hasValidChildToSave = newChildForms.some(child =>
@@ -2055,7 +2094,7 @@ const QuestionsForm = forwardRef(({
                         handleAddNewChildQuestion();
                       } else {
                         // Si la principal no es válida, mostrar un error
-                        setErrorMessage('Debe completar título, tipo de pregunta y sección de la pregunta principal antes de agregar una hija.');
+                        setErrorMessage('Debe completar título y tipo de pregunta para la pregunta principal antes de agregar una hija.');
                         setModalStatus('error');
                         setIsModalOpen(true);
                       }
