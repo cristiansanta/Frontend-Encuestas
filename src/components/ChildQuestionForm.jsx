@@ -118,6 +118,118 @@ const ChildQuestionForm = forwardRef(({ parentQuestionData, formId, onSave, onCa
     }
   }, [canActivateSwitches, props]);
 
+  // Efecto para guardado automático en tiempo real
+  useEffect(() => {
+    // Solo guardar si no está guardado y tenemos datos mínimos válidos
+    if (!saved && !isSaved && title.trim() !== '' && selectedQuestionType !== null) {
+      // Temporizador para evitar muchas operaciones
+      const timer = setTimeout(() => {
+        console.log("ChildQuestionForm: Guardado automático activado");
+
+        // Preparar datos para envío
+        const sanitizedTitle = DOMPurify.sanitize(title.trim());
+        const cleanDescription = DOMPurify.sanitize(description || '');
+        const finalDescription = isDescriptionNotEmpty(cleanDescription)
+          ? cleanDescription
+          : '<p>Sin descripción</p>';
+
+        // Determinar ID del padre
+        let parentId = 0;
+        if (parentQuestionData?.serverId && !isNaN(Number(parentQuestionData.serverId))) {
+          parentId = Number(parentQuestionData.serverId);
+        }
+        else if (parentQuestionData?.id) {
+          if (typeof parentQuestionData.id === 'number') {
+            parentId = parentQuestionData.id;
+          }
+          else if (typeof parentQuestionData.id === 'string' && !isNaN(Number(parentQuestionData.id))) {
+            parentId = Number(parentQuestionData.id);
+          }
+        }
+
+        if (parentId === 0) {
+          const storedId = localStorage.getItem('questions_id');
+          if (storedId && !isNaN(Number(storedId))) {
+            parentId = Number(storedId);
+          }
+        }
+
+        // Si no podemos determinar un ID válido, no intentar guardar
+        if (parentId === 0) {
+          return;
+        }
+
+        // Sección heredada del padre
+        const sectionId = selectedSection?.id || (parentQuestionData?.section?.id || 'default_section');
+
+        // Crear datos para enviar al API
+        const formData = {
+          title: sanitizedTitle,
+          descrip: finalDescription,
+          validate: mandatory ? 'Requerido' : 'Opcional',
+          cod_padre: parentId,
+          bank: addToBank,
+          type_questions_id: selectedQuestionType,
+          section_id: sectionId,
+          questions_conditions: false,
+          creator_id: 1,
+        };
+
+        // Enviar al servidor
+        const accessToken = localStorage.getItem('accessToken');
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(formData),
+        })
+          .then(response => {
+            if (!response.ok) {
+              return response.text().then(text => {
+                throw new Error(`Error: ${response.status}. ${text}`);
+              });
+            }
+            return response.json();
+          })
+          .then(responseData => {
+            // Marcar como guardado
+            setSaved(true);
+            setIsFormCompleted(true);
+
+            // Crear objeto de datos para pasar al padre
+            const childData = {
+              id: responseData.id,
+              title: sanitizedTitle,
+              description: finalDescription,
+              questionType: selectedQuestionType,
+              section: selectedSection || parentQuestionData?.section,
+              mandatory: mandatory,
+              addToBank: addToBank
+            };
+
+            // Notificar al padre sin plegar el formulario
+            if (onSave) {
+              onSave(childData);
+            }
+
+            if (onEditingChange) {
+              onEditingChange(false);
+            }
+
+            console.log("ChildQuestionForm: Guardado automático completado");
+          })
+          .catch(error => {
+            console.error('Error en guardado automático:', error);
+          });
+
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [title, selectedQuestionType, description, mandatory, addToBank]);
+
   // Actualizar pregunta en el banco cuando cambian los datos pero sigue activado el switch
   useEffect(() => {
     if (addToBank && canActivateSwitches && !isSaved) {

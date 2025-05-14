@@ -152,6 +152,35 @@ const SavedQuestionForm = ({
     setAddToBank(form.addToBank || false);
   }, [form]);
 
+  // Efecto para guardado automático en tiempo real
+  useEffect(() => {
+    // Solo guardar si estamos en modo edición y tenemos los datos mínimos necesarios (título y tipo)
+    if (isEditing && title.trim() !== '' && selectedQuestionType !== null) {
+      // Configurar un temporizador para evitar guardados excesivos mientras se escribe
+      const timer = setTimeout(() => {
+        console.log("SavedQuestionForm: Guardado automático activado");
+        // Usar una sección por defecto o nula si no hay seleccionada
+        const effectiveSection = selectedSection || null;
+        const updatedParentData = {
+          ...form,
+          title: title.trim(),
+          description,
+          questionType: selectedQuestionType,
+          section: effectiveSection,
+          mandatory,
+          isParentQuestion: isParentQuestionState,
+          addToBank,
+        };
+
+        onUpdate(form.id, updatedParentData);
+        // También guardar en localStorage mediante el servicio
+        updateQuestion(form.id, updatedParentData);
+      }, 800); // Retraso para no guardar en cada pulsación
+
+      return () => clearTimeout(timer);
+    }
+  }, [title, description, selectedQuestionType, selectedSection, mandatory, isParentQuestionState, addToBank]);
+
   useEffect(() => {
     if (selectedQuestionType !== null && !canBecomeParentQuestion(selectedQuestionType)) {
       // Si ya era una pregunta madre con hijos, mostrar alerta
@@ -750,20 +779,12 @@ const SavedQuestionForm = ({
 
               return (
                 <button
-                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"
-                    }`}
+                  className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${parentFormIsValid ? "bg-yellow-custom hover:bg-blue-400" : "bg-blue-200 cursor-not-allowed"}`}
                   onClick={() => {
-                    // Verificar si hay una pregunta hija incompleta
-                    const incompleteChildForm = childFormsFromProps.find(cf => !cf.completed);
-
-                    if (incompleteChildForm) {
-                      // Si hay una pregunta hija incompleta, intentar guardarla
-                      const childFormRef = childFormRefs.current[incompleteChildForm.id];
-                      if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
-                        childFormRef.submitChildQuestion();
-                      }
-                    } else if (parentFormIsValid) {
-                      // Sólo permitir crear una nueva si la principal es válida
+                    // Solo permitir agregar si la pregunta principal tiene datos válidos
+                    if (parentFormIsValid) {
+                      // Agregar directamente la nueva pregunta hija
+                      // No necesitamos guardar la principal primero, ya está guardada automáticamente
                       handleAddChildQuestionClick();
                     } else {
                       // Si la principal no es válida, mostrar un error
@@ -772,21 +793,18 @@ const SavedQuestionForm = ({
                       setIsModalOpen(true);
                     }
                   }}
-                  disabled={!canEnableButton}
-                  aria-disabled={!canEnableButton}
+                  disabled={!parentFormIsValid}
+                  aria-disabled={!parentFormIsValid}
                 >
-                  <span className={`font-work-sans text-2xl font-bold ${canEnableButton ? "text-blue-custom" : "text-gray-500"
-                    }`}>
-                    {childFormsFromProps.some(cf => !cf.completed && childFormValidities[cf.id])
-                      ? "Guardar pregunta hija"
-                      : "Agregar pregunta hija"}
+                  <span className={`font-work-sans text-2xl font-bold ${parentFormIsValid ? "text-blue-custom" : "text-gray-500"}`}>
+                    Agregar pregunta hija
                   </span>
                   <div className="absolute right-6">
                     {/* Icono AddCategory1 */}
                     <img
                       src={AddCategory1}
                       alt="Agregar"
-                      className={`w-8 h-8 ${!canEnableButton ? "opacity-50" : ""}`}
+                      className={`w-8 h-8 ${!parentFormIsValid ? "opacity-50" : ""}`}
                     />
                   </div>
                 </button>
@@ -833,6 +851,8 @@ const QuestionsForm = forwardRef(({
   const [selectedSection, setSelectedSection] = useState(null);
   const [availableSections, setAvailableSections] = useState([]);
   const [isNewFormCollapsed, setIsNewFormCollapsed] = useState(false);
+  const isFormKey = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Estado para el dropdown del banco de preguntas
   const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
@@ -874,10 +894,15 @@ const QuestionsForm = forwardRef(({
   // Efecto para determinar si se está configurando una pregunta
   useEffect(() => {
     // Se está configurando si:
-    // 1. Hay cambios en el formulario nuevo, o
+    // 1. Hay cambios en el formulario nuevo y no tiene datos mínimos válidos aún, o
     // 2. Se está editando alguna pregunta guardada
+    const formHasValidData = title.trim() !== '' && selectedQuestionType !== null;
     const isAnyFormEditing = Object.values(editingSavedForms).some(editing => editing);
-    const isCurrentlyConfiguring = hasNewFormChanges || isAnyFormEditing;
+
+    // Considerar que está configurando solo si no tiene datos válidos o está guardando
+    const isCurrentlyConfiguring = (hasNewFormChanges && !formHasValidData) ||
+      isAnyFormEditing ||
+      isSaving;
 
     setIsConfiguring(isCurrentlyConfiguring);
 
@@ -885,7 +910,154 @@ const QuestionsForm = forwardRef(({
     if (onConfiguringChange) {
       onConfiguringChange(isCurrentlyConfiguring);
     }
-  }, [hasNewFormChanges, editingSavedForms, onConfiguringChange]);
+  }, [hasNewFormChanges, editingSavedForms, onConfiguringChange, title, selectedQuestionType, isSaving]);
+
+  // Efecto para guardado automático del formulario nuevo
+  // Efecto para guardado automático del formulario nuevo (sin crear nuevo formulario)
+  useEffect(() => {
+    // Solo guardar automáticamente si hay datos mínimos válidos y no está en progreso otro guardado
+    if (title.trim() !== '' && selectedQuestionType !== null && !isSaving && hasNewFormChanges) {
+      const timer = setTimeout(() => {
+        console.log("QuestionsForm: Guardado automático del formulario principal en progreso");
+
+        // Validación básica
+        if (!title.trim() || !selectedQuestionType) {
+          return;
+        }
+
+        // Marca que estamos guardando para evitar guardados simultáneos
+        setIsSaving(true);
+
+        const sanitizedTitle = DOMPurify.sanitize(title.trim());
+        const cleanDescription = DOMPurify.sanitize(description || '');
+        const finalDescription = isDescriptionNotEmpty(cleanDescription)
+          ? cleanDescription
+          : '<p>Sin descripción</p>';
+
+        // Usar una sección por defecto si no hay seleccionada
+        const effectiveSection = selectedSection || {
+          id: 'default_section',
+          name: 'Sin sección'
+        };
+
+        const parentFormData = {
+          title: sanitizedTitle,
+          descrip: finalDescription,
+          validate: mandatory ? 'Requerido' : 'Opcional',
+          cod_padre: 0,
+          bank: addToBank,
+          type_questions_id: selectedQuestionType,
+          section_id: effectiveSection.id,
+          questions_conditions: isParentQuestion,
+          creator_id: 1,
+        };
+
+        // Enviar al servidor
+        const accessToken = localStorage.getItem('accessToken');
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify(parentFormData),
+        })
+          .then(response => {
+            if (!response.ok) {
+              return response.text().then(text => {
+                throw new Error(`Error ${response.status}: ${text}`);
+              });
+            }
+            return response.json();
+          })
+          .then(responseData => {
+            const serverId = responseData.id;
+            console.log("QuestionsForm: Pregunta principal guardada automáticamente con ID:", serverId);
+            localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
+
+            const savedFormEntry = {
+              id: formKey,
+              serverId: Number(serverId),
+              title: sanitizedTitle,
+              description: finalDescription,
+              questionType: selectedQuestionType,
+              section: effectiveSection,
+              mandatory: mandatory,
+              isParentQuestion: isParentQuestion,
+              addToBank: addToBank,
+              isCollapsed: false, // No colapsar en guardado automático para que siga editando
+              childForms: newChildForms
+                .filter(child => child.completed && child.data)
+                .map(child => ({
+                  id: child.id,
+                  parentData: {
+                    ...child.parentData,
+                    id: Number(serverId),
+                    serverId: Number(serverId)
+                  },
+                  completed: true,
+                  isCollapsed: true,
+                  data: child.data
+                }))
+            };
+
+            if (addToBank) {
+              const bankData = { ...savedFormEntry, id: Number(serverId) };
+              delete bankData.childForms;
+              delete bankData.serverId;
+              delete bankData.isCollapsed;
+              addQuestionToBank(bankData);
+            }
+
+            // Actualizar el estado y guardar en localStorage
+            setSavedForms(prevForms => {
+              // Verificar si ya existe esta pregunta en savedForms (por el formKey)
+              const existingFormIndex = prevForms.findIndex(f => f.id === formKey);
+
+              let updatedForms;
+              if (existingFormIndex >= 0) {
+                // Actualizar la pregunta existente
+                updatedForms = [...prevForms];
+                updatedForms[existingFormIndex] = savedFormEntry;
+              } else {
+                // Agregar nueva pregunta
+                updatedForms = [...prevForms, savedFormEntry];
+              }
+
+              // Guardar en localStorage
+              saveQuestions(updatedForms);
+
+              // Notificar que ahora hay preguntas válidas
+              setHasValidQuestions(true);
+              if (onQuestionsValidChange) {
+                onQuestionsValidChange(true);
+              }
+
+              return updatedForms;
+            });
+
+            // También añadir usando el servicio
+            addQuestion(savedFormEntry);
+
+            // NO resetear el formulario, permitir seguir editando
+            // Marcar que ya no estamos configurando para habilitar botón Continuar
+            setIsConfiguring(false);
+            if (onConfiguringChange) {
+              onConfiguringChange(false);
+            }
+          })
+          .catch(error => {
+            console.error('Error al guardar la pregunta automáticamente:', error);
+          })
+          .finally(() => {
+            setIsSaving(false);
+          });
+
+      }, 1500); // Retraso sustancial para permitir edición continua
+
+      return () => clearTimeout(timer);
+    }
+  }, [title, selectedQuestionType, description, mandatory, addToBank, isParentQuestion, hasNewFormChanges]);
 
   // Efecto para notificar sobre la validez del formulario cuando cambian las preguntas guardadas
   useEffect(() => {
@@ -1477,142 +1649,158 @@ const QuestionsForm = forwardRef(({
     canActivateNewFormSwitches && canBecomeParentQuestion(selectedQuestionType);
 
   // Enviar formulario - Manejar guardado del NUEVO formulario
-  const handleSubmitNewQuestion = async () => {
-    // Validación de datos - ahora solo título y tipo son requeridos
-    if (!title.trim()) {
-      setErrorMessage('El título de la pregunta es requerido.');
-      setModalStatus('error');
-      setIsModalOpen(true);
-      return;
-    }
+  // Enviar formulario - Manejar guardado del NUEVO formulario
+  // Enviar formulario - Manejar guardado del NUEVO formulario
+  const handleSubmitNewQuestion = async (showSuccessMessage = true, resetAfterSave = true) => {
+    // Evitar múltiples guardados simultáneos
+    if (isSaving) return;
 
-    if (!selectedQuestionType) {
-      setErrorMessage('Debe seleccionar un tipo de pregunta.');
-      setModalStatus('error');
-      setIsModalOpen(true);
-      return;
-    }
-
-    const sanitizedTitle = DOMPurify.sanitize(title.trim());
-
-    // FIX: Ensure description is never null - use empty string as fallback
-    const cleanDescription = DOMPurify.sanitize(description || '');
-    // If the description is completely empty, provide a default value
-    const finalDescription = isDescriptionNotEmpty(cleanDescription)
-      ? cleanDescription
-      : '<p>Sin descripción</p>';
-
-    // Usar una sección por defecto si no hay seleccionada
-    const effectiveSection = selectedSection || {
-      id: 'default_section',
-      name: 'Sin sección'
-    };
-
-    const parentFormData = {
-      title: sanitizedTitle,
-      descrip: finalDescription, // Use the non-null description
-      validate: mandatory ? 'Requerido' : 'Opcional',
-      cod_padre: 0,
-      bank: addToBank,
-      type_questions_id: selectedQuestionType,
-      section_id: effectiveSection.id,
-      questions_conditions: isParentQuestion,
-      creator_id: 1, // O obtener del usuario logueado
-    };
+    setIsSaving(true);
 
     try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify(parentFormData),
-      });
+      // Validación de datos - ahora solo título y tipo son requeridos
+      if (!title.trim()) {
+        setErrorMessage('El título de la pregunta es requerido.');
+        setModalStatus('error');
+        setIsModalOpen(true);
+        setIsSaving(false);
+        return;
+      }
 
-      if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+      if (!selectedQuestionType) {
+        setErrorMessage('Debe seleccionar un tipo de pregunta.');
+        setModalStatus('error');
+        setIsModalOpen(true);
+        setIsSaving(false);
+        return;
+      }
 
-      const responseData = await response.json();
-      const serverId = responseData.id;
-      console.log("QuestionsForm: Pregunta padre guardada en servidor con ID:", serverId);
-      localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
+      const sanitizedTitle = DOMPurify.sanitize(title.trim());
 
-      // Crear una sección por defecto si no se seleccionó ninguna
+      // FIX: Ensure description is never null - use empty string as fallback
+      const cleanDescription = DOMPurify.sanitize(description || '');
+      // If the description is completely empty, provide a default value
+      const finalDescription = isDescriptionNotEmpty(cleanDescription)
+        ? cleanDescription
+        : '<p>Sin descripción</p>';
+
+      // Usar una sección por defecto si no hay seleccionada
       const effectiveSection = selectedSection || {
         id: 'default_section',
         name: 'Sin sección'
       };
 
-      const savedFormEntry = {
-        id: formKey,
-        serverId: Number(serverId),
+      const parentFormData = {
         title: sanitizedTitle,
-        description: finalDescription,
-        questionType: selectedQuestionType,
-        section: effectiveSection,
-        mandatory: mandatory,
-        isParentQuestion: isParentQuestion,
-        addToBank: addToBank,
-        isCollapsed: true, // Colapsar al guardar
-        childForms: newChildForms
-          .filter(child => child.completed && child.data)
-          .map(child => ({
-            id: child.id,
-            parentData: {
-              ...child.parentData,
-              id: Number(serverId),
-              serverId: Number(serverId)
-            },
-            completed: true,
-            isCollapsed: true,
-            data: child.data
-          }))
+        descrip: finalDescription, // Use the non-null description
+        validate: mandatory ? 'Requerido' : 'Opcional',
+        cod_padre: 0,
+        bank: addToBank,
+        type_questions_id: selectedQuestionType,
+        section_id: effectiveSection.id,
+        questions_conditions: isParentQuestion,
+        creator_id: 1, // O obtener del usuario logueado
       };
 
-      if (addToBank) {
-        const bankData = { ...savedFormEntry, id: Number(serverId) };
-        delete bankData.childForms;
-        delete bankData.serverId;
-        delete bankData.isCollapsed;
-        addQuestionToBank(bankData);
-      }
-      // MODIFICADO: Actualizar el estado y guardar en localStorage
-      setSavedForms(prevForms => {
-        const updatedForms = [...prevForms, savedFormEntry];
-        // Guardar en localStorage
-        saveQuestions(updatedForms);
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify(parentFormData),
+        });
 
-        // Notificar que ahora hay preguntas válidas
-        setHasValidQuestions(true);
-        if (onQuestionsValidChange) {
-          onQuestionsValidChange(true);
+        if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+
+        const responseData = await response.json();
+        const serverId = responseData.id;
+        console.log("QuestionsForm: Pregunta padre guardada en servidor con ID:", serverId);
+        localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
+
+        // Crear una sección por defecto si no se seleccionó ninguna
+        const savedFormEntry = {
+          id: formKey,
+          serverId: Number(serverId),
+          title: sanitizedTitle,
+          description: finalDescription,
+          questionType: selectedQuestionType,
+          section: effectiveSection,
+          mandatory: mandatory,
+          isParentQuestion: isParentQuestion,
+          addToBank: addToBank,
+          isCollapsed: true, // Colapsar al guardar
+          childForms: newChildForms
+            .filter(child => child.completed && child.data)
+            .map(child => ({
+              id: child.id,
+              parentData: {
+                ...child.parentData,
+                id: Number(serverId),
+                serverId: Number(serverId)
+              },
+              completed: true,
+              isCollapsed: true,
+              data: child.data
+            }))
+        };
+
+        if (addToBank) {
+          const bankData = { ...savedFormEntry, id: Number(serverId) };
+          delete bankData.childForms;
+          delete bankData.serverId;
+          delete bankData.isCollapsed;
+          addQuestionToBank(bankData);
         }
 
-        return updatedForms;
-      });
+        // MODIFICADO: Actualizar el estado y guardar en localStorage
+        setSavedForms(prevForms => {
+          const updatedForms = [...prevForms, savedFormEntry];
+          // Guardar en localStorage
+          saveQuestions(updatedForms);
 
-      // NUEVO: También añadir usando el servicio
-      addQuestion(savedFormEntry);
+          // Notificar que ahora hay preguntas válidas
+          setHasValidQuestions(true);
+          if (onQuestionsValidChange) {
+            onQuestionsValidChange(true);
+          }
 
-      // Resetear form nuevo
-      resetNewForm(true);
+          return updatedForms;
+        });
 
-      // Notificar que ya no estamos configurando
-      setIsConfiguring(false);
-      if (onConfiguringChange) {
-        onConfiguringChange(false);
+        // NUEVO: También añadir usando el servicio
+        addQuestion(savedFormEntry);
+
+        // MODIFICADO: Solo resetear el formulario si se solicita explícitamente
+        if (resetAfterSave) {
+          resetNewForm(true);
+        }
+
+        addQuestion(savedFormEntry);
+
+        // Notificar que ya no estamos configurando para habilitar botón Continuar
+        setIsConfiguring(false);
+        if (onConfiguringChange) {
+          onConfiguringChange(false);
+        }
+
+        // Solo mostrar mensaje de éxito si se solicita explícitamente
+        if (showSuccessMessage) {
+          setErrorMessage('Pregunta agregada correctamente.');
+          setModalStatus('success');
+          setIsModalOpen(true);
+        }
+
+      } catch (error) {
+        console.error('Error al guardar la pregunta:', error);
+        setErrorMessage(`Error al guardar: ${error.message}.`);
+        setModalStatus('error');
+        setIsModalOpen(true);
       }
-
-      setErrorMessage('Pregunta agregada correctamente.');
-      setModalStatus('success');
-      setIsModalOpen(true);
-
-    } catch (error) {
-      console.error('Error al guardar la pregunta:', error);
-      setErrorMessage(`Error al guardar: ${error.message}.`);
-      setModalStatus('error');
-      setIsModalOpen(true);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -2077,20 +2265,11 @@ const QuestionsForm = forwardRef(({
 
                 return (
                   <button
-                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canEnableButton ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"
-                      }`}
+                    className={`w-5/6 py-2.5 md:py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${parentFormIsValid ? "bg-yellow-custom hover:bg-green-400" : "bg-green-200 cursor-not-allowed"}`}
                     onClick={() => {
-                      // Verificar si hay una pregunta hija incompleta
-                      const incompleteChild = newChildForms.find(child => !child.completed);
-
-                      if (incompleteChild) {
-                        // Si hay una pregunta hija incompleta, intentar guardarla
-                        const childFormRef = childFormRefs.current[incompleteChild.id];
-                        if (childFormRef && typeof childFormRef.submitChildQuestion === 'function') {
-                          childFormRef.submitChildQuestion();
-                        }
-                      } else if (parentFormIsValid) {
-                        // Sólo permitir crear una nueva si la principal es válida
+                      // Solo permitir agregar si la principal es válida
+                      if (parentFormIsValid) {
+                        // Agregar directamente, ya que el guardado automático ha ocurrido
                         handleAddNewChildQuestion();
                       } else {
                         // Si la principal no es válida, mostrar un error
@@ -2099,20 +2278,17 @@ const QuestionsForm = forwardRef(({
                         setIsModalOpen(true);
                       }
                     }}
-                    disabled={!canEnableButton}
-                    aria-disabled={!canEnableButton}
+                    disabled={!parentFormIsValid}
+                    aria-disabled={!parentFormIsValid}
                   >
-                    <span className={`font-work-sans text-2xl font-bold ${canEnableButton ? "text-blue-custom" : "text-gray-500"
-                      }`}>
-                      {newChildForms.some(child => !child.completed && childFormValidities[child.id])
-                        ? "Guardar pregunta hija"
-                        : "Agregar pregunta hija"}
+                    <span className={`font-work-sans text-2xl font-bold ${parentFormIsValid ? "text-blue-custom" : "text-gray-500"}`}>
+                      Agregar pregunta hija
                     </span>
                     <div className="absolute right-6">
                       <img
                         src={AddCategory1}
                         alt="Agregar"
-                        className={`w-8 h-8 ${!canEnableButton ? "opacity-50" : ""}`}
+                        className={`w-8 h-8 ${!parentFormIsValid ? "opacity-50" : ""}`}
                       />
                     </div>
                   </button>
@@ -2126,15 +2302,13 @@ const QuestionsForm = forwardRef(({
       {/* Botón: Agregar pregunta (NUEVO Form) */}
       <div className="mt-4">
         <button
-          className={`w-full py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canActivateNewFormSwitches
-            ? "bg-yellow-custom hover:bg-yellow-400"
-            : "bg-gray-200 cursor-not-allowed"
-            }`}
-          onClick={handleSubmitNewQuestion}
+          className={`w-full py-3 rounded-xl flex items-center justify-start pl-6 gap-2 transition-colors relative shadow-sm hover:shadow-md ${canActivateNewFormSwitches ? "bg-yellow-custom hover:bg-yellow-400" : "bg-gray-200 cursor-not-allowed"}`}
+          onClick={() => handleSubmitNewQuestion(true, true)} // Mostrar mensaje y resetear
           disabled={!canActivateNewFormSwitches}
         >
-          <span className={`font-work-sans text-2xl font-bold ${canActivateNewFormSwitches ? "text-blue-custom" : "text-gray-500"
-            }`}>Agregar pregunta</span>
+          <span className={`font-work-sans text-2xl font-bold ${canActivateNewFormSwitches ? "text-blue-custom" : "text-gray-500"}`}>
+            Agregar pregunta
+          </span>
           <div className="absolute right-6">
             <img src={AddCategory1} alt="Agregar" className={`w-8 h-8 ${!canActivateNewFormSwitches ? "opacity-50" : ""}`} />
           </div>
