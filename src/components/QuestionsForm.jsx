@@ -875,127 +875,126 @@ const QuestionsForm = forwardRef(({
   }, [hasNewFormChanges, editingSavedForms, onConfiguringChange, title, selectedQuestionType, isSaving]);
 
   // Efecto para guardado automático del formulario nuevo
-  useEffect(() => {
-    if (title.trim() !== '' && selectedQuestionType !== null && !isSaving) {
-      const timer = setTimeout(() => {
-        console.log("QuestionsForm: Guardado automático del formulario principal en progreso");
+useEffect(() => {
+  if (title.trim() !== '' && selectedQuestionType !== null && !isSaving) {
+    const timer = setTimeout(() => {
+      console.log("QuestionsForm: Guardado automático del formulario principal en progreso");
 
-        if (!title.trim() || !selectedQuestionType) {
-          return;
-        }
+      if (!title.trim() || !selectedQuestionType) {
+        return;
+      }
 
-        setIsSaving(true);
+      setIsSaving(true);
 
-        const sanitizedTitle = DOMPurify.sanitize(title.trim());
-        const cleanDescription = DOMPurify.sanitize(description || '');
-        const finalDescription = isDescriptionNotEmpty(cleanDescription)
-          ? cleanDescription
-          : '<p>Sin descripción</p>';
+      const sanitizedTitle = DOMPurify.sanitize(title.trim());
+      const cleanDescription = DOMPurify.sanitize(description || '');
+      const finalDescription = isDescriptionNotEmpty(cleanDescription)
+        ? cleanDescription
+        : '<p>Sin descripción</p>';
 
-        const effectiveSection = selectedSection || {
-          id: 'default_section',
-          name: 'Sin sección'
-        };
+      const effectiveSection = selectedSection || {
+        id: 'default_section',
+        name: 'Sin sección'
+      };
 
-        const parentFormData = {
-          title: sanitizedTitle,
-          descrip: finalDescription,
-          validate: mandatory ? 'Requerido' : 'Opcional',
-          cod_padre: 0,
-          bank: addToBank,
-          type_questions_id: selectedQuestionType,
-          section_id: effectiveSection.id,
-          questions_conditions: isParentQuestion,
-          creator_id: 1,
-        };
+      const parentFormData = {
+        title: sanitizedTitle,
+        descrip: finalDescription,
+        validate: mandatory ? 'Requerido' : 'Opcional',
+        cod_padre: 0,
+        bank: addToBank,
+        type_questions_id: selectedQuestionType,
+        section_id: effectiveSection.id,
+        questions_conditions: isParentQuestion,
+        creator_id: 1,
+      };
 
-        const accessToken = localStorage.getItem('accessToken');
-        fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify(parentFormData),
-        })
-          .then(response => {
-            if (!response.ok) {
-              return response.text().then(text => {
-                throw new Error(`Error ${response.status}: ${text}`);
-              });
-            }
-            return response.json();
-          })
-          .then(responseData => {
-            const serverId = responseData.id;
-            console.log("QuestionsForm: Pregunta principal guardada automáticamente con ID:", serverId);
-            localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
-
-            const savedFormEntry = {
-              id: formKey,
-              serverId: Number(serverId),
-              title: sanitizedTitle,
-              description: finalDescription,
-              questionType: selectedQuestionType,
-              section: effectiveSection,
-              mandatory: mandatory,
-              isParentQuestion: isParentQuestion,
-              addToBank: addToBank,
-              isCollapsed: true,
-              childForms: newChildForms
-                .filter(child => child.completed && child.data)
-                .map(child => ({
-                  id: child.id,
-                  parentData: {
-                    ...child.parentData,
-                    id: Number(serverId),
-                    serverId: Number(serverId)
-                  },
-                  completed: true,
-                  isCollapsed: true,
-                  data: child.data
-                }))
-            };
-
-            if (addToBank) {
-              const bankData = { ...savedFormEntry, id: Number(serverId) };
-              delete bankData.childForms;
-              delete bankData.serverId;
-              delete bankData.isCollapsed;
-              addQuestionToBank(bankData);
-            }
-
-            setSavedForms(prevForms => {
-              const updatedForms = [...prevForms, savedFormEntry];
-              saveQuestions(updatedForms);
-              setHasValidQuestions(true);
-              if (onQuestionsValidChange) {
-                onQuestionsValidChange(true);
-              }
-              return updatedForms;
+      const accessToken = localStorage.getItem('accessToken');
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(parentFormData),
+      })
+        .then(response => {
+          if (!response.ok) {
+            return response.text().then(text => {
+              throw new Error(`Error ${response.status}: ${text}`);
             });
+          }
+          return response.json();
+        })
+        .then(responseData => {
+          const serverId = responseData.id;
+          console.log("QuestionsForm: Pregunta principal guardada automáticamente con ID:", serverId);
+          localStorage.setItem('questions_id', DOMPurify.sanitize(String(serverId)));
 
-            addQuestion(savedFormEntry);
+          const savedFormEntry = {
+            id: formKey,
+            serverId: Number(serverId),
+            title: sanitizedTitle,
+            description: finalDescription,
+            questionType: selectedQuestionType,
+            section: effectiveSection,
+            mandatory: mandatory,
+            isParentQuestion: isParentQuestion,
+            addToBank: addToBank,
+            isCollapsed: true,
+            childForms: newChildForms
+              .filter(child => child.completed && child.data)
+              .map(child => ({
+                id: child.id,
+                parentData: {
+                  ...child.parentData,
+                  id: Number(serverId),
+                  serverId: Number(serverId)
+                },
+                completed: true,
+                isCollapsed: true,
+                data: child.data
+              }))
+          };
 
-            // Crear un nuevo formulario vacío después del guardado automático
-            resetNewForm(true);
+          if (addToBank) {
+            const bankData = { ...savedFormEntry, id: Number(serverId) };
+            delete bankData.childForms;
+            delete bankData.serverId;
+            delete bankData.isCollapsed;
+            addQuestionToBank(bankData);
+          }
 
-            setIsConfiguring(false);
-            if (onConfiguringChange) {
-              onConfiguringChange(false);
+          setSavedForms(prevForms => {
+            const updatedForms = [...prevForms, savedFormEntry];
+            saveQuestions(updatedForms);
+            setHasValidQuestions(true);
+            if (onQuestionsValidChange) {
+              onQuestionsValidChange(true);
             }
-          })
-          .catch(error => {
-            console.error('Error al guardar la pregunta automáticamente:', error);
-          })
-          .finally(() => {
-            setIsSaving(false);
+            return updatedForms;
           });
-      }, 1500);
 
-      return () => clearTimeout(timer);
-    }
-  }, [title, selectedQuestionType, description, mandatory, addToBank, isParentQuestion]);
+          addQuestion(savedFormEntry);
+
+          // No crear un nuevo formulario vacío después del guardado automático
+          setIsConfiguring(false);
+          if (onConfiguringChange) {
+            onConfiguringChange(false);
+          }
+        })
+        .catch(error => {
+          console.error('Error al guardar la pregunta automáticamente:', error);
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }
+}, [title, selectedQuestionType, description, mandatory, addToBank, isParentQuestion]);
+
 
   // Efecto para notificar sobre la validez del formulario cuando cambian las preguntas guardadas
   useEffect(() => {
