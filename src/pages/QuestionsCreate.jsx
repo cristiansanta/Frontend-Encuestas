@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import SurveyLayout from '../components/SurveyLayout';
 import QuestionsForm from '../components/QuestionsForm';
 import { SurveyContext } from '../Provider/SurveyContext';
@@ -8,7 +8,13 @@ import { useNavigate } from 'react-router-dom';
 const QuestionsCreate = () => {
   const { selectedCategory } = useContext(SurveyContext);
   const navigate = useNavigate();
-  const [questionsValid, setQuestionsValid] = useState(false);
+  const questionsFormRef = useRef(null);
+
+  // Dos estados separados para controlar la validez del botón Continuar:
+  // 1. Si hay preguntas guardadas válidas
+  const [hasValidQuestions, setHasValidQuestions] = useState(false);
+  // 2. Si el usuario está configurando una pregunta actualmente
+  const [isConfiguringQuestion, setIsConfiguringQuestion] = useState(false);
 
   // Obtener la categoría del servicio en lugar de localStorage directo
   const surveyInfo = getSurveyInfo();
@@ -16,22 +22,21 @@ const QuestionsCreate = () => {
   const categoryData = selectedCategory || surveyInfo.selectedCategory;
 
   // Crear el título del header basado en la categoría
-  const headerTitle = `Configuración de la encuesta: Categoría seleccionada: ${categoryData ? `${categoryData[0][1]}` : ''
-    }`;
+  const headerTitle = `Configuración de la encuesta: Categoría seleccionada: ${categoryData ? `${categoryData[0][1]}` : ''}`;
 
   // Manejar el clic en el botón Continuar
   const handleContinue = () => {
-    // Aquí podrías tener lógica de validación si es necesario
-    // Por ejemplo, verificar que haya al menos una pregunta creada
-
-    // Navegar a la página de previsualización
-    navigate('/preview-survey');
+    // Navegar a la página de previsualización solo si hay preguntas válidas
+    // y no se está configurando ninguna pregunta actualmente
+    if (hasValidQuestions && !isConfiguringQuestion) {
+      navigate('/preview-survey');
+    }
   };
 
-  // Recibir el estado de validez desde el formulario de preguntas
-  const handleQuestionsValidChange = (isValid) => {
-    setQuestionsValid(isValid);
-  };
+  // El botón debe estar habilitado solo cuando:
+  // 1. Hay al menos una pregunta guardada (hasValidQuestions es true)
+  // 2. No se está configurando ninguna pregunta (isConfiguringQuestion es false)
+  const isButtonEnabled = hasValidQuestions && !isConfiguringQuestion;
 
   return (
     <SurveyLayout
@@ -39,10 +44,12 @@ const QuestionsCreate = () => {
       headerTitle={headerTitle}
       navButtonType="continue"
       onNavButtonClick={handleContinue}
-      navButtonDisabled={!questionsValid}
+      navButtonDisabled={!isButtonEnabled}
     >
       <QuestionsForm
-        onValidChange={handleQuestionsValidChange}
+        ref={questionsFormRef}
+        onQuestionsValidChange={setHasValidQuestions}
+        onConfiguringChange={setIsConfiguringQuestion}
       />
     </SurveyLayout>
   );

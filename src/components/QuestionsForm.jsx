@@ -778,7 +778,7 @@ const SwitchOption = ({ value, onChange, label, disabled = false }) => (
   </div>
 );
 // Componente Principal actualizado
-const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
+const QuestionsForm = forwardRef(({ onAddChildQuestion, onQuestionsValidChange, onConfiguringChange, ...props }, ref) => {
   // --- Estados ---
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -813,6 +813,8 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const childFormRefs = useRef({});
 
   const endpoint = import.meta.env.VITE_API_ENDPOINT + 'questions/store';
+  // Estado para rastrear si el usuario está configurando activamente una pregunta
+  const [isConfiguring, setIsConfiguring] = useState(false);
   const canBecomeParentQuestion = (questionTypeId) => {
     // Solo tipos 3 (Opción Única), 4 (Opción Multiple) y 5 (Falso / Verdadero) pueden ser madres
     return questionTypeId === 3 || questionTypeId === 4 || questionTypeId === 5;
@@ -929,6 +931,48 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       setNewChildFormCompleted(true);
     }
   }, [isParentQuestion]);
+
+  // Efecto para monitorear cambios en las preguntas guardadas y notificar al padre
+  useEffect(() => {
+    // Determinar si hay al menos una pregunta válida guardada
+    const hasValidSavedQuestions = savedForms.length > 0;
+
+    // Notificar al componente padre sobre el estado de validez de las preguntas
+    if (onQuestionsValidChange) {
+      onQuestionsValidChange(hasValidSavedQuestions);
+    }
+  }, [savedForms, onQuestionsValidChange]);
+  // Efecto para detectar si se está configurando una nueva pregunta
+  useEffect(() => {
+    // Se considera que está configurando si:
+    // 1. El nuevo formulario tiene contenido o
+    // 2. Hay algún formulario hijo en proceso o
+    // 3. Hay cambios pendientes en el formulario principal
+    const hasNewFormChanges =
+      title.trim() !== '' ||
+      isDescriptionNotEmpty(description) ||
+      selectedQuestionType !== null ||
+      selectedSection !== null;
+
+    const hasIncompleteChildForms = newChildForms.some(child => !child.completed);
+
+    const isCurrentlyConfiguring = hasNewFormChanges || hasIncompleteChildForms;
+
+    // Actualizar el estado local
+    setIsConfiguring(isCurrentlyConfiguring);
+
+    // Notificar al componente padre
+    if (onConfiguringChange) {
+      onConfiguringChange(isCurrentlyConfiguring);
+    }
+  }, [
+    title,
+    description,
+    selectedQuestionType,
+    selectedSection,
+    newChildForms,
+    onConfiguringChange
+  ]);
   // Verificar cambios
   const hasNewFormChanges =
     selectedQuestionType !== null ||
@@ -1303,6 +1347,8 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
     setErrorMessage('Pregunta hija temporal agregada.');
     setModalStatus('success');
     setIsModalOpen(true);
+    // Actualizar estado de configuración después de guardar hijo
+    setIsConfiguring(false);
   };
 
   // Cancelar la creación de la pregunta hija en el NUEVO formulario
@@ -1424,11 +1470,13 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
       // NUEVO: También añadir usando el servicio
       addQuestion(savedFormEntry);
 
-      resetNewForm(true); // Resetear form nuevo
+
       setErrorMessage('Pregunta agregada correctamente.');
       setModalStatus('success');
       setIsModalOpen(true);
-
+      // Actualizar estado de configuración después de guardar exitosamente
+      setIsConfiguring(false);
+      resetNewForm(true); // Resetear form nuevo
     } catch (error) {
       console.error('Error al guardar la pregunta:', error);
       setErrorMessage(`Error al guardar: ${error.message}.`);
@@ -1440,7 +1488,9 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   // Exponer funciones al padre
   useImperativeHandle(ref, () => ({
     submitQuestionForm: handleSubmitNewQuestion,
-    addQuestion: handleSubmitNewQuestion
+    addQuestion: handleSubmitNewQuestion,
+    // Nueva función para verificar el estado de configuración actual
+    isConfiguringQuestion: () => isConfiguring
   }));
 
   // Cerrar modal
@@ -1470,6 +1520,26 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
   const hasValidChildToSave = newChildForms.some(child =>
     !child.completed && childFormValidities[child.id]
   );
+  // Renderizar un mensaje informativo cuando el botón Continuar está deshabilitado
+  const renderButtonStatusMessage = () => {
+    if (isConfiguring) {
+      return (
+        <div className="text-amber-600 text-sm mt-2 text-center">
+          Complete la configuración de la pregunta actual antes de continuar
+        </div>
+      );
+    }
+
+    if (savedForms.length === 0) {
+      return (
+        <div className="text-amber-600 text-sm mt-2 text-center">
+          Debe agregar al menos una pregunta para continuar
+        </div>
+      );
+    }
+
+    return null;
+  };
   // --- Renderizado JSX ---
   return (
     <>
@@ -1902,6 +1972,8 @@ const QuestionsForm = forwardRef(({ onAddChildQuestion, ...props }, ref) => {
           </div>
         </button>
       </div>
+      {/* Mensaje de estado del botón Continuar */}
+      {renderButtonStatusMessage()}
     </>
   );
 });
